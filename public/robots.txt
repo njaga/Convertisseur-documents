@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+
+# Sitemap
+Sitemap: https://convertisseur-documents.vercel.app/sitemap.xml
+
+# Temps de crawl
+Crawl-delay: 10
+
+# Directives spécifiques pour les bots principaux
+User-agent: Googlebot
+Allow: /
+User-agent: Bingbot
+Allow: /
+User-agent: Slurp
+Allow: /

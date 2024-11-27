@@ -1,0 +1,59 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fond avec dégradé -->
+  <rect width="1200" height="630" fill="url(#gradient)" />
+  
+  <!-- Motif de grille (subtil) -->
+  <path d="M0 0h1200v630H0z" fill="url(#grid)" fill-opacity="0.1" />
+  
+  <!-- Logo et Texte -->
+  <g filter="url(#shadow)">
+    <!-- Icône de conversion -->
+    <path d="M500 315L460 275M500 315L460 355M500 315H380M420 275L380 315M380 315L420 355" 
+      stroke="white" 
+      stroke-width="8" 
+      stroke-linecap="round" 
+      stroke-linejoin="round"
+    />
+    
+    <!-- Texte SunuConvert -->
+    <text x="600" y="330" 
+      font-family="Arial, sans-serif" 
+      font-size="72" 
+      font-weight="bold" 
+      fill="white" 
+      text-anchor="middle"
+    >
+      SunuConvert
+    </text>
+    
+    <!-- Sous-titre -->
+    <text x="600" y="390" 
+      font-family="Arial, sans-serif" 
+      font-size="28" 
+      fill="white" 
+      text-anchor="middle" 
+      opacity="0.9"
+    >
+      Convertisseur de Fichiers Gratuit
+    </text>
+  </g>
+
+  <!-- Définitions des effets -->
+  <defs>
+    <!-- Dégradé de fond -->
+    <linearGradient id="gradient" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B82F6" />
+      <stop offset="100%" stop-color="#1D4ED8" />
+    </linearGradient>
+    
+    <!-- Motif de grille -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M0 0h40v40H0z" fill="none" stroke="white" stroke-width="0.5" opacity="0.1" />
+    </pattern>
+    
+    <!-- Ombre du texte -->
+    <filter id="shadow" x="-10" y="-10" width="1220" height="650">
+      <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.25" />
+    </filter>
+  </defs>
+</svg>

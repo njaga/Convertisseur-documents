@@ -13,6 +13,7 @@ import { convertFile } from './services/conversionService';
 import TermsOfUsePage from './pages/TermsOfUsePage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
+import NotFound from './pages/NotFound';
 
 function App() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -205,6 +206,7 @@ function App() {
           <Route path="/conditions" element={<TermsOfUsePage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
         <Footer />
       </div>
