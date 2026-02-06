@@ -1,30 +1,32 @@
 import { Github, Linkedin } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Logo from './Logo';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="border-t border-gray-100 bg-white">
-      <div className="max-w-5xl mx-auto px-6 py-12">
+      <div className="max-w-5xl mx-auto px-6 py-10">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
           {/* Brand */}
-          <div className="text-center md:text-left">
-            <Link to="/" className="text-lg font-semibold text-gray-900">
-              FileConvert
+          <div className="text-center md:text-left flex flex-col items-center md:items-start gap-2">
+            <Link to="/" className="flex items-center gap-2">
+              <Logo size={24} />
+              <span className="text-lg font-bold text-gray-900">FileConvert</span>
             </Link>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-gray-500">
               Conversion de fichiers simple et gratuite
             </p>
           </div>
 
           {/* Links */}
           <div className="flex items-center gap-6">
+            <Link to="/formats" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
+              Formats
+            </Link>
             <Link to="/conditions" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
               Conditions
-            </Link>
-            <Link to="/about" className="text-sm text-gray-500 hover:text-gray-900 transition-colors">
-              A propos
             </Link>
             <div className="flex items-center gap-3 ml-4">
               <a

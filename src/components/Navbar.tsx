@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import Logo from './Logo';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -17,7 +18,7 @@ const Navbar = () => {
   const navLinks = [
     { to: '/', label: 'Accueil' },
     { to: '/formats', label: 'Formats' },
-    { to: '/about', label: 'A propos' },
+    { to: '/conditions', label: 'Conditions' },
   ];
 
   return (
@@ -26,8 +27,11 @@ const Navbar = () => {
       <div className="max-w-5xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="text-lg font-semibold text-gray-900 tracking-tight">
-            FileConvert
+          <Link to="/" className="flex items-center gap-2.5 group">
+            <Logo size={32} className="transition-transform group-hover:scale-110 duration-200" />
+            <span className="text-lg font-bold text-gray-900 tracking-tight">
+              FileConvert
+            </span>
           </Link>
 
           {/* Navigation desktop */}
@@ -36,17 +40,19 @@ const Navbar = () => {
               <Link
                 key={link.to}
                 to={link.to}
-                className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
               >
                 {link.label}
               </Link>
             ))}
-            <Link
-              to="/contact"
+            <a
+              href="https://github.com/njaga"
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-lg transition-colors"
             >
-              Contact
-            </Link>
+              GitHub
+            </a>
           </div>
 
           {/* Menu mobile */}
@@ -61,25 +67,27 @@ const Navbar = () => {
 
         {/* Menu mobile dropdown */}
         {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-100">
+          <div className="md:hidden py-4 border-t border-gray-100 animate-in slide-in-from-top-2">
             <div className="flex flex-col gap-1">
               {navLinks.map(link => (
                 <Link
                   key={link.to}
                   to={link.to}
-                  className="px-3 py-2.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                  className="px-3 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {link.label}
                 </Link>
               ))}
-              <Link
-                to="/contact"
+              <a
+                href="https://github.com/njaga"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="mt-2 px-3 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg text-center"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                Contact
-              </Link>
+                GitHub
+              </a>
             </div>
           </div>
         )}

@@ -1,91 +1,185 @@
-import { Shield, AlertCircle } from 'lucide-react';
+import { Shield, Zap, Lock, Clock, Code, ArrowUpRight } from 'lucide-react';
 
 const TermsOfUsePage = () => {
+  const features = [
+    {
+      icon: Shield,
+      title: 'Confidentialite',
+      description: 'Vos fichiers restent sur votre appareil',
+    },
+    {
+      icon: Zap,
+      title: 'Performance',
+      description: 'Conversion instantanee sans upload',
+    },
+    {
+      icon: Lock,
+      title: 'Securite',
+      description: 'Aucune donnee stockee sur nos serveurs',
+    },
+    {
+      icon: Clock,
+      title: 'Disponibilite',
+      description: 'Service accessible 24h/24',
+    },
+  ];
+
+  const terms = [
+    {
+      title: 'Utilisation',
+      items: [
+        'Service gratuit et open source',
+        'Usage personnel et professionnel autorise',
+        'Aucune inscription requise',
+      ],
+    },
+    {
+      title: 'Limites',
+      items: [
+        '100 MB par fichier maximum',
+        'Documents: 1800 conversions/mois (API)',
+        'Images/Videos/Audio: illimite (local)',
+      ],
+    },
+    {
+      title: 'Responsabilite',
+      items: [
+        'Service fourni "tel quel"',
+        'Aucune garantie de disponibilite',
+        'Utilisateur responsable du contenu',
+      ],
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-white py-20">
-      <div className="border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="flex flex-col items-center">
-            <Shield className="w-12 h-12 text-blue-500 mb-6" />
-            <h1 className="text-3xl font-bold text-gray-900 text-center">
-              Conditions d'Utilisation
-            </h1>
-            <p className="mt-4 text-gray-500 text-sm text-center">
-              Dernière mise à jour : {new Date().toLocaleDateString()}
-            </p>
+    <div className="min-h-screen bg-gray-50 pt-24 pb-16">
+      {/* Hero Section */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
+
+        <div className="relative max-w-3xl mx-auto px-6 py-16 text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full border border-gray-200 text-sm text-gray-600 mb-6">
+            <Code size={14} />
+            <span>Open Source Project</span>
+          </div>
+
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4">
+            Conditions d'utilisation
+          </h1>
+
+          <p className="text-lg text-gray-500 max-w-xl mx-auto">
+            Un service simple, transparent et respectueux de votre vie privee.
+          </p>
+        </div>
+      </div>
+
+      {/* Features Grid */}
+      <div className="max-w-3xl mx-auto px-6 -mt-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {features.map((feature, i) => (
+            <div
+              key={i}
+              className="group relative bg-white rounded-2xl border border-gray-200 p-5 hover:border-gray-300 hover:shadow-lg transition-all duration-300"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative">
+                <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-gray-900 transition-colors">
+                  <feature.icon size={18} className="text-gray-600 group-hover:text-white transition-colors" />
+                </div>
+                <h3 className="font-semibold text-gray-900 text-sm">{feature.title}</h3>
+                <p className="text-xs text-gray-500 mt-1">{feature.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Terms Cards */}
+      <div className="max-w-3xl mx-auto px-6 mt-12">
+        <div className="grid md:grid-cols-3 gap-4">
+          {terms.map((section, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-md transition-shadow"
+            >
+              <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <span className="w-6 h-6 bg-gray-900 text-white rounded-lg text-xs flex items-center justify-center">
+                  {i + 1}
+                </span>
+                {section.title}
+              </h2>
+              <ul className="space-y-2.5">
+                {section.items.map((item, j) => (
+                  <li key={j} className="flex items-start gap-2 text-sm text-gray-600">
+                    <div className="w-1 h-1 bg-gray-400 rounded-full mt-2 flex-shrink-0" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Developer Card */}
+      <div className="max-w-3xl mx-auto px-6 mt-12">
+        <div className="relative overflow-hidden bg-gray-900 rounded-2xl p-8">
+          {/* Decorative elements */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-gray-800 to-transparent rounded-full blur-3xl opacity-50" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-gray-800 to-transparent rounded-full blur-2xl opacity-30" />
+
+          <div className="relative">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div>
+                <p className="text-gray-400 text-sm mb-1">Developpe par</p>
+                <h3 className="text-xl font-semibold text-white">Ndiaga Ndiaye</h3>
+                <p className="text-gray-400 mt-1">UI/UX Designer & Front-end Developer</p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href="https://ndiagandiaye.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-900 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
+                >
+                  Portfolio
+                  <ArrowUpRight size={14} />
+                </a>
+                <a
+                  href="https://github.com/njaga"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
+                >
+                  GitHub
+                  <ArrowUpRight size={14} />
+                </a>
+              </div>
+            </div>
+
+            {/* Skills */}
+            <div className="mt-6 pt-6 border-t border-gray-800">
+              <div className="flex flex-wrap gap-2">
+                {['React', 'TypeScript', 'Next.js', 'Figma', 'Tailwind CSS', 'UI/UX'].map((skill) => (
+                  <span
+                    key={skill}
+                    className="px-3 py-1 bg-gray-800 text-gray-300 rounded-full text-xs"
+                  >
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="prose prose-blue max-w-none">
-          <p className="text-gray-600 mb-8">
-            Cette application open source a été développée dans le but d'aider les utilisateurs à convertir leurs fichiers simplement et gratuitement. 
-            En utilisant ce service, vous acceptez les conditions suivantes.
-          </p>
-
-          <h2 className="text-xl font-semibold text-gray-900 mt-12 mb-4">
-            1. Utilisation du Service
-          </h2>
-          <p className="text-gray-600 mb-4">
-            • Le service est entièrement gratuit et open source
-          </p>
-          <p className="text-gray-600 mb-4">
-            • L'utilisation est destinée à des fins légales uniquement
-          </p>
-          <p className="text-gray-600 mb-4">
-            • Aucune inscription n'est nécessaire pour utiliser le service
-          </p>
-
-          <h2 className="text-xl font-semibold text-gray-900 mt-12 mb-4">
-            2. Protection de vos Données
-          </h2>
-          <p className="text-gray-600 mb-4">
-            • Vos fichiers sont supprimés automatiquement après 24 heures
-          </p>
-          <p className="text-gray-600 mb-4">
-            • Nous ne conservons aucune donnée personnelle
-          </p>
-          <p className="text-gray-600 mb-4">
-            • Le service utilise une connexion sécurisée HTTPS
-          </p>
-
-          <h2 className="text-xl font-semibold text-gray-900 mt-12 mb-4">
-            3. Limitations Techniques
-          </h2>
-          <p className="text-gray-600 mb-4">
-            • Taille maximale : 100 MB par fichier
-          </p>
-          <p className="text-gray-600 mb-4">
-            • 10 conversions par heure pour garantir la disponibilité du service
-          </p>
-
-          <div className="mt-12 p-6 bg-blue-50 rounded-xl">
-            <div className="flex gap-4">
-              <AlertCircle className="w-6 h-6 text-blue-500 flex-shrink-0" />
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Projet en Développement
-                </h3>
-                <p className="text-gray-600">
-                  Cette application est en constante évolution. De nouvelles fonctionnalités 
-                  comme la compression de fichiers sont en cours de développement. N'hésitez pas 
-                  à contribuer au projet sur GitHub.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-12 text-center text-gray-600">
-            <p>Des questions ou suggestions ?</p>
-            <a 
-              href="mailto:contact@ndiagandiaye.com" 
-              className="text-blue-500 hover:text-blue-600 font-medium"
-            >
-              contact@ndiagandiaye.com
-            </a>
-          </div>
-        </div>
+      {/* Footer Note */}
+      <div className="max-w-3xl mx-auto px-6 mt-8 text-center">
+        <p className="text-sm text-gray-400">
+          Questions ? <a href="mailto:contact@ndiagandiaye.com" className="text-gray-600 hover:text-gray-900 transition-colors">contact@ndiagandiaye.com</a>
+        </p>
       </div>
     </div>
   );
