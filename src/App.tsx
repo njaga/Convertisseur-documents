@@ -5,7 +5,7 @@ import { FileType, ConversionJob, ConversionFormat } from './types/converter';
 import FileUploader from './components/FileUploader';
 import FormatSelector from './components/FormatSelector';
 import ConversionProgress from './components/ConversionProgress';
-import { FileCheck, File, Image, Video, Music } from 'lucide-react';
+import { Image, Video, Music, FileText, ArrowRight } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import MenuVisibilityHandler from './components/MenuVisibilityHandler';
@@ -25,13 +25,13 @@ function App() {
     setSelectedFile(file);
     const extension = file.name.split('.').pop()?.toLowerCase() || '';
     setSourceFormat(extension);
-    
+
     if (extension) {
-      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'svg', 'ico', 'heic'].includes(extension)) {
+      if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'ico'].includes(extension)) {
         setFileType('image');
-      } else if (['mp4', 'mov', 'avi', 'mkv', 'wmv', 'flv', 'webm', '3gp', 'm4v', 'mpeg'].includes(extension)) {
+      } else if (['mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'm4v'].includes(extension)) {
         setFileType('video');
-      } else if (['mp3', 'wav', 'aac', 'ogg', 'flac', 'm4a', 'wma', 'aiff', 'amr', 'opus'].includes(extension)) {
+      } else if (['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'].includes(extension)) {
         setFileType('audio');
       } else {
         setFileType('document');
@@ -41,12 +41,6 @@ function App() {
 
   const handleFormatSelect = async (format: ConversionFormat) => {
     if (selectedFile) {
-      console.log('Début de la conversion:', {
-        fileName: selectedFile.name,
-        outputFormat: format.extension,
-        fileSize: selectedFile.size
-      });
-
       const newJob: ConversionJob = {
         id: Date.now().toString(),
         inputFile: selectedFile,
@@ -54,28 +48,24 @@ function App() {
         status: 'pending',
         progress: 0
       };
-      
+
       setConversionJobs(prev => [...prev, newJob]);
       setSelectedFile(null);
       setFileType(null);
 
       try {
-        console.log('Conversion en cours...');
-        newJob.status = 'processing';
         const outputUrl = await convertFile(
           selectedFile,
           format.extension,
           (progress) => {
-            console.log(`Progression: ${progress}%`);
             setConversionJobs(prev =>
               prev.map(job =>
-                job.id === newJob.id ? { ...job, progress } : job
+                job.id === newJob.id ? { ...job, progress, status: 'processing' } : job
               )
             );
           }
         );
 
-        console.log('Conversion terminée avec succès');
         setConversionJobs(prev =>
           prev.map(job =>
             job.id === newJob.id
@@ -83,8 +73,7 @@ function App() {
               : job
           )
         );
-      } catch (error) {
-        console.error('Erreur de conversion:', error);
+      } catch {
         setConversionJobs(prev =>
           prev.map(job =>
             job.id === newJob.id
@@ -96,109 +85,100 @@ function App() {
     }
   };
 
-  // Fonction pour obtenir l'icône selon le type de fichier
   const getFileTypeIcon = (type: FileType) => {
+    const iconProps = { size: 20, strokeWidth: 1.5, className: "text-gray-600" };
     switch (type) {
-      case 'image':
-        return <Image className="w-8 h-8 text-blue-500" />;
-      case 'video':
-        return <Video className="w-8 h-8 text-blue-500" />;
-      case 'audio':
-        return <Music className="w-8 h-8 text-blue-500" />;
-      default:
-        return <File className="w-8 h-8 text-blue-500" />;
+      case 'image': return <Image {...iconProps} />;
+      case 'video': return <Video {...iconProps} />;
+      case 'audio': return <Music {...iconProps} />;
+      default: return <FileText {...iconProps} />;
     }
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
   };
 
   return (
     <>
       <MenuVisibilityHandler />
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
         <Routes>
           <Route path="/" element={
-            <main className="flex-grow">
-              <div className="min-h-screen bg-gray-50 py-20 px-4 sm:px-6 lg:px-8">
-                <div className="max-w-4xl mx-auto">
-                  <div className="text-center mb-12 pt-16 md:pt-20">
-                    <FileCheck className="w-16 h-16 mx-auto text-blue-500 mb-6" />
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                      Convertisseur de Fichiers
-                    </h1>
-                    <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                      Convertissez facilement vos fichiers dans différents formats
-                    </p>
-                  </div>
+            <main className="flex-grow pt-24 pb-16 px-6">
+              <div className="max-w-2xl mx-auto">
+                {/* Header */}
+                <div className="text-center mb-10">
+                  <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">
+                    Convertisseur de fichiers
+                  </h1>
+                  <p className="text-gray-500 mt-2">
+                    Convertissez vos fichiers rapidement et gratuitement
+                  </p>
+                </div>
 
-                  <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-                    <FileUploader onFileSelect={handleFileSelect} />
-                  </div>
+                {/* Uploader */}
+                <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+                  <FileUploader onFileSelect={handleFileSelect} />
+                </div>
 
-                  {selectedFile && (
-                    <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-                      <div className="flex items-center space-x-4 mb-4">
-                        {fileType && getFileTypeIcon(fileType)}
-                        <div className="flex-1">
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {selectedFile.name}
-                          </h3>
-                          <p className="text-sm text-gray-500">
-                            {(selectedFile.size / 1024 / 1024).toFixed(2)} MB • {fileType}
-                          </p>
-                        </div>
-                        {fileType === 'image' && (
-                          <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100">
-                            <img
-                              src={URL.createObjectURL(selectedFile)}
-                              alt="Aperçu"
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        )}
+                {/* Selected File Info */}
+                {selectedFile && fileType && (
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-gray-100 rounded-xl">
+                        {getFileTypeIcon(fileType)}
                       </div>
-                      <div className="w-full h-2 bg-blue-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-500 rounded-full w-full animate-pulse"></div>
-                      </div>
-                    </div>
-                  )}
-
-                  {fileType && (
-                    <div className="bg-white rounded-xl shadow-lg p-8 mb-8">
-                      <div className="flex flex-col items-center space-y-4 mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900">
-                          Sélectionnez le format de sortie
-                        </h2>
-                        <div className="h-1 w-24 bg-blue-500 rounded-full"></div>
-                        <p className="text-gray-600 text-center">
-                          Choisissez le format dans lequel vous souhaitez convertir votre fichier
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-gray-900 truncate">
+                          {selectedFile.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {formatFileSize(selectedFile.size)} - {fileType}
                         </p>
                       </div>
-                      <div className="bg-gray-50 rounded-lg p-6">
-                        <FormatSelector
-                          fileType={fileType}
-                          onFormatSelect={handleFormatSelect}
-                          sourceFormat={sourceFormat}
-                        />
-                      </div>
+                      {fileType === 'image' && (
+                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                          <img
+                            src={URL.createObjectURL(selectedFile)}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
+                )}
 
-                  {conversionJobs.length > 0 && (
-                    <div className="bg-white rounded-xl shadow-lg p-8">
-                      <div className="flex flex-col items-center space-y-4 mb-6">
-                        <h2 className="text-2xl font-bold text-gray-900">
-                          Conversions en cours
-                        </h2>
-                        <div className="h-1 w-24 bg-blue-500 rounded-full"></div>
-                      </div>
-                      <div className="space-y-4">
-                        {conversionJobs.map(job => (
-                          <ConversionProgress key={job.id} job={job} />
-                        ))}
-                      </div>
+                {/* Format Selector */}
+                {fileType && (
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6 mb-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <ArrowRight size={16} className="text-gray-400" />
+                      <h2 className="font-medium text-gray-900">Format de sortie</h2>
                     </div>
-                  )}
-                </div>
+                    <FormatSelector
+                      fileType={fileType}
+                      onFormatSelect={handleFormatSelect}
+                      sourceFormat={sourceFormat}
+                    />
+                  </div>
+                )}
+
+                {/* Conversion Progress */}
+                {conversionJobs.length > 0 && (
+                  <div className="bg-white rounded-2xl border border-gray-200 p-6">
+                    <h2 className="font-medium text-gray-900 mb-4">Conversions</h2>
+                    <div className="space-y-3">
+                      {conversionJobs.map(job => (
+                        <ConversionProgress key={job.id} job={job} />
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </main>
           } />

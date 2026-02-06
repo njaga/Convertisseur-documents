@@ -1,66 +1,79 @@
-import axios, { AxiosProgressEvent } from 'axios';
+/**
+ * Service principal de conversion de fichiers
+ * Route les conversions vers les services spécialisés:
+ * - Images: Canvas API (local)
+ * - Vidéos: FFmpeg.wasm (local)
+ * - Audio: FFmpeg.wasm (local)
+ * - Documents: Conversions locales TXT/MD/HTML
+ */
 
-// URL de développement local
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-const DEV_MODE = import.meta.env.VITE_DEV_MODE === 'true';
+import { convertImage, isImageFormatSupported } from './imageConverter';
+import { convertViaVert, isVertVideoSupported, isVertDocumentSupported } from './vertService';
+import { convertAudio, isAudioFormatSupported } from './mediaConverter';
 
-export const convertFile = async (
+/**
+ * Détermine le type de fichier à partir de son extension
+ */
+function getFileType(filename: string): 'image' | 'video' | 'audio' | 'document' {
+  const extension = filename.split('.').pop()?.toLowerCase() || '';
+
+  const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'ico'];
+  const videoExtensions = ['mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'm4v'];
+  const audioExtensions = ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'];
+
+  if (imageExtensions.includes(extension)) return 'image';
+  if (videoExtensions.includes(extension)) return 'video';
+  if (audioExtensions.includes(extension)) return 'audio';
+  return 'document';
+}
+
+/**
+ * Convertit un fichier vers le format spécifié
+ */
+export async function convertFile(
   file: File,
   outputFormat: string,
   onProgress: (progress: number) => void
-): Promise<string> => {
-  if (DEV_MODE) {
-    // Mode développement : simulation de conversion
-    return new Promise((resolve) => {
-      let progress = 0;
-      const interval = setInterval(() => {
-        progress += 10;
-        onProgress(progress);
-        if (progress >= 100) {
-          clearInterval(interval);
-          resolve(URL.createObjectURL(file));
-        }
-      }, 500);
-    });
-  }
+): Promise<string> {
+  const fileType = getFileType(file.name);
+  const format = outputFormat.toLowerCase();
 
-  const formData = new FormData();
-  formData.append('file', file);
-  formData.append('outputFormat', outputFormat);
+  console.log(`🔄 Conversion: ${file.name} → ${format} (type: ${fileType})`);
 
   try {
-    // Simulation de progression pour le développement
-    let progress = 0;
-    const progressInterval = setInterval(() => {
-      progress += 10;
-      if (progress <= 90) {
-        onProgress(progress);
-      }
-    }, 500);
-
-    const response = await axios.post(`${API_URL}/convert`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      onUploadProgress: (progressEvent: AxiosProgressEvent) => {
-        if (progressEvent.total) {
-          const uploadProgress = (progressEvent.loaded / progressEvent.total) * 100;
-          onProgress(Math.min(90, uploadProgress)); // Limite à 90% jusqu'à la fin du traitement
+    switch (fileType) {
+      case 'image':
+        if (isImageFormatSupported(format)) {
+          console.log('📷 Conversion image via Canvas API');
+          return await convertImage(file, format, onProgress);
         }
-      },
-    });
+        break;
 
-    clearInterval(progressInterval);
-    onProgress(100);
+      case 'video':
+        if (isVertVideoSupported(format)) {
+          console.log('🎬 Conversion vidéo via FFmpeg');
+          return await convertViaVert(file, format, onProgress);
+        }
+        break;
 
-    // Pour le développement, vous pouvez retourner une URL simulée
-    return response.data.url || URL.createObjectURL(new Blob([file]));
+      case 'audio':
+        if (isAudioFormatSupported(format)) {
+          console.log('🎵 Conversion audio via FFmpeg');
+          return await convertAudio(file, format, onProgress);
+        }
+        break;
+
+      case 'document':
+        if (isVertDocumentSupported(format)) {
+          console.log('📄 Conversion document');
+          return await convertViaVert(file, format, onProgress);
+        }
+        break;
+    }
+
+    throw new Error(`Format non supporté: ${format}`);
   } catch (error) {
-    console.error('Erreur de conversion:', error);
-    throw new Error('Erreur lors de la conversion');
+    console.error('❌ Erreur de conversion:', error);
+    throw error;
   }
-};
-
-// Configuration d'Axios pour le développement
-axios.defaults.baseURL = API_URL;
-axios.defaults.timeout = 30000; // 30 secondes
+}

@@ -8,23 +8,20 @@ interface FormatSelectorProps {
 }
 
 const FormatSelector = ({ fileType, onFormatSelect, sourceFormat }: FormatSelectorProps) => {
-  const formats = supportedFormats;
-
-  const availableFormats = formats[fileType].filter(
+  const availableFormats = supportedFormats[fileType].filter(
     format => format.extension.toLowerCase() !== sourceFormat.toLowerCase()
   );
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+    <div className="flex flex-wrap gap-2">
       {availableFormats.map((format) => (
         <button
           key={format.extension}
           onClick={() => onFormatSelect(format)}
-          className="flex items-center justify-center p-4 rounded-xl border-2 border-blue-500/20 
-          bg-white hover:bg-blue-50 hover:border-blue-500 transition-all duration-200
-          text-gray-900 font-medium shadow-sm hover:shadow-md"
+          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 
+            rounded-lg transition-colors duration-150"
         >
-          <span className="text-base whitespace-nowrap">{format.name}</span>
+          {format.name}
         </button>
       ))}
     </div>
