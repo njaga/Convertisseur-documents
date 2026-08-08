@@ -28,18 +28,17 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Remove unused Axios
-        run: npm uninstall axios
+      - name: Remove unused dependencies
+        run: npm uninstall axios sharp @types/sharp
 
-      - name: Update React Router to a patched release
+      - name: Update runtime dependencies
         run: npm install react-router-dom@latest
 
-      - name: Update Sharp and keep it development-only
+      - name: Update build and lint toolchain
         run: |
-          npm uninstall sharp
-          npm install --save-dev sharp@^0.35.3
+          npm install --save-dev vite@latest @vitejs/plugin-react@latest eslint@latest @eslint/js@latest typescript-eslint@latest eslint-plugin-react-hooks@latest eslint-plugin-react-refresh@latest globals@latest
 
-      - name: Apply non-breaking audit fixes
+      - name: Apply compatible audit fixes
         run: npm audit fix || true
 
       - name: Show remaining audit findings
@@ -51,7 +50,7 @@ jobs:
           npx tsc -b --pretty false
           npm run build
 
-      - name: Commit lockfile refresh
+      - name: Commit dependency refresh
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -59,7 +58,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No dependency changes to commit"
           else
-            git commit -m "chore: refresh vulnerable dependencies"
+            git commit -m "chore: modernize build dependencies"
             git push origin HEAD:fix/conversion-engine-hardening
           fi
 
