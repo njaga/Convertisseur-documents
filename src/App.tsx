@@ -1,4 +1,4 @@
-import { Routes, Route, Link } from 'react-router-dom';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 import SupportedFormats from './pages/SupportedFormats';
 import { useEffect, useRef, useState } from 'react';
 import { FileType, ConversionJob, ConversionFormat } from './types/converter';
@@ -16,6 +16,7 @@ import PdfTools from './pages/PdfTools';
 import NotFound from './pages/NotFound';
 
 function App() {
+  const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [fileType, setFileType] = useState<FileType | null>(null);
   const [conversionJobs, setConversionJobs] = useState<ConversionJob[]>([]);
@@ -38,6 +39,10 @@ function App() {
     setSelectedFile(file);
     setSourceFormat(extension);
     setFileType(detectedType);
+  };
+
+  const handlePdfSelect = (file: File) => {
+    navigate('/pdf', { state: { initialFile: file } });
   };
 
   const handleFormatSelect = async (format: ConversionFormat) => {
@@ -104,13 +109,13 @@ function App() {
 
   const features = [
     { icon: Zap, label: 'Rapide', desc: 'Conversion directement dans le navigateur' },
-    { icon: Shield, label: 'Prive', desc: 'Vos fichiers restent sur votre appareil' },
+    { icon: Shield, label: 'Privé', desc: 'Vos fichiers restent sur votre appareil' },
     { icon: Sparkles, label: 'Gratuit', desc: 'Sans inscription' },
   ];
 
   const supportedTypes = [
     { icon: Image, label: 'Images', formats: 'PNG, JPG, WebP, ICO' },
-    { icon: Video, label: 'Videos', formats: 'MP4, WebM, AVI, MKV, MOV, GIF' },
+    { icon: Video, label: 'Vidéos', formats: 'MP4, WebM, AVI, MKV, MOV, GIF' },
     { icon: Music, label: 'Audio', formats: 'MP3, WAV, OGG, AAC, FLAC, M4A' },
     { icon: FileText, label: 'Texte & PDF', formats: 'TXT, Markdown, HTML + outils PDF' },
   ];
@@ -138,7 +143,7 @@ function App() {
                       </span>
                     </h1>
                     <p className="text-lg text-gray-500 max-w-xl mx-auto mb-8">
-                      Convertissez vos images, videos, fichiers audio et documents directement dans votre navigateur.
+                      Convertissez vos images, vidéos, fichiers audio et documents directement dans votre navigateur.
                       Aucune inscription et aucun envoi de fichier vers nos serveurs.
                     </p>
                     <div className="flex flex-wrap justify-center gap-3 mb-6">
@@ -164,11 +169,11 @@ function App() {
                       <div className="px-6 py-4 border-b border-gray-100 bg-gray-50/50">
                         <div className="flex items-center gap-2">
                           <Upload size={16} className="text-gray-500" />
-                          <span className="text-sm font-medium text-gray-700">Deposez votre fichier</span>
+                          <span className="text-sm font-medium text-gray-700">Déposez votre fichier</span>
                         </div>
                       </div>
                       <div className="p-6">
-                        <FileUploader onFileSelect={handleFileSelect} />
+                        <FileUploader onFileSelect={handleFileSelect} onPdfSelect={handlePdfSelect} />
                       </div>
 
                       {selectedFile && fileType && (
@@ -211,7 +216,7 @@ function App() {
               <div className="px-6 pb-20">
                 <div className="max-w-3xl mx-auto">
                   <div className="text-center mb-8">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Formats supportes</h2>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Formats supportés</h2>
                     <p className="text-sm text-gray-500">Uniquement les conversions réellement prises en charge sont proposées.</p>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
