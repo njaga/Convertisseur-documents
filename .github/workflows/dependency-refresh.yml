@@ -62,3 +62,5 @@ jobs:
             git commit -m "chore: refresh vulnerable dependencies"
             git push origin HEAD:fix/conversion-engine-hardening
           fi
+
+      # One-shot maintenance workflow: remove after the dependency refresh is committed.
