@@ -34,7 +34,7 @@ jobs:
       - name: Verify dependency audit
         run: npm audit --audit-level=high
 
-      - name: Verify existing project
+      - name: Verify project
         run: |
           npm run lint
           npm run typecheck
@@ -50,5 +50,7 @@ jobs:
             echo "No dependency changes"
           else
             git commit -m "feat(v2): add pdf-lib for local PDF tools"
+            git fetch origin feat/v2-pdf-ico
+            git rebase origin/feat/v2-pdf-ico
             git push origin HEAD:feat/v2-pdf-ico
           fi
