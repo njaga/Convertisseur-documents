@@ -16,6 +16,7 @@ Application web open source de conversion de fichiers, pensée avec une approche
 - Taille maximale actuelle : 100 MB
 - Progression et messages d'erreur explicites
 - Interface responsive avec glisser-déposer
+- Tests unitaires sur la matrice de conversion et la détection
 - Aucun compte requis
 
 ## Conversions actuellement supportées
