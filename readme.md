@@ -115,24 +115,7 @@ Les conversions nécessitant le service Office restent dépendantes d'une connex
 
 ## Stack
 
-- React 18
-- TypeScript
-- Vite 8
-- Tailwind CSS
-- React Router
-- React Dropzone
-- FFmpeg WebAssembly
-- Canvas API
-- pdf-lib
-- PDF.js (`pdfjs-dist`)
-- Marked
-- DOMPurify
-- Turndown
-- Node.js
-- LibreOffice Headless
-- Docker
-- Vitest
-- GitHub Actions
+React 18, TypeScript, Vite 8, Tailwind CSS, React Router, React Dropzone, FFmpeg WebAssembly, Canvas API, pdf-lib, PDF.js, Marked, DOMPurify, Turndown, Node.js, LibreOffice Headless, Docker, Vitest et GitHub Actions.
 
 ## Installation frontend
 
@@ -166,27 +149,13 @@ Les conversions FFmpeg et le rendu de gros PDF peuvent utiliser beaucoup de mém
 
 ## CI
 
-GitHub Actions contrôle :
-
-- `npm ci`
-- audit des dépendances
-- ESLint
-- TypeScript
-- Vitest
-- syntaxe du service Office
-- présence des assets FFmpeg auto-hébergés
-- build Vite de production
+GitHub Actions contrôle `npm ci`, l'audit des dépendances, ESLint, TypeScript, Vitest, la syntaxe du service Office, la présence des assets FFmpeg auto-hébergés et le build Vite de production.
 
 ## État V2
 
-- [x] Support ICO entrée/sortie
-- [x] ICO multi-résolutions
-- [x] Images → PDF
-- [x] PDF → PNG
-- [x] Fusion PDF
-- [x] Séparation PDF
-- [x] Rotation PDF
-- [x] Extraction / réorganisation PDF
+- [x] Support ICO entrée/sortie et multi-résolutions
+- [x] Images → PDF et PDF → PNG
+- [x] Fusion, séparation, rotation, extraction et réorganisation PDF
 - [x] Markdown / HTML avec parseurs dédiés
 - [x] PWA / cache offline
 - [x] FFmpeg auto-hébergé
