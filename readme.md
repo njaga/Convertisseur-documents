@@ -6,14 +6,15 @@ Application web open source de conversion de fichiers, pensée avec une approche
 
 ## Fonctionnalités
 
-- Conversion d'images PNG, JPG/JPEG et WebP via Canvas API
-- Conversion audio via FFmpeg WebAssembly
-- Conversion vidéo via FFmpeg WebAssembly
+- Conversion d'images PNG, JPG/JPEG, WebP et ICO via les APIs du navigateur
+- Génération de vrais fichiers ICO avec une image PNG 256×256 intégrée
+- Conversion audio et vidéo via FFmpeg WebAssembly
 - Conversion locale entre TXT, Markdown et HTML
+- Outils PDF 100 % locaux : images → PDF, fusion, séparation et rotation
 - Détection centralisée du format d'entrée
 - Matrice de compatibilité source → destination
 - Validation des fichiers avant conversion
-- Taille maximale actuelle : 100 MB
+- Taille maximale actuelle : 100 MB pour le convertisseur principal
 - Progression et messages d'erreur explicites
 - Interface responsive avec glisser-déposer
 - Tests unitaires sur la matrice de conversion et la détection
@@ -23,9 +24,12 @@ Application web open source de conversion de fichiers, pensée avec une approche
 
 ### Images
 
-- PNG → JPG, JPEG, WebP
-- JPG/JPEG → PNG, WebP
-- WebP → PNG, JPG, JPEG
+- PNG → JPG, JPEG, WebP, ICO
+- JPG/JPEG → PNG, WebP, ICO
+- WebP → PNG, JPG, JPEG, ICO
+- ICO → PNG, JPG, JPEG, WebP lorsque le navigateur sait décoder le fichier ICO
+
+L'export ICO produit un véritable conteneur `.ico` et non un fichier PNG simplement renommé.
 
 ### Vidéo
 
@@ -41,22 +45,29 @@ Conversions entre MP3, WAV, OGG, FLAC, M4A et AAC via FFmpeg.wasm.
 - Markdown → HTML, TXT
 - HTML → TXT, Markdown
 
+### Outils PDF
+
+La page `/pdf` fonctionne intégralement dans le navigateur avec `pdf-lib` :
+
+- plusieurs images PNG/JPG/JPEG/WebP/ICO → un PDF ;
+- fusion de plusieurs PDF ;
+- séparation d'un PDF en un fichier par page ;
+- rotation de toutes les pages à 90°, 180° ou 270°.
+
+Aucun PDF utilisé par ces outils n'est envoyé vers un serveur.
+
 La page `/formats` est générée à partir de la même matrice que le moteur de conversion afin d'éviter les divergences entre documentation et fonctionnalités réelles.
 
-## Pourquoi les conversions PDF / Office ont-elles été retirées ?
+## Office : prochaine étape serveur
 
-Une ancienne version annonçait des conversions PDF, DOCX, XLSX et PPTX via une API tierce appelée directement depuis le navigateur. Cette approche avait plusieurs défauts :
+Une ancienne version annonçait des conversions PDF, DOCX, XLSX et PPTX via une API tierce appelée directement depuis le navigateur. Cette approche exposait des clés API et rendait incorrecte la promesse de traitement local.
 
-- clés API exposées dans le bundle frontend ;
-- dépendance forte à un fournisseur externe ;
-- formats proposés par l'interface sans garantie qu'une route de conversion existe ;
-- promesse « 100 % local » incorrecte pour les fichiers envoyés à l'API.
-
-Ces conversions seront réintroduites lorsqu'un moteur serveur sécurisé sera disponible, idéalement avec LibreOffice Headless dans un worker Dockerisé.
+Les conversions Office seront réintroduites via une couche serveur sécurisée basée sur LibreOffice Headless, isolée du frontend et sans clé secrète embarquée dans le bundle.
 
 ## Architecture
 
 ```text
+Convertisseur principal
 Upload
   │
   ▼
@@ -65,13 +76,16 @@ Validation + détection du format
   ▼
 Conversion Registry
   │
-  ├── Image provider ───── Canvas API
+  ├── Image provider ───── Canvas API + encodeur ICO
   ├── Video provider ───── FFmpeg.wasm
   ├── Audio provider ───── FFmpeg.wasm
   └── Text provider ────── Browser APIs
+
+Outils PDF
+Fichiers locaux ────────── pdf-lib ────────── PDF local
 ```
 
-La matrice `conversionMatrix` dans `src/utils/formats.ts` est la source de vérité pour les conversions proposées par l'interface.
+La matrice `conversionMatrix` dans `src/utils/formats.ts` reste la source de vérité pour les conversions proposées par le convertisseur principal.
 
 ## Stack
 
@@ -83,6 +97,7 @@ La matrice `conversionMatrix` dans `src/utils/formats.ts` est la source de véri
 - React Dropzone
 - FFmpeg WebAssembly
 - Canvas API
+- pdf-lib
 - Vitest
 - GitHub Actions
 
@@ -113,27 +128,29 @@ Les tests unitaires protègent notamment la matrice de compatibilité et la dét
 
 ## Confidentialité
 
-Les conversions actuellement disponibles sont exécutées localement dans le navigateur. Aucun fichier n'est envoyé vers un serveur applicatif par le moteur actuel.
+Les conversions et outils PDF actuellement disponibles sont exécutés localement dans le navigateur. Aucun fichier n'est envoyé vers un serveur applicatif par ces moteurs.
 
-La taille maximale acceptée par l'interface est de 100 MB. Les performances des conversions FFmpeg dépendent fortement de la mémoire et de la puissance de l'appareil ; les gros fichiers vidéo sont donc plus coûteux à traiter sur mobile.
+Les performances des conversions FFmpeg et des grosses manipulations PDF dépendent de la mémoire et de la puissance de l'appareil. Les fichiers volumineux peuvent donc être coûteux à traiter sur mobile.
 
 ## CI
 
-À chaque changement, GitHub Actions vérifie :
+À chaque changement vérifié par la CI, GitHub Actions contrôle :
 
 - installation reproductible avec `npm ci` ;
-- audit des dépendances avec échec en cas de vulnérabilité importante ;
+- audit des dépendances ;
 - ESLint ;
 - TypeScript ;
 - tests Vitest ;
 - build de production.
 
-La toolchain a été modernisée et l'audit npm est actuellement à **0 vulnérabilité connue** sur la branche de refonte.
+## Roadmap V2
 
-## Roadmap
-
-- [ ] Ajouter des outils PDF locaux : fusion, séparation, rotation, images → PDF
-- [ ] Ajouter un backend de conversion Office basé sur LibreOffice Headless
+- [x] Support ICO en entrée/sortie image
+- [x] Images → PDF
+- [x] Fusion PDF
+- [x] Séparation PDF
+- [x] Rotation PDF
+- [ ] Backend de conversion Office basé sur LibreOffice Headless
 - [ ] Isoler les conversions lourdes dans des workers
 - [ ] Héberger les assets FFmpeg sous contrôle du projet
 - [ ] Ajouter des tests end-to-end
