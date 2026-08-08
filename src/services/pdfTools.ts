@@ -1,4 +1,8 @@
 import { degrees, PDFDocument } from 'pdf-lib';
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
+import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+
+GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 export interface PdfOutput {
   name: string;
@@ -9,6 +13,15 @@ function bytesToPdfUrl(bytes: Uint8Array): string {
   const copy = new Uint8Array(bytes.byteLength);
   copy.set(bytes);
   return URL.createObjectURL(new Blob([copy.buffer], { type: 'application/pdf' }));
+}
+
+function canvasToPngBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(blob => {
+      if (!blob) reject(new Error('Impossible de générer l’image PNG.'));
+      else resolve(blob);
+    }, 'image/png');
+  });
 }
 
 async function fileToPngBytes(file: File): Promise<Uint8Array> {
@@ -110,6 +123,38 @@ export async function rotatePdf(file: File, angle: 90 | 180 | 270): Promise<PdfO
     name: `${file.name.replace(/\.pdf$/i, '')}-rotation-${angle}.pdf`,
     url: bytesToPdfUrl(bytes),
   };
+}
+
+export async function pdfToPngs(file: File, scale = 2): Promise<PdfOutput[]> {
+  const data = new Uint8Array(await file.arrayBuffer());
+  const loadingTask = getDocument({ data });
+  const pdf = await loadingTask.promise;
+  const outputs: PdfOutput[] = [];
+  const baseName = file.name.replace(/\.pdf$/i, '');
+
+  try {
+    for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+      const page = await pdf.getPage(pageNumber);
+      const viewport = page.getViewport({ scale });
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.ceil(viewport.width);
+      canvas.height = Math.ceil(viewport.height);
+      const context = canvas.getContext('2d');
+      if (!context) throw new Error('Canvas indisponible dans ce navigateur.');
+
+      await page.render({ canvasContext: context, viewport }).promise;
+      const blob = await canvasToPngBlob(canvas);
+      outputs.push({
+        name: `${baseName}-page-${pageNumber}.png`,
+        url: URL.createObjectURL(blob),
+      });
+      page.cleanup();
+    }
+  } finally {
+    await pdf.destroy();
+  }
+
+  return outputs;
 }
 
 export async function getPdfPageCount(file: File): Promise<number> {
