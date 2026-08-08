@@ -34,9 +34,12 @@ jobs:
       - name: Update runtime dependencies
         run: npm install react-router-dom@latest
 
-      - name: Update build and lint toolchain
+      - name: Update Vite toolchain
+        run: npm install --save-dev vite@latest @vitejs/plugin-react@latest
+
+      - name: Keep ESLint on compatible major and update patches
         run: |
-          npm install --save-dev vite@latest @vitejs/plugin-react@latest eslint@latest @eslint/js@latest typescript-eslint@latest eslint-plugin-react-hooks@latest eslint-plugin-react-refresh@latest globals@latest
+          npm install --save-dev eslint@^9 @eslint/js@^9 typescript-eslint@latest eslint-plugin-react-hooks@latest eslint-plugin-react-refresh@latest globals@latest
 
       - name: Apply compatible audit fixes
         run: npm audit fix || true
