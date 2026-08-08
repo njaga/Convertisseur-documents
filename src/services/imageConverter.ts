@@ -1,90 +1,65 @@
-/**
- * Service de conversion d'images utilisant Canvas API
- */
-
 const mimeTypes: Record<string, string> = {
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    png: 'image/png',
-    webp: 'image/webp',
-    gif: 'image/gif',
-    bmp: 'image/bmp',
-    ico: 'image/x-icon',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
 };
 
-/**
- * Convertit une image vers un autre format en utilisant Canvas
- */
 export async function convertImage(
-    file: File,
-    outputFormat: string,
-    onProgress: (progress: number) => void
+  file: File,
+  outputFormat: string,
+  onProgress: (progress: number) => void
 ): Promise<string> {
-    return new Promise((resolve, reject) => {
-        onProgress(10);
+  const format = outputFormat.toLowerCase();
+  const mimeType = mimeTypes[format];
+  if (!mimeType) throw new Error(`Le format image ${format.toUpperCase()} n'est pas disponible localement.`);
 
-        const img = new Image();
-        const reader = new FileReader();
+  return new Promise((resolve, reject) => {
+    onProgress(10);
+    const image = new Image();
+    const inputUrl = URL.createObjectURL(file);
 
-        reader.onload = (e) => {
-            onProgress(30);
-            img.src = e.target?.result as string;
-        };
+    const cleanup = () => URL.revokeObjectURL(inputUrl);
 
-        reader.onerror = () => reject(new Error('Erreur de lecture du fichier'));
+    image.onload = () => {
+      onProgress(45);
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('Canvas indisponible dans ce navigateur.');
 
-        img.onload = () => {
-            onProgress(50);
+        if (format === 'jpg' || format === 'jpeg') {
+          context.fillStyle = '#fff';
+          context.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        context.drawImage(image, 0, 0);
+        onProgress(75);
 
-            try {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.naturalWidth;
-                canvas.height = img.naturalHeight;
+        canvas.toBlob(blob => {
+          cleanup();
+          if (!blob) return reject(new Error('Le navigateur n’a pas pu encoder cette image.'));
+          if (blob.type && blob.type !== mimeType) {
+            return reject(new Error(`Le navigateur ne prend pas en charge l'export ${format.toUpperCase()}.`));
+          }
+          onProgress(100);
+          resolve(URL.createObjectURL(blob));
+        }, mimeType, format === 'jpg' || format === 'jpeg' ? 0.92 : undefined);
+      } catch (error) {
+        cleanup();
+        reject(error);
+      }
+    };
 
-                const ctx = canvas.getContext('2d');
-                if (!ctx) {
-                    throw new Error('Impossible de créer le contexte Canvas');
-                }
-
-                // Fond blanc pour les formats sans transparence (JPG/JPEG)
-                if (outputFormat === 'jpg' || outputFormat === 'jpeg') {
-                    ctx.fillStyle = '#FFFFFF';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                }
-
-                ctx.drawImage(img, 0, 0);
-                onProgress(70);
-
-                const mimeType = mimeTypes[outputFormat.toLowerCase()] || 'image/png';
-                const quality = outputFormat === 'jpg' || outputFormat === 'jpeg' ? 0.92 : undefined;
-
-                canvas.toBlob(
-                    (blob) => {
-                        if (blob) {
-                            onProgress(100);
-                            const url = URL.createObjectURL(blob);
-                            resolve(url);
-                        } else {
-                            reject(new Error('Erreur lors de la création du blob'));
-                        }
-                    },
-                    mimeType,
-                    quality
-                );
-            } catch (error) {
-                reject(error);
-            }
-        };
-
-        img.onerror = () => reject(new Error('Erreur de chargement de l\'image'));
-
-        reader.readAsDataURL(file);
-    });
+    image.onerror = () => {
+      cleanup();
+      reject(new Error("Impossible de lire l'image."));
+    };
+    image.src = inputUrl;
+  });
 }
 
-/**
- * Vérifie si le format est supporté par le convertisseur d'images
- */
 export function isImageFormatSupported(format: string): boolean {
-    return Object.keys(mimeTypes).includes(format.toLowerCase());
+  return Boolean(mimeTypes[format.toLowerCase()]);
 }
