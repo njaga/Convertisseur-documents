@@ -21,14 +21,10 @@ function canvasToBlob(canvas: HTMLCanvasElement, mimeType: string, quality?: num
   });
 }
 
-async function createIcoBlob(image: HTMLImageElement): Promise<Blob> {
-  // Modern ICO files can embed PNG-compressed icon images. A 256x256 PNG entry
-  // gives good Windows/browser compatibility while keeping transparency intact.
-  const size = 256;
+async function renderSquarePng(image: HTMLImageElement, size: number): Promise<Uint8Array> {
   const canvas = document.createElement('canvas');
   canvas.width = size;
   canvas.height = size;
-
   const context = canvas.getContext('2d');
   if (!context) throw new Error('Canvas indisponible dans ce navigateur.');
 
@@ -40,31 +36,40 @@ async function createIcoBlob(image: HTMLImageElement): Promise<Blob> {
 
   context.clearRect(0, 0, size, size);
   context.drawImage(image, x, y, width, height);
+  const blob = await canvasToBlob(canvas, 'image/png');
+  return new Uint8Array(await blob.arrayBuffer());
+}
 
-  const pngBlob = await canvasToBlob(canvas, 'image/png');
-  const pngBytes = new Uint8Array(await pngBlob.arrayBuffer());
+async function createIcoBlob(image: HTMLImageElement): Promise<Blob> {
+  const sizes = [16, 32, 48, 64, 128, 256];
+  const images = await Promise.all(sizes.map(size => renderSquarePng(image, size)));
 
   const headerSize = 6;
   const directoryEntrySize = 16;
-  const imageOffset = headerSize + directoryEntrySize;
-  const output = new Uint8Array(imageOffset + pngBytes.length);
+  const directorySize = directoryEntrySize * images.length;
+  let imageOffset = headerSize + directorySize;
+  const totalSize = imageOffset + images.reduce((sum, bytes) => sum + bytes.length, 0);
+  const output = new Uint8Array(totalSize);
   const view = new DataView(output.buffer);
 
-  // ICONDIR
-  view.setUint16(0, 0, true); // reserved
-  view.setUint16(2, 1, true); // type: icon
-  view.setUint16(4, 1, true); // one image
+  view.setUint16(0, 0, true);
+  view.setUint16(2, 1, true);
+  view.setUint16(4, images.length, true);
 
-  // ICONDIRENTRY. Width/height value 0 represents 256 pixels in ICO.
-  output[6] = 0;
-  output[7] = 0;
-  output[8] = 0; // color count
-  output[9] = 0; // reserved
-  view.setUint16(10, 1, true); // color planes
-  view.setUint16(12, 32, true); // bits per pixel
-  view.setUint32(14, pngBytes.length, true);
-  view.setUint32(18, imageOffset, true);
-  output.set(pngBytes, imageOffset);
+  images.forEach((pngBytes, index) => {
+    const size = sizes[index];
+    const entryOffset = headerSize + index * directoryEntrySize;
+    output[entryOffset] = size === 256 ? 0 : size;
+    output[entryOffset + 1] = size === 256 ? 0 : size;
+    output[entryOffset + 2] = 0;
+    output[entryOffset + 3] = 0;
+    view.setUint16(entryOffset + 4, 1, true);
+    view.setUint16(entryOffset + 6, 32, true);
+    view.setUint32(entryOffset + 8, pngBytes.length, true);
+    view.setUint32(entryOffset + 12, imageOffset, true);
+    output.set(pngBytes, imageOffset);
+    imageOffset += pngBytes.length;
+  });
 
   return new Blob([output], { type: 'image/x-icon' });
 }
@@ -84,14 +89,13 @@ export async function convertImage(
     onProgress(10);
     const image = new Image();
     const inputUrl = URL.createObjectURL(file);
-
     const cleanup = () => URL.revokeObjectURL(inputUrl);
 
     image.onload = async () => {
       onProgress(45);
       try {
         if (format === 'ico') {
-          onProgress(70);
+          onProgress(65);
           const icoBlob = await createIcoBlob(image);
           cleanup();
           onProgress(100);
