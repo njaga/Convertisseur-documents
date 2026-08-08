@@ -62,18 +62,11 @@ Un PDF déposé directement sur la page d'accueil est accepté et redirigé vers
 
 ## Office → PDF
 
-La V2 contient également un service serveur optionnel dans `server/office-converter`.
+La V2 contient un service serveur optionnel dans `server/office-converter`.
 
-Formats pris en charge par ce service :
+Formats pris en charge : DOC, DOCX, XLS, XLSX, PPT, PPTX, ODT, ODS et ODP. La sortie est PDF.
 
-- DOC / DOCX
-- XLS / XLSX
-- PPT / PPTX
-- ODT / ODS / ODP
-
-Sortie : PDF.
-
-Le service utilise LibreOffice Headless dans Docker et applique notamment : limite d'upload, timeout, noms de fichiers assainis, exécution sans interpolation shell et suppression automatique des fichiers temporaires.
+Le service utilise LibreOffice Headless dans Docker et applique : limite d'upload, timeout, noms de fichiers assainis, exécution sans interpolation shell et suppression automatique des fichiers temporaires.
 
 Le frontend n'affiche les formats Office que lorsque la variable suivante est configurée :
 
@@ -118,7 +111,7 @@ Browser ── HTTPS ──► Docker Node service ──► LibreOffice Headles
 
 Un service worker est enregistré en production. Le shell de l'application et les ressources déjà chargées peuvent être réutilisés hors ligne. Les assets FFmpeg du même domaine sont mis en cache après leur première utilisation.
 
-Les conversions nécessitant le service Office restent naturellement dépendantes d'une connexion réseau.
+Les conversions nécessitant le service Office restent dépendantes d'une connexion réseau.
 
 ## Stack
 
@@ -200,7 +193,7 @@ GitHub Actions contrôle :
 - [x] Backend Docker LibreOffice Office → PDF
 - [x] Tests unitaires des règles de conversion et de sélection de pages
 - [ ] Déployer le conteneur LibreOffice sur une infrastructure publique et configurer son URL dans le frontend
-- [ ] Ajouter une suite E2E navigateur plus large
+- [ ] Étendre les tests E2E navigateur
 
 ## Contribution
 
