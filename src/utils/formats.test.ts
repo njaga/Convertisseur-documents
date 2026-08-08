@@ -19,6 +19,12 @@ describe('conversionMatrix', () => {
     }
   });
 
+  it('keeps the public format helper aligned with the registry', () => {
+    for (const [source, outputs] of Object.entries(conversionMatrix)) {
+      expect(getAvailableOutputFormats(source).map(format => format.extension)).toEqual(outputs);
+    }
+  });
+
   it('answers support checks consistently', () => {
     expect(isConversionSupported('png', 'webp')).toBe(true);
     expect(isConversionSupported('pdf', 'xlsx')).toBe(false);
