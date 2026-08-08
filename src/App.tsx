@@ -19,24 +19,13 @@ function App() {
   const [fileType, setFileType] = useState<FileType | null>(null);
   const [conversionJobs, setConversionJobs] = useState<ConversionJob[]>([]);
   const [sourceFormat, setSourceFormat] = useState<string>('');
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const outputUrlsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
-    if (!selectedFile || fileType !== 'image') {
-      setPreviewUrl(null);
-      return;
-    }
-
-    const url = URL.createObjectURL(selectedFile);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [selectedFile, fileType]);
-
-  useEffect(() => {
+    const outputUrls = outputUrlsRef.current;
     return () => {
-      outputUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
-      outputUrlsRef.current.clear();
+      outputUrls.forEach(url => URL.revokeObjectURL(url));
+      outputUrls.clear();
     };
   }, []);
 
@@ -186,11 +175,6 @@ function App() {
                               <p className="font-medium text-gray-900 truncate">{selectedFile.name}</p>
                               <p className="text-sm text-gray-500">{formatFileSize(selectedFile.size)} • {fileType}</p>
                             </div>
-                            {fileType === 'image' && previewUrl && (
-                              <div className="w-14 h-14 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
-                                <img src={previewUrl} alt="Apercu du fichier selectionne" className="w-full h-full object-cover" />
-                              </div>
-                            )}
                           </div>
                         </div>
                       )}
