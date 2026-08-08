@@ -1,0 +1,43 @@
+import { describe, expect, it } from 'vitest';
+import {
+  conversionMatrix,
+  getAvailableOutputFormats,
+  getFileTypeFromExtension,
+  isConversionSupported,
+} from './formats';
+
+describe('conversionMatrix', () => {
+  it('only exposes source-aware conversion pairs', () => {
+    expect(getAvailableOutputFormats('pdf')).toEqual([]);
+    expect(getAvailableOutputFormats('png').map(format => format.extension)).toEqual(['jpg', 'jpeg', 'webp']);
+    expect(getAvailableOutputFormats('txt').map(format => format.extension)).toEqual(['html', 'md']);
+  });
+
+  it('does not contain identity conversions', () => {
+    for (const [source, outputs] of Object.entries(conversionMatrix)) {
+      expect(outputs).not.toContain(source);
+    }
+  });
+
+  it('answers support checks consistently', () => {
+    expect(isConversionSupported('png', 'webp')).toBe(true);
+    expect(isConversionSupported('pdf', 'xlsx')).toBe(false);
+    expect(isConversionSupported('md', 'html')).toBe(true);
+    expect(isConversionSupported('mp3', 'png')).toBe(false);
+  });
+});
+
+describe('getFileTypeFromExtension', () => {
+  it('detects supported file families', () => {
+    expect(getFileTypeFromExtension('PNG')).toBe('image');
+    expect(getFileTypeFromExtension('mp4')).toBe('video');
+    expect(getFileTypeFromExtension('FLAC')).toBe('audio');
+    expect(getFileTypeFromExtension('md')).toBe('document');
+  });
+
+  it('returns null instead of guessing unsupported files', () => {
+    expect(getFileTypeFromExtension('pdf')).toBeNull();
+    expect(getFileTypeFromExtension('exe')).toBeNull();
+    expect(getFileTypeFromExtension('')).toBeNull();
+  });
+});
