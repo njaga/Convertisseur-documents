@@ -1,22 +1,23 @@
 import { ConversionFormat, FileType } from '../types/converter';
+import { isOfficeConverterConfigured, isOfficeInputFormat } from '../services/officeConverter';
 
 export type SupportedFileFormat =
   | 'png' | 'jpg' | 'jpeg' | 'webp' | 'ico'
   | 'mp4' | 'mov' | 'avi' | 'mkv' | 'webm' | 'gif'
   | 'mp3' | 'wav' | 'ogg' | 'flac' | 'm4a' | 'aac'
-  | 'txt' | 'md' | 'html';
+  | 'txt' | 'md' | 'html'
+  | 'doc' | 'docx' | 'xls' | 'xlsx' | 'ppt' | 'pptx' | 'odt' | 'ods' | 'odp' | 'pdf';
 
 const labels: Record<string, string> = {
   png: 'PNG', jpg: 'JPG', jpeg: 'JPEG', webp: 'WebP', ico: 'ICO',
-  mp4: 'MP4', mov: 'MOV', avi: 'AVI', mkv: 'MKV', webm: 'WebM', gif: 'GIF anime',
+  mp4: 'MP4', mov: 'MOV', avi: 'AVI', mkv: 'MKV', webm: 'WebM', gif: 'GIF animé',
   mp3: 'MP3', wav: 'WAV', ogg: 'OGG', flac: 'FLAC', m4a: 'M4A', aac: 'AAC',
   txt: 'Texte', md: 'Markdown', html: 'HTML',
+  doc: 'Word DOC', docx: 'Word DOCX', xls: 'Excel XLS', xlsx: 'Excel XLSX',
+  ppt: 'PowerPoint PPT', pptx: 'PowerPoint PPTX', odt: 'OpenDocument ODT',
+  ods: 'OpenDocument ODS', odp: 'OpenDocument ODP', pdf: 'PDF',
 };
 
-/**
- * Unique source of truth for conversions that are actually implemented.
- * Do not add a pair here until a provider can produce a valid output and it has been tested.
- */
 export const conversionMatrix: Record<string, string[]> = {
   png: ['jpg', 'jpeg', 'webp', 'ico'],
   jpg: ['png', 'webp', 'ico'],
@@ -42,18 +43,25 @@ export const conversionMatrix: Record<string, string[]> = {
   html: ['txt', 'md'],
 };
 
+export const officeInputFormats = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp'];
+
 export const inputFormats: Record<FileType, string[]> = {
   image: ['jpg', 'jpeg', 'png', 'webp', 'ico'],
   video: ['mp4', 'mov', 'avi', 'mkv', 'webm'],
   audio: ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'],
-  document: ['txt', 'md', 'html'],
+  document: ['txt', 'md', 'html', ...officeInputFormats],
 };
+
+function enabledInputFormats(type: FileType): string[] {
+  if (type !== 'document' || isOfficeConverterConfigured()) return inputFormats[type];
+  return inputFormats.document.filter(extension => !isOfficeInputFormat(extension));
+}
 
 export const supportedFormats: Record<FileType, ConversionFormat[]> = {
   image: inputFormats.image.map(extension => ({ extension, name: labels[extension] })),
   video: [...inputFormats.video, 'gif'].map(extension => ({ extension, name: labels[extension] })),
   audio: inputFormats.audio.map(extension => ({ extension, name: labels[extension] })),
-  document: inputFormats.document.map(extension => ({ extension, name: labels[extension] })),
+  document: enabledInputFormats('document').map(extension => ({ extension, name: labels[extension] })),
 };
 
 export function getFileTypeFromExtension(extension: string): FileType | null {
@@ -65,14 +73,21 @@ export function getFileTypeFromExtension(extension: string): FileType | null {
 }
 
 export function getAvailableOutputFormats(sourceFormat: string): ConversionFormat[] {
-  const outputs = conversionMatrix[sourceFormat.toLowerCase()] ?? [];
+  const source = sourceFormat.toLowerCase();
+  if (isOfficeInputFormat(source)) {
+    return isOfficeConverterConfigured() ? [{ extension: 'pdf', name: labels.pdf }] : [];
+  }
+  const outputs = conversionMatrix[source] ?? [];
   return outputs.map(extension => ({ extension, name: labels[extension] ?? extension.toUpperCase() }));
 }
 
 export function isConversionSupported(inputFormat: string, outputFormat: string): boolean {
-  return (conversionMatrix[inputFormat.toLowerCase()] ?? []).includes(outputFormat.toLowerCase());
+  const input = inputFormat.toLowerCase();
+  const output = outputFormat.toLowerCase();
+  if (isOfficeInputFormat(input)) return isOfficeConverterConfigured() && output === 'pdf';
+  return (conversionMatrix[input] ?? []).includes(output);
 }
 
 export function getAllAcceptedExtensions(): string[] {
-  return [...new Set(Object.values(inputFormats).flat())];
+  return [...new Set((Object.keys(inputFormats) as FileType[]).flatMap(enabledInputFormats))];
 }
