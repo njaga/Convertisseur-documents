@@ -1,41 +1,37 @@
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
+import TurndownService from 'turndown';
+
 function escapeHtml(text: string): string {
   return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function sanitizeHtml(html: string): string {
+  return DOMPurify.sanitize(html, { USE_PROFILES: { html: true } });
+}
+
 function stripHtml(html: string): string {
-  const document = new DOMParser().parseFromString(html, 'text/html');
-  document.querySelectorAll('script, style').forEach(node => node.remove());
+  const safe = sanitizeHtml(html);
+  const document = new DOMParser().parseFromString(safe, 'text/html');
   return document.body.textContent?.trim() ?? '';
 }
 
-function htmlToMarkdown(html: string): string {
-  const document = new DOMParser().parseFromString(html, 'text/html');
-  document.querySelectorAll('script, style').forEach(node => node.remove());
-
-  document.querySelectorAll('h1,h2,h3,h4,h5,h6').forEach(node => {
-    const level = Number(node.tagName.substring(1));
-    node.replaceWith(`${'#'.repeat(level)} ${node.textContent ?? ''}\n\n`);
+async function markdownToHtml(markdown: string): Promise<string> {
+  const rendered = await marked.parse(markdown, {
+    gfm: true,
+    breaks: false,
   });
-  document.querySelectorAll('br').forEach(node => node.replaceWith('\n'));
-  document.querySelectorAll('p').forEach(node => node.replaceWith(`${node.textContent ?? ''}\n\n`));
-  document.querySelectorAll('li').forEach(node => node.replaceWith(`- ${node.textContent ?? ''}\n`));
-  return (document.body.textContent ?? '').replace(/\n{3,}/g, '\n\n').trim();
+  const safe = sanitizeHtml(rendered);
+  return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Document converti</title></head><body>${safe}</body></html>`;
 }
 
-function markdownToHtml(markdown: string): string {
-  // Deliberately small safe subset. A full Markdown library can replace this provider later.
-  const escaped = escapeHtml(markdown);
-  const lines = escaped.split(/\r?\n/);
-  const body = lines.map(line => {
-    const heading = /^(#{1,6})\s+(.+)$/.exec(line);
-    if (heading) {
-      const level = heading[1].length;
-      return `<h${level}>${heading[2]}</h${level}>`;
-    }
-    if (!line.trim()) return '';
-    return `<p>${line}</p>`;
-  }).join('\n');
-  return `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Document converti</title></head><body>${body}</body></html>`;
+function htmlToMarkdown(html: string): string {
+  const service = new TurndownService({
+    headingStyle: 'atx',
+    bulletListMarker: '-',
+    codeBlockStyle: 'fenced',
+  });
+  return service.turndown(sanitizeHtml(html)).trim();
 }
 
 export async function convertTextDocument(
@@ -47,7 +43,7 @@ export async function convertTextDocument(
   const output = outputFormat.toLowerCase();
   onProgress(20);
   const content = await file.text();
-  onProgress(60);
+  onProgress(55);
 
   let result: string;
   let mimeType: string;
@@ -59,10 +55,11 @@ export async function convertTextDocument(
     result = content;
     mimeType = 'text/markdown';
   } else if (input === 'md' && output === 'html') {
-    result = markdownToHtml(content);
+    result = await markdownToHtml(content);
     mimeType = 'text/html';
   } else if (input === 'md' && output === 'txt') {
-    result = content.replace(/^#{1,6}\s+/gm, '').replace(/[*_`~]/g, '');
+    const html = await markdownToHtml(content);
+    result = stripHtml(html);
     mimeType = 'text/plain';
   } else if (input === 'html' && output === 'txt') {
     result = stripHtml(content);
@@ -71,7 +68,7 @@ export async function convertTextDocument(
     result = htmlToMarkdown(content);
     mimeType = 'text/markdown';
   } else {
-    throw new Error(`Conversion ${input.toUpperCase()} vers ${output.toUpperCase()} non supportee.`);
+    throw new Error(`Conversion ${input.toUpperCase()} vers ${output.toUpperCase()} non supportée.`);
   }
 
   onProgress(90);
