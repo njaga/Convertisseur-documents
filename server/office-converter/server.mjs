@@ -39,7 +39,13 @@ async function readRequestBody(req) {
 }
 
 function sanitizeFileName(value) {
-  const raw = basename(value || 'document');
+  let decoded = value || 'document';
+  try {
+    decoded = decodeURIComponent(decoded);
+  } catch {
+    // Keep the original header value if it was not URI encoded correctly.
+  }
+  const raw = basename(decoded);
   const cleaned = raw.replace(/[^a-zA-Z0-9._-]/g, '_');
   return cleaned || `document-${randomUUID()}`;
 }
