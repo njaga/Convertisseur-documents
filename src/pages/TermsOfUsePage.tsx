@@ -51,7 +51,7 @@ const TermsOfUsePage = () => {
 
       <div className="max-w-3xl mx-auto px-6 -mt-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {features.map((feature, index) => (
+          {features.map(feature => (
             <div key={feature.title} className="group relative bg-white rounded-2xl border border-gray-200 p-5 hover:border-gray-300 hover:shadow-lg transition-all duration-300">
               <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative">
