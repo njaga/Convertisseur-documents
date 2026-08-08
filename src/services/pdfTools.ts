@@ -142,7 +142,7 @@ export async function pdfToPngs(file: File, scale = 2): Promise<PdfOutput[]> {
       const context = canvas.getContext('2d');
       if (!context) throw new Error('Canvas indisponible dans ce navigateur.');
 
-      await page.render({ canvasContext: context, viewport }).promise;
+      await page.render({ canvas, canvasContext: context, viewport }).promise;
       const blob = await canvasToPngBlob(canvas);
       outputs.push({
         name: `${baseName}-page-${pageNumber}.png`,
@@ -151,7 +151,7 @@ export async function pdfToPngs(file: File, scale = 2): Promise<PdfOutput[]> {
       page.cleanup();
     }
   } finally {
-    await pdf.destroy();
+    await loadingTask.destroy();
   }
 
   return outputs;
