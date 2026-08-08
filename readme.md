@@ -76,16 +76,18 @@ La matrice `conversionMatrix` dans `src/utils/formats.ts` est la source de véri
 
 - React 18
 - TypeScript
-- Vite
+- Vite 8
 - Tailwind CSS
 - React Router
 - React Dropzone
 - FFmpeg WebAssembly
 - Canvas API
-- Lucide React
+- Vitest
 - GitHub Actions
 
 ## Installation
+
+Node.js 22.12+ est requis.
 
 ```bash
 git clone https://github.com/njaga/Convertisseur-documents.git
@@ -97,10 +99,16 @@ npm run dev
 Vérifications locales :
 
 ```bash
+npm audit --audit-level=high
 npm run lint
-npx tsc -b
+npm run typecheck
+npm test
 npm run build
 ```
+
+## Tests
+
+Les tests unitaires protègent notamment la matrice de compatibilité et la détection des formats. Ils vérifient qu'une conversion non implémentée ne puisse pas être annoncée par erreur dans l'interface, que les conversions identité ne soient pas proposées et que les extensions inconnues soient refusées au lieu d'être classées arbitrairement comme documents.
 
 ## Confidentialité
 
@@ -110,13 +118,16 @@ La taille maximale acceptée par l'interface est de 100 MB. Les performances des
 
 ## CI
 
-La CI GitHub vérifie :
+À chaque changement, GitHub Actions vérifie :
 
 - installation reproductible avec `npm ci` ;
-- audit des dépendances ;
+- audit des dépendances avec échec en cas de vulnérabilité importante ;
 - ESLint ;
 - TypeScript ;
+- tests Vitest ;
 - build de production.
+
+La toolchain a été modernisée et l'audit npm est actuellement à **0 vulnérabilité connue** sur la branche de refonte.
 
 ## Roadmap
 
@@ -124,7 +135,7 @@ La CI GitHub vérifie :
 - [ ] Ajouter un backend de conversion Office basé sur LibreOffice Headless
 - [ ] Isoler les conversions lourdes dans des workers
 - [ ] Héberger les assets FFmpeg sous contrôle du projet
-- [ ] Ajouter tests unitaires et end-to-end
+- [ ] Ajouter des tests end-to-end
 - [ ] Remplacer le convertisseur Markdown minimal par un parseur dédié
 - [ ] Ajouter une PWA avec cache des dépendances locales
 
