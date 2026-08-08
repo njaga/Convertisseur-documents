@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import SupportedFormats from './pages/SupportedFormats';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { FileType, ConversionJob, ConversionFormat } from './types/converter';
 import FileUploader from './components/FileUploader';
 import FormatSelector from './components/FormatSelector';
@@ -20,6 +20,7 @@ function App() {
   const [conversionJobs, setConversionJobs] = useState<ConversionJob[]>([]);
   const [sourceFormat, setSourceFormat] = useState<string>('');
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const outputUrlsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!selectedFile || fileType !== 'image') {
@@ -34,16 +35,14 @@ function App() {
 
   useEffect(() => {
     return () => {
-      conversionJobs.forEach(job => {
-        if (job.outputUrl) URL.revokeObjectURL(job.outputUrl);
-      });
+      outputUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+      outputUrlsRef.current.clear();
     };
-  }, [conversionJobs]);
+  }, []);
 
   const handleFileSelect = (file: File) => {
     const extension = file.name.split('.').pop()?.toLowerCase() || '';
     const detectedType = getFileTypeFromExtension(extension);
-
     if (!detectedType) return;
 
     setSelectedFile(file);
@@ -77,6 +76,7 @@ function App() {
         );
       });
 
+      outputUrlsRef.current.add(outputUrl);
       setConversionJobs(prev =>
         prev.map(job =>
           job.id === newJob.id
@@ -152,8 +152,8 @@ function App() {
                       Aucune inscription et aucun envoi de fichier vers nos serveurs.
                     </p>
                     <div className="flex flex-wrap justify-center gap-3 mb-12">
-                      {features.map((feature, index) => (
-                        <div key={index} title={feature.desc} className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-gray-200 shadow-sm">
+                      {features.map(feature => (
+                        <div key={feature.label} title={feature.desc} className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-gray-200 shadow-sm">
                           <feature.icon size={16} className="text-gray-600" />
                           <span className="text-sm font-medium text-gray-700">{feature.label}</span>
                         </div>
@@ -181,9 +181,7 @@ function App() {
                       {selectedFile && fileType && (
                         <div className="px-6 pb-6">
                           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                            <div className="p-3 bg-white rounded-xl border border-gray-200 shadow-sm">
-                              {getFileTypeIcon(fileType)}
-                            </div>
+                            <div className="p-3 bg-white rounded-xl border border-gray-200 shadow-sm">{getFileTypeIcon(fileType)}</div>
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-gray-900 truncate">{selectedFile.name}</p>
                               <p className="text-sm text-gray-500">{formatFileSize(selectedFile.size)} • {fileType}</p>
@@ -229,8 +227,8 @@ function App() {
                     <p className="text-sm text-gray-500">Uniquement les conversions réellement prises en charge sont proposées.</p>
                   </div>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    {supportedTypes.map((type, index) => (
-                      <div key={index} className="group relative bg-white rounded-xl border border-gray-200 p-5 hover:border-gray-300 hover:shadow-lg transition-all duration-300 cursor-default">
+                    {supportedTypes.map(type => (
+                      <div key={type.label} className="group relative bg-white rounded-xl border border-gray-200 p-5 hover:border-gray-300 hover:shadow-lg transition-all duration-300 cursor-default">
                         <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-gray-900 transition-colors">
                           <type.icon size={18} className="text-gray-600 group-hover:text-white transition-colors" />
                         </div>
