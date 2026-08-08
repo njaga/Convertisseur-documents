@@ -1,13 +1,13 @@
 import { ConversionFormat, FileType } from '../types/converter';
 
 export type SupportedFileFormat =
-  | 'png' | 'jpg' | 'jpeg' | 'webp'
+  | 'png' | 'jpg' | 'jpeg' | 'webp' | 'ico'
   | 'mp4' | 'mov' | 'avi' | 'mkv' | 'webm' | 'gif'
   | 'mp3' | 'wav' | 'ogg' | 'flac' | 'm4a' | 'aac'
   | 'txt' | 'md' | 'html';
 
 const labels: Record<string, string> = {
-  png: 'PNG', jpg: 'JPG', jpeg: 'JPEG', webp: 'WebP',
+  png: 'PNG', jpg: 'JPG', jpeg: 'JPEG', webp: 'WebP', ico: 'ICO',
   mp4: 'MP4', mov: 'MOV', avi: 'AVI', mkv: 'MKV', webm: 'WebM', gif: 'GIF anime',
   mp3: 'MP3', wav: 'WAV', ogg: 'OGG', flac: 'FLAC', m4a: 'M4A', aac: 'AAC',
   txt: 'Texte', md: 'Markdown', html: 'HTML',
@@ -18,10 +18,11 @@ const labels: Record<string, string> = {
  * Do not add a pair here until a provider can produce a valid output and it has been tested.
  */
 export const conversionMatrix: Record<string, string[]> = {
-  png: ['jpg', 'jpeg', 'webp'],
-  jpg: ['png', 'webp'],
-  jpeg: ['png', 'webp'],
-  webp: ['png', 'jpg', 'jpeg'],
+  png: ['jpg', 'jpeg', 'webp', 'ico'],
+  jpg: ['png', 'webp', 'ico'],
+  jpeg: ['png', 'webp', 'ico'],
+  webp: ['png', 'jpg', 'jpeg', 'ico'],
+  ico: ['png', 'jpg', 'jpeg', 'webp'],
 
   mp4: ['webm', 'avi', 'mkv', 'mov', 'gif'],
   webm: ['mp4', 'avi', 'mkv', 'mov', 'gif'],
@@ -42,7 +43,7 @@ export const conversionMatrix: Record<string, string[]> = {
 };
 
 export const inputFormats: Record<FileType, string[]> = {
-  image: ['jpg', 'jpeg', 'png', 'webp'],
+  image: ['jpg', 'jpeg', 'png', 'webp', 'ico'],
   video: ['mp4', 'mov', 'avi', 'mkv', 'webm'],
   audio: ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'],
   document: ['txt', 'md', 'html'],
