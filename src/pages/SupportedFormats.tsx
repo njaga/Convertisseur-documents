@@ -1,59 +1,40 @@
-import { Image, Video, Music, FileText } from 'lucide-react';
-import { supportedFormats } from '../utils/formats';
+import { Image, Video, Music, FileText, ArrowRight } from 'lucide-react';
+import { conversionMatrix, inputFormats } from '../utils/formats';
+import { FileType } from '../types/converter';
+
+const labels: Record<string, string> = {
+  png: 'PNG', jpg: 'JPG', jpeg: 'JPEG', webp: 'WebP',
+  mp4: 'MP4', mov: 'MOV', avi: 'AVI', mkv: 'MKV', webm: 'WebM', gif: 'GIF',
+  mp3: 'MP3', wav: 'WAV', ogg: 'OGG', flac: 'FLAC', m4a: 'M4A', aac: 'AAC',
+  txt: 'TXT', md: 'Markdown', html: 'HTML',
+};
+
+const categories: Array<{ key: FileType; title: string; icon: typeof Image; description: string }> = [
+  { key: 'image', title: 'Images', icon: Image, description: 'Canvas API, traitement local' },
+  { key: 'video', title: 'Videos', icon: Video, description: 'FFmpeg WebAssembly, traitement local' },
+  { key: 'audio', title: 'Audio', icon: Music, description: 'FFmpeg WebAssembly, traitement local' },
+  { key: 'document', title: 'Texte', icon: FileText, description: 'Conversion locale TXT / Markdown / HTML' },
+];
 
 const SupportedFormats = () => {
-  const categories = [
-    {
-      key: 'image' as const,
-      title: 'Images',
-      icon: Image,
-      description: 'Conversion locale via Canvas API'
-    },
-    {
-      key: 'video' as const,
-      title: 'Videos',
-      icon: Video,
-      description: 'Conversion via FFmpeg WebAssembly'
-    },
-    {
-      key: 'audio' as const,
-      title: 'Audio',
-      icon: Music,
-      description: 'Conversion via FFmpeg WebAssembly'
-    },
-    {
-      key: 'document' as const,
-      title: 'Documents',
-      icon: FileText,
-      description: 'Conversion entre formats texte'
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-gray-50 pt-24 pb-16 px-6">
-      <div className="max-w-2xl mx-auto">
-        {/* Header */}
+      <div className="max-w-3xl mx-auto">
         <div className="mb-10">
-          <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">
-            Formats supportes
-          </h1>
+          <h1 className="text-3xl font-semibold text-gray-900 tracking-tight">Conversions supportees</h1>
           <p className="text-gray-500 mt-2">
-            Tous les formats sont convertis localement sur votre appareil
+            Cette page liste uniquement les conversions réellement disponibles dans l'application.
           </p>
         </div>
 
-        {/* Format Categories */}
         <div className="space-y-4">
-          {categories.map((category) => {
-            const formats = supportedFormats[category.key];
+          {categories.map(category => {
             const Icon = category.icon;
+            const sources = inputFormats[category.key];
 
             return (
-              <div
-                key={category.key}
-                className="bg-white rounded-2xl border border-gray-200 p-6"
-              >
-                <div className="flex items-center gap-3 mb-4">
+              <section key={category.key} className="bg-white rounded-2xl border border-gray-200 p-6">
+                <div className="flex items-center gap-3 mb-5">
                   <div className="p-2 bg-gray-100 rounded-lg">
                     <Icon size={18} className="text-gray-600" />
                   </div>
@@ -63,29 +44,33 @@ const SupportedFormats = () => {
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-2">
-                  {formats.map((format) => (
-                    <span
-                      key={format.extension}
-                      className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg"
-                    >
-                      {format.name}
-                    </span>
+                <div className="space-y-3">
+                  {sources.map(source => (
+                    <div key={source} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-sm">
+                      <span className="w-24 font-semibold text-gray-900">{labels[source] ?? source.toUpperCase()}</span>
+                      <ArrowRight size={14} className="hidden sm:block text-gray-300" />
+                      <div className="flex flex-wrap gap-2">
+                        {(conversionMatrix[source] ?? []).map(output => (
+                          <span key={output} className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded-lg">
+                            {labels[output] ?? output.toUpperCase()}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
-              </div>
+              </section>
             );
           })}
         </div>
 
-        {/* Info */}
         <div className="mt-6 p-4 bg-white rounded-2xl border border-gray-200">
-          <h3 className="font-medium text-gray-900 mb-2">Informations</h3>
+          <h3 className="font-medium text-gray-900 mb-2">Confidentialite et limites</h3>
           <ul className="space-y-1.5 text-sm text-gray-500">
-            <li>- Traitement 100% local (aucun upload)</li>
-            <li>- Aucune limite de taille</li>
-            <li>- Conversions illimitees</li>
-            <li>- Respect de la vie privee</li>
+            <li>- Les conversions actuelles sont effectuees localement dans votre navigateur.</li>
+            <li>- La taille maximale acceptee par l'interface est de 100 MB.</li>
+            <li>- Les performances dependent de votre appareil, surtout pour la video.</li>
+            <li>- Les conversions PDF et Office reviendront lorsqu'un moteur serveur securise sera disponible.</li>
           </ul>
         </div>
       </div>
