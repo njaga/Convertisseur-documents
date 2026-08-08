@@ -28,32 +28,29 @@ jobs:
       - name: Install locked dependencies
         run: npm ci
 
-      - name: Remove unused dependencies
-        run: npm uninstall axios sharp @types/sharp
+      - name: Ensure clean dependencies
+        run: npm uninstall axios sharp @types/sharp || true
 
-      - name: Update runtime dependencies
-        run: npm install react-router-dom@latest
+      - name: Install test runner
+        run: npm install --save-dev vitest@latest
 
-      - name: Update Vite toolchain
-        run: npm install --save-dev vite@latest @vitejs/plugin-react@latest
-
-      - name: Keep ESLint on compatible major and update patches
+      - name: Update package metadata and scripts
         run: |
-          npm install --save-dev eslint@^9 @eslint/js@^9 typescript-eslint@latest eslint-plugin-react-hooks@latest eslint-plugin-react-refresh@latest globals@latest
+          npm pkg set name="convertisseur-documents"
+          npm pkg set engines.node=">=22.12.0"
+          npm pkg set scripts.typecheck="tsc -b --pretty false"
+          npm pkg set scripts.test="vitest run"
 
-      - name: Apply compatible audit fixes
-        run: npm audit fix || true
-
-      - name: Show remaining audit findings
-        run: npm audit --audit-level=high || true
+      - name: Audit
+        run: npm audit --audit-level=high
 
       - name: Verify project
         run: |
           npm run lint
-          npx tsc -b --pretty false
+          npm run typecheck
           npm run build
 
-      - name: Commit dependency refresh
+      - name: Commit test tooling
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -61,7 +58,7 @@ jobs:
           if git diff --cached --quiet; then
             echo "No dependency changes to commit"
           else
-            git commit -m "chore: modernize build dependencies"
+            git commit -m "test: add Vitest and project scripts"
             git push origin HEAD:fix/conversion-engine-hardening
           fi
 
