@@ -1,91 +1,124 @@
-# Convertisseur de Fichiers
+# FileConvert — Convertisseur de Fichiers
 
 Application web open source de conversion de fichiers, pensée avec une approche **local-first** : lorsqu'une conversion peut être réalisée de manière fiable dans le navigateur, le fichier ne quitte pas l'appareil de l'utilisateur.
 
-> Le projet privilégie la fiabilité à la quantité : une conversion n'est affichée dans l'interface que si un moteur réellement implémenté la prend en charge.
+> Le projet privilégie la fiabilité à la quantité : une conversion n'est affichée dans l'interface que si un moteur réellement implémenté et disponible la prend en charge.
 
-## Fonctionnalités
+## Fonctionnalités V2
 
-- Conversion d'images PNG, JPG/JPEG, WebP et ICO via les APIs du navigateur
-- Génération de vrais fichiers ICO avec une image PNG 256×256 intégrée
-- Conversion audio et vidéo via FFmpeg WebAssembly
-- Conversion locale entre TXT, Markdown et HTML
-- Outils PDF 100 % locaux : images → PDF, fusion, séparation et rotation
-- Détection centralisée du format d'entrée
-- Matrice de compatibilité source → destination
-- Validation des fichiers avant conversion
-- Taille maximale actuelle : 100 MB pour le convertisseur principal
-- Progression et messages d'erreur explicites
-- Interface responsive avec glisser-déposer
-- Tests unitaires sur la matrice de conversion et la détection
-- Aucun compte requis
+- Conversion d'images PNG, JPG/JPEG, WebP et ICO dans le navigateur
+- Génération de vrais fichiers ICO multi-résolutions : 16, 32, 48, 64, 128 et 256 px
+- Conversion audio et vidéo via FFmpeg WebAssembly auto-hébergé
+- Conversion TXT / Markdown / HTML avec Marked, DOMPurify et Turndown
+- Outils PDF locaux avec `pdf-lib` et PDF.js
+- PDF déposé sur l'accueil automatiquement orienté vers l'espace PDF
+- PWA avec service worker et cache des ressources locales
+- Backend Office → PDF optionnel basé sur LibreOffice Headless
+- Détection centralisée des formats et matrice source → destination
+- Validation des fichiers, erreurs explicites et aucune inscription
 
-## Conversions actuellement supportées
+## Images
 
-### Images
+Conversions actuellement disponibles :
 
 - PNG → JPG, JPEG, WebP, ICO
 - JPG/JPEG → PNG, WebP, ICO
 - WebP → PNG, JPG, JPEG, ICO
-- ICO → PNG, JPG, JPEG, WebP lorsque le navigateur sait décoder le fichier ICO
+- ICO → PNG, JPG, JPEG, WebP lorsque le navigateur sait décoder la source
 
-L'export ICO produit un véritable conteneur `.ico` et non un fichier PNG simplement renommé.
+L'export ICO génère un véritable conteneur `.ico` avec plusieurs représentations PNG intégrées, et non une image renommée.
 
-### Vidéo
+## Audio et vidéo
 
-Les formats d'entrée actuellement gérés sont MP4, WebM, AVI, MKV et MOV. Les sorties proposées dépendent du format source et sont encodées localement avec FFmpeg.wasm.
+Les conversions audio/vidéo sont exécutées avec FFmpeg WebAssembly dans le navigateur.
 
-### Audio
+Entrées vidéo principales : MP4, WebM, AVI, MKV et MOV.
 
-Conversions entre MP3, WAV, OGG, FLAC, M4A et AAC via FFmpeg.wasm.
+Audio : MP3, WAV, OGG, FLAC, M4A et AAC.
 
-### Documents texte
+Le core FFmpeg JS/WASM est versionné dans `public/ffmpeg` et servi depuis le même domaine : l'application ne dépend plus d'un CDN tiers pour initialiser FFmpeg.
+
+## Texte
 
 - TXT → HTML, Markdown
 - Markdown → HTML, TXT
 - HTML → TXT, Markdown
 
-### Outils PDF
+Markdown est analysé avec `marked`; le HTML produit ou fourni est assaini avec `DOMPurify`; la conversion HTML → Markdown utilise `Turndown`.
 
-La page `/pdf` fonctionne intégralement dans le navigateur avec `pdf-lib` :
+## Outils PDF
 
-- plusieurs images PNG/JPG/JPEG/WebP/ICO → un PDF ;
-- fusion de plusieurs PDF ;
-- séparation d'un PDF en un fichier par page ;
-- rotation de toutes les pages à 90°, 180° ou 270°.
+La page `/pdf` traite les documents localement dans le navigateur :
 
-Aucun PDF utilisé par ces outils n'est envoyé vers un serveur.
+- Images PNG/JPG/JPEG/WebP/ICO → PDF
+- PDF → PNG, une image par page
+- Fusion de plusieurs PDF
+- Séparation d'un PDF en un fichier par page
+- Rotation des pages à 90°, 180° ou 270°
+- Extraction de pages sélectionnées
+- Réorganisation des pages avec une syntaxe comme `3,1,2` ou `1,3,5-8`
 
-La page `/formats` est générée à partir de la même matrice que le moteur de conversion afin d'éviter les divergences entre documentation et fonctionnalités réelles.
+Un PDF déposé directement sur la page d'accueil est accepté et redirigé vers cet espace au lieu d'être rejeté comme format non supporté.
 
-## Office : prochaine étape serveur
+## Office → PDF
 
-Une ancienne version annonçait des conversions PDF, DOCX, XLSX et PPTX via une API tierce appelée directement depuis le navigateur. Cette approche exposait des clés API et rendait incorrecte la promesse de traitement local.
+La V2 contient également un service serveur optionnel dans `server/office-converter`.
 
-Les conversions Office seront réintroduites via une couche serveur sécurisée basée sur LibreOffice Headless, isolée du frontend et sans clé secrète embarquée dans le bundle.
+Formats pris en charge par ce service :
+
+- DOC / DOCX
+- XLS / XLSX
+- PPT / PPTX
+- ODT / ODS / ODP
+
+Sortie : PDF.
+
+Le service utilise LibreOffice Headless dans Docker et applique notamment : limite d'upload, timeout, noms de fichiers assainis, exécution sans interpolation shell et suppression automatique des fichiers temporaires.
+
+Le frontend n'affiche les formats Office que lorsque la variable suivante est configurée :
+
+```env
+VITE_OFFICE_CONVERTER_URL=https://office-converter.example.com
+```
+
+Sans cette variable, aucun bouton Office trompeur n'est affiché.
+
+Voir `server/office-converter/README.md` pour le déploiement Docker.
 
 ## Architecture
 
 ```text
-Convertisseur principal
-Upload
-  │
-  ▼
-Validation + détection du format
-  │
-  ▼
-Conversion Registry
-  │
-  ├── Image provider ───── Canvas API + encodeur ICO
-  ├── Video provider ───── FFmpeg.wasm
-  ├── Audio provider ───── FFmpeg.wasm
-  └── Text provider ────── Browser APIs
+                         FileConvert Web
+                              │
+                    validation / registry
+                              │
+        ┌─────────────────────┼──────────────────────┐
+        │                     │                      │
+        ▼                     ▼                      ▼
+ Images / ICO            Audio / Vidéo          Texte
+ Canvas + ICO             FFmpeg.wasm      Marked / Turndown
+ encoder local            auto-hébergé       + DOMPurify
+        │                     │                      │
+        └────────────── traitement local ───────────┘
+                              │
+                              ▼
+                         Outils PDF
+                    pdf-lib + PDF.js
+                              │
+                              ▼
+                 Aucun upload pour ces outils
 
-Outils PDF
-Fichiers locaux ────────── pdf-lib ────────── PDF local
+Office (optionnel)
+Browser ── HTTPS ──► Docker Node service ──► LibreOffice Headless
+                              │
+                              └── fichiers temporaires supprimés
 ```
 
-La matrice `conversionMatrix` dans `src/utils/formats.ts` reste la source de vérité pour les conversions proposées par le convertisseur principal.
+## PWA / hors ligne
+
+Un service worker est enregistré en production. Le shell de l'application et les ressources déjà chargées peuvent être réutilisés hors ligne. Les assets FFmpeg du même domaine sont mis en cache après leur première utilisation.
+
+Les conversions nécessitant le service Office restent naturellement dépendantes d'une connexion réseau.
 
 ## Stack
 
@@ -98,10 +131,17 @@ La matrice `conversionMatrix` dans `src/utils/formats.ts` reste la source de vé
 - FFmpeg WebAssembly
 - Canvas API
 - pdf-lib
+- PDF.js (`pdfjs-dist`)
+- Marked
+- DOMPurify
+- Turndown
+- Node.js
+- LibreOffice Headless
+- Docker
 - Vitest
 - GitHub Actions
 
-## Installation
+## Installation frontend
 
 Node.js 22.12+ est requis.
 
@@ -119,47 +159,52 @@ npm audit --audit-level=high
 npm run lint
 npm run typecheck
 npm test
+node --check server/office-converter/server.mjs
 npm run build
 ```
 
-## Tests
-
-Les tests unitaires protègent notamment la matrice de compatibilité et la détection des formats. Ils vérifient qu'une conversion non implémentée ne puisse pas être annoncée par erreur dans l'interface, que les conversions identité ne soient pas proposées et que les extensions inconnues soient refusées au lieu d'être classées arbitrairement comme documents.
-
 ## Confidentialité
 
-Les conversions et outils PDF actuellement disponibles sont exécutés localement dans le navigateur. Aucun fichier n'est envoyé vers un serveur applicatif par ces moteurs.
+Images, audio, vidéo, texte et outils PDF sont traités localement.
 
-Les performances des conversions FFmpeg et des grosses manipulations PDF dépendent de la mémoire et de la puissance de l'appareil. Les fichiers volumineux peuvent donc être coûteux à traiter sur mobile.
+Les documents Office ne quittent le navigateur que si le service LibreOffice optionnel est explicitement configuré. Ce service est stateless et supprime ses fichiers temporaires après chaque requête.
+
+Les conversions FFmpeg et le rendu de gros PDF peuvent utiliser beaucoup de mémoire sur les appareils mobiles.
 
 ## CI
 
-À chaque changement vérifié par la CI, GitHub Actions contrôle :
+GitHub Actions contrôle :
 
-- installation reproductible avec `npm ci` ;
-- audit des dépendances ;
-- ESLint ;
-- TypeScript ;
-- tests Vitest ;
-- build de production.
+- `npm ci`
+- audit des dépendances
+- ESLint
+- TypeScript
+- Vitest
+- syntaxe du service Office
+- présence des assets FFmpeg auto-hébergés
+- build Vite de production
 
-## Roadmap V2
+## État V2
 
-- [x] Support ICO en entrée/sortie image
+- [x] Support ICO entrée/sortie
+- [x] ICO multi-résolutions
 - [x] Images → PDF
+- [x] PDF → PNG
 - [x] Fusion PDF
 - [x] Séparation PDF
 - [x] Rotation PDF
-- [ ] Backend de conversion Office basé sur LibreOffice Headless
-- [ ] Isoler les conversions lourdes dans des workers
-- [ ] Héberger les assets FFmpeg sous contrôle du projet
-- [ ] Ajouter des tests end-to-end
-- [ ] Remplacer le convertisseur Markdown minimal par un parseur dédié
-- [ ] Ajouter une PWA avec cache des dépendances locales
+- [x] Extraction / réorganisation PDF
+- [x] Markdown / HTML avec parseurs dédiés
+- [x] PWA / cache offline
+- [x] FFmpeg auto-hébergé
+- [x] Backend Docker LibreOffice Office → PDF
+- [x] Tests unitaires des règles de conversion et de sélection de pages
+- [ ] Déployer le conteneur LibreOffice sur une infrastructure publique et configurer son URL dans le frontend
+- [ ] Ajouter une suite E2E navigateur plus large
 
 ## Contribution
 
-Les contributions sont les bienvenues. Merci de n'ajouter un couple de conversion à la matrice qu'après avoir vérifié qu'un provider produit réellement un fichier valide avec le bon type MIME.
+N'ajoutez un couple de conversion à la matrice qu'après avoir vérifié qu'un provider produit réellement un fichier valide avec le type MIME attendu.
 
 ## Contact
 
