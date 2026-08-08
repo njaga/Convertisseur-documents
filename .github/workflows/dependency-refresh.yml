@@ -65,4 +65,4 @@ jobs:
             git push origin HEAD:fix/conversion-engine-hardening
           fi
 
-      # One-shot maintenance workflow: remove after the dependency refresh is committed.
+      # One-shot maintenance workflow. Remove after this successful refresh.
