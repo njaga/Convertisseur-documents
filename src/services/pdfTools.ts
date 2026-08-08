@@ -15,7 +15,6 @@ async function fileToPngBytes(file: File): Promise<Uint8Array> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     const url = URL.createObjectURL(file);
-
     const cleanup = () => URL.revokeObjectURL(url);
 
     image.onload = () => {
@@ -109,6 +108,55 @@ export async function rotatePdf(file: File, angle: 90 | 180 | 270): Promise<PdfO
   const bytes = await pdf.save();
   return {
     name: `${file.name.replace(/\.pdf$/i, '')}-rotation-${angle}.pdf`,
+    url: bytesToPdfUrl(bytes),
+  };
+}
+
+export async function getPdfPageCount(file: File): Promise<number> {
+  const pdf = await PDFDocument.load(await file.arrayBuffer());
+  return pdf.getPageCount();
+}
+
+export function parsePageSelection(value: string, pageCount: number): number[] {
+  const tokens = value.split(',').map(token => token.trim()).filter(Boolean);
+  if (tokens.length === 0) throw new Error('Indiquez au moins une page.');
+
+  const result: number[] = [];
+  for (const token of tokens) {
+    const range = /^(\d+)\s*-\s*(\d+)$/.exec(token);
+    if (range) {
+      const start = Number(range[1]);
+      const end = Number(range[2]);
+      if (start < 1 || end < 1 || start > pageCount || end > pageCount) {
+        throw new Error(`Les pages doivent être comprises entre 1 et ${pageCount}.`);
+      }
+      const step = start <= end ? 1 : -1;
+      for (let page = start; page !== end + step; page += step) result.push(page - 1);
+      continue;
+    }
+
+    const page = Number(token);
+    if (!Number.isInteger(page) || page < 1 || page > pageCount) {
+      throw new Error(`Page invalide : ${token}. Utilisez des numéros entre 1 et ${pageCount}.`);
+    }
+    result.push(page - 1);
+  }
+  return result;
+}
+
+export async function organizePdf(file: File, selection: string): Promise<PdfOutput> {
+  const source = await PDFDocument.load(await file.arrayBuffer());
+  const pageCount = source.getPageCount();
+  if (pageCount === 0) throw new Error('Ce PDF ne contient aucune page.');
+
+  const indices = parsePageSelection(selection, pageCount);
+  const output = await PDFDocument.create();
+  const pages = await output.copyPages(source, indices);
+  pages.forEach(page => output.addPage(page));
+  const bytes = await output.save();
+
+  return {
+    name: `${file.name.replace(/\.pdf$/i, '')}-organise.pdf`,
     url: bytesToPdfUrl(bytes),
   };
 }
