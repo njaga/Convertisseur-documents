@@ -1,0 +1,39 @@
+name: Vendor FFmpeg core
+
+on:
+  push:
+    branches:
+      - feat/v2-pdf-ico
+    paths:
+      - .github/workflows/vendor-ffmpeg.yml
+
+permissions:
+  contents: write
+
+jobs:
+  vendor:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feat/v2-pdf-ico
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Download pinned FFmpeg core package
+        run: |
+          npm pack @ffmpeg/core@0.12.10
+          tar -xzf ffmpeg-core-0.12.10.tgz
+          mkdir -p public/ffmpeg
+          cp package/dist/esm/ffmpeg-core.js public/ffmpeg/ffmpeg-core.js
+          cp package/dist/esm/ffmpeg-core.wasm public/ffmpeg/ffmpeg-core.wasm
+          rm -rf package ffmpeg-core-0.12.10.tgz
+      - name: Commit vendored assets
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/ffmpeg/ffmpeg-core.js public/ffmpeg/ffmpeg-core.wasm
+          git commit -m "chore(v2): self-host FFmpeg core assets"
+          git fetch origin feat/v2-pdf-ico
+          git rebase origin/feat/v2-pdf-ico
+          git push origin HEAD:feat/v2-pdf-ico
