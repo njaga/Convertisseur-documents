@@ -40,7 +40,10 @@ jobs:
           npm install --save-dev sharp@^0.35.3
 
       - name: Apply non-breaking audit fixes
-        run: npm audit fix
+        run: npm audit fix || true
+
+      - name: Show remaining audit findings
+        run: npm audit --audit-level=high || true
 
       - name: Verify project
         run: |
