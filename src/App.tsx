@@ -155,7 +155,7 @@ function App() {
                       ))}
                     </div>
                     <Link to="/pdf" className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900">
-                      Nouveau : fusion, séparation, rotation et images → PDF <ArrowRight size={15} />
+                      Outils PDF : convertir, fusionner, séparer, tourner et organiser <ArrowRight size={15} />
                     </Link>
                   </div>
                 </div>
