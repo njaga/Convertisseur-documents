@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
 import SupportedFormats from './pages/SupportedFormats';
 import { useEffect, useRef, useState } from 'react';
 import { FileType, ConversionJob, ConversionFormat } from './types/converter';
@@ -12,6 +12,7 @@ import MenuVisibilityHandler from './components/MenuVisibilityHandler';
 import { convertFile } from './services/conversionService';
 import { getFileTypeFromExtension } from './utils/formats';
 import TermsOfUsePage from './pages/TermsOfUsePage';
+import PdfTools from './pages/PdfTools';
 import NotFound from './pages/NotFound';
 
 function App() {
@@ -108,10 +109,10 @@ function App() {
   ];
 
   const supportedTypes = [
-    { icon: Image, label: 'Images', formats: 'PNG, JPG, WebP' },
+    { icon: Image, label: 'Images', formats: 'PNG, JPG, WebP, ICO' },
     { icon: Video, label: 'Videos', formats: 'MP4, WebM, AVI, MKV, MOV, GIF' },
     { icon: Music, label: 'Audio', formats: 'MP3, WAV, OGG, AAC, FLAC, M4A' },
-    { icon: FileText, label: 'Texte', formats: 'TXT, Markdown, HTML' },
+    { icon: FileText, label: 'Texte & PDF', formats: 'TXT, Markdown, HTML + outils PDF' },
   ];
 
   return (
@@ -137,10 +138,10 @@ function App() {
                       </span>
                     </h1>
                     <p className="text-lg text-gray-500 max-w-xl mx-auto mb-8">
-                      Convertissez vos images, videos, fichiers audio et documents texte directement dans votre navigateur.
+                      Convertissez vos images, videos, fichiers audio et documents directement dans votre navigateur.
                       Aucune inscription et aucun envoi de fichier vers nos serveurs.
                     </p>
-                    <div className="flex flex-wrap justify-center gap-3 mb-12">
+                    <div className="flex flex-wrap justify-center gap-3 mb-6">
                       {features.map(feature => (
                         <div key={feature.label} title={feature.desc} className="flex items-center gap-2 px-4 py-2 bg-white rounded-full border border-gray-200 shadow-sm">
                           <feature.icon size={16} className="text-gray-600" />
@@ -148,6 +149,9 @@ function App() {
                         </div>
                       ))}
                     </div>
+                    <Link to="/pdf" className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900">
+                      Nouveau : fusion, séparation, rotation et images → PDF <ArrowRight size={15} />
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -225,6 +229,7 @@ function App() {
               </div>
             </main>
           } />
+          <Route path="/pdf" element={<PdfTools />} />
           <Route path="/formats" element={<SupportedFormats />} />
           <Route path="/conditions" element={<TermsOfUsePage />} />
           <Route path="*" element={<NotFound />} />
