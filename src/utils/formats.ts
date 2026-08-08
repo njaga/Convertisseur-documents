@@ -1,88 +1,77 @@
 import { ConversionFormat, FileType } from '../types/converter';
 
-/**
- * Formats supportes par l'application
- * 
- * Technologies utilisees:
- * - Images: Canvas API (conversion locale instantanee)
- * - Videos: FFmpeg.wasm (conversion locale)
- * - Audio: FFmpeg.wasm (conversion locale)
- * - Documents: Cloudmersive API (PDF, Office, etc.)
- */
-export const supportedFormats: Record<FileType, ConversionFormat[]> = {
-  // ───────────────────────────────────────────────────────────────
-  // IMAGES - Canvas API (100% local, instantane)
-  // ───────────────────────────────────────────────────────────────
-  image: [
-    { extension: 'png', name: 'PNG' },
-    { extension: 'jpg', name: 'JPG' },
-    { extension: 'jpeg', name: 'JPEG' },
-    { extension: 'webp', name: 'WebP' },
-    { extension: 'gif', name: 'GIF' },
-    { extension: 'bmp', name: 'BMP' },
-    { extension: 'ico', name: 'ICO' },
-  ],
+export type SupportedFileFormat =
+  | 'png' | 'jpg' | 'jpeg' | 'webp'
+  | 'mp4' | 'mov' | 'avi' | 'mkv' | 'webm' | 'gif'
+  | 'mp3' | 'wav' | 'ogg' | 'flac' | 'm4a' | 'aac'
+  | 'txt' | 'md' | 'html';
 
-  // ───────────────────────────────────────────────────────────────
-  // VIDEOS - FFmpeg.wasm (local, peut prendre du temps)
-  // ───────────────────────────────────────────────────────────────
-  video: [
-    { extension: 'mp4', name: 'MP4' },
-    { extension: 'webm', name: 'WebM' },
-    { extension: 'avi', name: 'AVI' },
-    { extension: 'mov', name: 'MOV' },
-    { extension: 'mkv', name: 'MKV' },
-    { extension: 'gif', name: 'GIF anime' },
-  ],
-
-  // ───────────────────────────────────────────────────────────────
-  // AUDIO - FFmpeg.wasm (local, rapide)
-  // ───────────────────────────────────────────────────────────────
-  audio: [
-    { extension: 'mp3', name: 'MP3' },
-    { extension: 'wav', name: 'WAV' },
-    { extension: 'ogg', name: 'OGG' },
-    { extension: 'aac', name: 'AAC' },
-    { extension: 'flac', name: 'FLAC' },
-    { extension: 'm4a', name: 'M4A' },
-  ],
-
-  // ───────────────────────────────────────────────────────────────
-  // DOCUMENTS - Cloudmersive API (1800 conversions/mois gratuites)
-  // ───────────────────────────────────────────────────────────────
-  document: [
-    { extension: 'pdf', name: 'PDF' },
-    { extension: 'docx', name: 'Word' },
-    { extension: 'xlsx', name: 'Excel' },
-    { extension: 'pptx', name: 'PowerPoint' },
-    { extension: 'txt', name: 'Texte' },
-    { extension: 'html', name: 'HTML' },
-    { extension: 'csv', name: 'CSV' },
-  ],
+const labels: Record<string, string> = {
+  png: 'PNG', jpg: 'JPG', jpeg: 'JPEG', webp: 'WebP',
+  mp4: 'MP4', mov: 'MOV', avi: 'AVI', mkv: 'MKV', webm: 'WebM', gif: 'GIF anime',
+  mp3: 'MP3', wav: 'WAV', ogg: 'OGG', flac: 'FLAC', m4a: 'M4A', aac: 'AAC',
+  txt: 'Texte', md: 'Markdown', html: 'HTML',
 };
 
 /**
- * Formats d'entree acceptes par type de fichier
- * (pour la detection automatique du type)
+ * Unique source of truth for conversions that are actually implemented.
+ * Do not add a pair here until a provider can produce a valid output and it has been tested.
  */
+export const conversionMatrix: Record<string, string[]> = {
+  png: ['jpg', 'jpeg', 'webp'],
+  jpg: ['png', 'webp'],
+  jpeg: ['png', 'webp'],
+  webp: ['png', 'jpg', 'jpeg'],
+
+  mp4: ['webm', 'avi', 'mkv', 'mov', 'gif'],
+  webm: ['mp4', 'avi', 'mkv', 'mov', 'gif'],
+  avi: ['mp4', 'webm', 'mkv', 'mov', 'gif'],
+  mkv: ['mp4', 'webm', 'avi', 'mov', 'gif'],
+  mov: ['mp4', 'webm', 'avi', 'mkv', 'gif'],
+
+  mp3: ['wav', 'ogg', 'flac', 'm4a', 'aac'],
+  wav: ['mp3', 'ogg', 'flac', 'm4a', 'aac'],
+  ogg: ['mp3', 'wav', 'flac', 'm4a', 'aac'],
+  flac: ['mp3', 'wav', 'ogg', 'm4a', 'aac'],
+  m4a: ['mp3', 'wav', 'ogg', 'flac', 'aac'],
+  aac: ['mp3', 'wav', 'ogg', 'flac', 'm4a'],
+
+  txt: ['html', 'md'],
+  md: ['html', 'txt'],
+  html: ['txt', 'md'],
+};
+
 export const inputFormats: Record<FileType, string[]> = {
-  image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'ico', 'tiff', 'tif', 'heic', 'heif', 'svg'],
-  video: ['mp4', 'mov', 'avi', 'mkv', 'webm', '3gp', 'm4v', 'flv', 'wmv', 'mpeg', 'mpg'],
-  audio: ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac', 'wma', 'aiff', 'opus'],
-  document: ['pdf', 'docx', 'doc', 'xlsx', 'xls', 'pptx', 'ppt', 'txt', 'rtf', 'odt', 'html', 'htm', 'csv', 'md'],
+  image: ['jpg', 'jpeg', 'png', 'webp'],
+  video: ['mp4', 'mov', 'avi', 'mkv', 'webm'],
+  audio: ['mp3', 'wav', 'ogg', 'flac', 'm4a', 'aac'],
+  document: ['txt', 'md', 'html'],
 };
 
-/**
- * Obtenir le type de fichier a partir de l'extension
- */
-export function getFileTypeFromExtension(extension: string): FileType {
+export const supportedFormats: Record<FileType, ConversionFormat[]> = {
+  image: inputFormats.image.map(extension => ({ extension, name: labels[extension] })),
+  video: [...inputFormats.video, 'gif'].map(extension => ({ extension, name: labels[extension] })),
+  audio: inputFormats.audio.map(extension => ({ extension, name: labels[extension] })),
+  document: inputFormats.document.map(extension => ({ extension, name: labels[extension] })),
+};
+
+export function getFileTypeFromExtension(extension: string): FileType | null {
   const ext = extension.toLowerCase();
-
   for (const [type, formats] of Object.entries(inputFormats)) {
-    if (formats.includes(ext)) {
-      return type as FileType;
-    }
+    if (formats.includes(ext)) return type as FileType;
   }
+  return null;
+}
 
-  return 'document'; // Par defaut
+export function getAvailableOutputFormats(sourceFormat: string): ConversionFormat[] {
+  const outputs = conversionMatrix[sourceFormat.toLowerCase()] ?? [];
+  return outputs.map(extension => ({ extension, name: labels[extension] ?? extension.toUpperCase() }));
+}
+
+export function isConversionSupported(inputFormat: string, outputFormat: string): boolean {
+  return (conversionMatrix[inputFormat.toLowerCase()] ?? []).includes(outputFormat.toLowerCase());
+}
+
+export function getAllAcceptedExtensions(): string[] {
+  return [...new Set(Object.values(inputFormats).flat())];
 }
