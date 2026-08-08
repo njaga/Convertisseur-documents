@@ -1,20 +1,28 @@
 import { useEffect, useRef, useState } from 'react';
-import { FileImage, FilePlus2, Merge, RotateCw, Scissors, Download, Loader2, ShieldCheck } from 'lucide-react';
-import { imagesToPdf, mergePdfs, PdfOutput, rotatePdf, splitPdf } from '../services/pdfTools';
+import { useLocation } from 'react-router-dom';
+import { FileImage, FilePlus2, Merge, RotateCw, Scissors, Download, Loader2, ShieldCheck, ListOrdered } from 'lucide-react';
+import { getPdfPageCount, imagesToPdf, mergePdfs, organizePdf, PdfOutput, rotatePdf, splitPdf } from '../services/pdfTools';
 
-type Tool = 'images' | 'merge' | 'split' | 'rotate';
+type Tool = 'images' | 'merge' | 'split' | 'rotate' | 'organize';
+
+type LocationState = { initialFile?: File } | null;
 
 const tools: Array<{ id: Tool; label: string; description: string; icon: typeof FileImage }> = [
   { id: 'images', label: 'Images → PDF', description: 'PNG, JPG, WebP et ICO vers un PDF', icon: FileImage },
   { id: 'merge', label: 'Fusionner', description: 'Regrouper plusieurs PDF en un seul', icon: Merge },
   { id: 'split', label: 'Séparer', description: 'Créer un PDF par page', icon: Scissors },
   { id: 'rotate', label: 'Rotation', description: 'Tourner toutes les pages', icon: RotateCw },
+  { id: 'organize', label: 'Organiser', description: 'Extraire ou réordonner des pages', icon: ListOrdered },
 ];
 
 const PdfTools = () => {
-  const [tool, setTool] = useState<Tool>('images');
-  const [files, setFiles] = useState<File[]>([]);
+  const location = useLocation();
+  const initialFile = (location.state as LocationState)?.initialFile;
+  const [tool, setTool] = useState<Tool>(initialFile ? 'organize' : 'images');
+  const [files, setFiles] = useState<File[]>(initialFile ? [initialFile] : []);
   const [rotation, setRotation] = useState<90 | 180 | 270>(90);
+  const [pageSelection, setPageSelection] = useState('');
+  const [pageCount, setPageCount] = useState<number | null>(null);
   const [outputs, setOutputs] = useState<PdfOutput[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
@@ -28,6 +36,24 @@ const PdfTools = () => {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    if (files.length !== 1 || tool === 'images' || tool === 'merge') {
+      setPageCount(null);
+      return;
+    }
+
+    getPdfPageCount(files[0])
+      .then(count => {
+        if (!cancelled) setPageCount(count);
+      })
+      .catch(() => {
+        if (!cancelled) setPageCount(null);
+      });
+
+    return () => { cancelled = true; };
+  }, [files, tool]);
+
   const resetResults = () => {
     outputs.forEach(output => {
       URL.revokeObjectURL(output.url);
@@ -40,13 +66,26 @@ const PdfTools = () => {
   const changeTool = (next: Tool) => {
     resetResults();
     setFiles([]);
+    setPageSelection('');
+    setPageCount(null);
     setTool(next);
   };
 
   const handleFiles = (selected: FileList | null) => {
     resetResults();
     if (!selected) return;
-    setFiles(Array.from(selected));
+    const nextFiles = Array.from(selected);
+    const invalid = nextFiles.find(file => {
+      const extension = file.name.split('.').pop()?.toLowerCase();
+      if (tool === 'images') return !['png', 'jpg', 'jpeg', 'webp', 'ico'].includes(extension ?? '');
+      return extension !== 'pdf';
+    });
+    if (invalid) {
+      setFiles([]);
+      setError(`Le fichier ${invalid.name} n'est pas valide pour cet outil.`);
+      return;
+    }
+    setFiles(nextFiles);
   };
 
   const runTool = async () => {
@@ -59,9 +98,12 @@ const PdfTools = () => {
       else if (tool === 'split') {
         if (files.length !== 1) throw new Error('Sélectionnez un seul PDF à séparer.');
         result = await splitPdf(files[0]);
-      } else {
+      } else if (tool === 'rotate') {
         if (files.length !== 1) throw new Error('Sélectionnez un seul PDF à faire pivoter.');
         result = [await rotatePdf(files[0], rotation)];
+      } else {
+        if (files.length !== 1) throw new Error('Sélectionnez un seul PDF à organiser.');
+        result = [await organizePdf(files[0], pageSelection)];
       }
 
       result.forEach(output => urlsRef.current.add(output.url));
@@ -75,7 +117,13 @@ const PdfTools = () => {
 
   const acceptsImages = tool === 'images';
   const multiple = tool === 'images' || tool === 'merge';
-  const canRun = tool === 'images' ? files.length >= 1 : tool === 'merge' ? files.length >= 2 : files.length === 1;
+  const canRun = tool === 'images'
+    ? files.length >= 1
+    : tool === 'merge'
+      ? files.length >= 2
+      : tool === 'organize'
+        ? files.length === 1 && pageSelection.trim().length > 0
+        : files.length === 1;
 
   return (
     <main className="flex-grow pt-28 pb-20 px-6">
@@ -89,7 +137,7 @@ const PdfTools = () => {
           <p className="mt-3 text-gray-500 max-w-2xl mx-auto">Créez et modifiez vos PDF directement dans votre navigateur. Aucun document n'est envoyé vers un serveur.</p>
         </div>
 
-        <div className="grid md:grid-cols-4 gap-3 mb-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
           {tools.map(item => (
             <button
               key={item.id}
@@ -125,6 +173,7 @@ const PdfTools = () => {
                 <div className="space-y-1 max-h-32 overflow-auto">
                   {files.map(file => <p key={`${file.name}-${file.size}`} className="text-xs text-gray-500 truncate">{file.name}</p>)}
                 </div>
+                {pageCount !== null && <p className="text-xs text-gray-500 mt-2">{pageCount} page{pageCount > 1 ? 's' : ''}</p>}
               </div>
             )}
 
@@ -136,6 +185,21 @@ const PdfTools = () => {
                     <button key={angle} type="button" onClick={() => setRotation(angle)} className={`px-4 py-2 rounded-lg text-sm font-medium border ${rotation === angle ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-200'}`}>{angle}°</button>
                   ))}
                 </div>
+              </div>
+            )}
+
+            {tool === 'organize' && (
+              <div className="mt-5">
+                <label htmlFor="page-selection" className="block text-sm font-medium text-gray-700 mb-2">Pages à conserver et ordre</label>
+                <input
+                  id="page-selection"
+                  type="text"
+                  value={pageSelection}
+                  onChange={event => setPageSelection(event.target.value)}
+                  placeholder={pageCount ? `Ex. 1,3,5-${Math.min(8, pageCount)}` : 'Ex. 1,3,5-8'}
+                  className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400"
+                />
+                <p className="text-xs text-gray-500 mt-2">Utilisez des virgules et des plages. L'ordre saisi devient l'ordre du PDF final. Exemple : <strong>3,1,2</strong> réordonne les trois premières pages.</p>
               </div>
             )}
 
