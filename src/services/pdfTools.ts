@@ -1,8 +1,5 @@
 import { degrees, PDFDocument } from 'pdf-lib';
-import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-
-GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
 export interface PdfOutput {
   name: string;
@@ -126,6 +123,9 @@ export async function rotatePdf(file: File, angle: 90 | 180 | 270): Promise<PdfO
 }
 
 export async function pdfToPngs(file: File, scale = 2): Promise<PdfOutput[]> {
+  const { getDocument, GlobalWorkerOptions } = await import('pdfjs-dist');
+  GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+
   const data = new Uint8Array(await file.arrayBuffer());
   const loadingTask = getDocument({ data });
   const pdf = await loadingTask.promise;
