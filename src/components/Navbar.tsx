@@ -18,6 +18,7 @@ const Navbar = () => {
   const navLinks = [
     { to: '/', label: 'Accueil' },
     { to: '/pdf', label: 'Outils PDF' },
+    { to: '/optimiser', label: 'Compression' },
     { to: '/formats', label: 'Formats' },
     { to: '/conditions', label: 'Conditions' },
   ];
