@@ -14,6 +14,7 @@ import { getFileTypeFromExtension } from './utils/formats';
 import TermsOfUsePage from './pages/TermsOfUsePage';
 import PdfTools from './pages/PdfTools';
 import OptimizeTools from './pages/OptimizeTools';
+import DocumentLab from './pages/DocumentLab';
 import NotFound from './pages/NotFound';
 import FilePreview from './components/FilePreview';
 import { createZip } from './services/zip';
@@ -282,6 +283,7 @@ function App() {
           } />
           <Route path="/pdf" element={<PdfTools />} />
           <Route path="/optimiser" element={<OptimizeTools />} />
+          <Route path="/documents" element={<DocumentLab />} />
           <Route path="/formats" element={<SupportedFormats />} />
           <Route path="/conditions" element={<TermsOfUsePage />} />
           <Route path="*" element={<NotFound />} />
