@@ -20,6 +20,7 @@ const Navbar = () => {
     { to: '/pdf', label: 'Outils PDF' },
     { to: '/optimiser', label: 'Compression' },
     { to: '/documents', label: 'Documents' },
+    { to: '/batch', label: 'Batch' },
     { to: '/formats', label: 'Formats' },
     { to: '/conditions', label: 'Conditions' },
   ];
