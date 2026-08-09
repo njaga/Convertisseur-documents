@@ -173,3 +173,12 @@ export function isVideoFormatSupported(format: string): boolean {
 export function isAudioFormatSupported(format: string): boolean {
   return getAudioArgs(format.toLowerCase()) !== null;
 }
+
+
+export function cancelActiveMediaConversion(): void {
+  if (ffmpeg) ffmpeg.terminate();
+  ffmpeg = null;
+  ffmpegLoaded = false;
+  currentProgressCallback = null;
+  operationQueue = Promise.resolve();
+}
