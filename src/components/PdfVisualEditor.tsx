@@ -29,7 +29,7 @@ export default function PdfVisualEditor({ file }: { file: File }) {
           previews.forEach(preview => URL.revokeObjectURL(preview.url));
           return;
         }
-        previewUrls.current = previews.map(preview => preview.url);
+        previewUrls.current.push(...previews.map(preview => preview.url));
         setPages(previews.map((preview, index) => ({
           sourceIndex: index,
           pageNumber: preview.pageNumber,
@@ -51,7 +51,7 @@ export default function PdfVisualEditor({ file }: { file: File }) {
 
   const replaceOutputs = (next: PdfOutput[]) => {
     outputUrls.current.forEach(URL.revokeObjectURL);
-    outputUrls.current = next.map(output => output.url);
+    outputUrls.current.splice(0, outputUrls.current.length, ...next.map(output => output.url));
     setOutputs(next);
   };
 
