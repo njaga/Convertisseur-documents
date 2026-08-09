@@ -19,6 +19,8 @@ import BatchManager from './pages/BatchManager';
 import NotFound from './pages/NotFound';
 import FilePreview from './components/FilePreview';
 import { createZip } from './services/zip';
+import { saveHistory } from './services/history';
+import HistoryPage from './pages/HistoryPage';
 
 function App() {
   const navigate = useNavigate();
@@ -103,6 +105,8 @@ function App() {
         outputUrlsRef.current.add(outputUrl);
         const base = job.inputFile.name.replace(/\.[^.]+$/, '');
         completed.push({ name: `${base}.${format.extension}`, url: outputUrl });
+        const historyBlob = await fetch(outputUrl).then(response => response.blob());
+        await saveHistory(`${base}.${format.extension}`, `${job.inputFile.name} → ${format.extension}`, historyBlob).catch(() => undefined);
         setConversionJobs(prev => prev.map(item => item.id === job.id ? { ...item, status: 'completed', progress: 100, outputUrl } : item));
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Une erreur inattendue est survenue.';
@@ -286,6 +290,7 @@ function App() {
           <Route path="/optimiser" element={<OptimizeTools />} />
           <Route path="/documents" element={<DocumentLab />} />
           <Route path="/batch" element={<BatchManager />} />
+          <Route path="/historique" element={<HistoryPage />} />
           <Route path="/formats" element={<SupportedFormats />} />
           <Route path="/conditions" element={<TermsOfUsePage />} />
           <Route path="*" element={<NotFound />} />
