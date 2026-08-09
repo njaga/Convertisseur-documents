@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { FileImage, FilePlus2, Merge, RotateCw, Scissors, Download, Loader2, ShieldCheck, ListOrdered, Images } from 'lucide-react';
-import { getPdfPageCount, imagesToPdf, mergePdfs, organizePdf, pdfToPngs, PdfOutput, rotatePdf, splitPdf } from '../services/pdfTools';
+import { FileImage, FilePlus2, Merge, RotateCw, Scissors, Download, Loader2, ShieldCheck, ListOrdered, Images, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { createPdfPagePreviews, getPdfPageCount, imagesToPdf, mergePdfs, organizePdf, pdfToPngs, PdfOutput, PdfPagePreview, rotatePdf, splitPdf } from '../services/pdfTools';
 
 type Tool = 'images' | 'render' | 'merge' | 'split' | 'rotate' | 'organize';
 type LocationState = { initialFile?: File } | null;
@@ -26,15 +26,46 @@ const PdfTools = () => {
   const [outputs, setOutputs] = useState<PdfOutput[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
+  const [previews, setPreviews] = useState<PdfPagePreview[]>([]);
+  const [loadingPreviews, setLoadingPreviews] = useState(false);
   const urlsRef = useRef<Set<string>>(new Set());
+  const previewUrlsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const urls = urlsRef.current;
     return () => {
       urls.forEach(url => URL.revokeObjectURL(url));
       urls.clear();
+      previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+      previewUrlsRef.current.clear();
     };
   }, []);
+
+  useEffect(() => {
+    previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+    previewUrlsRef.current.clear();
+    setPreviews([]);
+    if (!files.length || tool === 'images') return;
+
+    let cancelled = false;
+    setLoadingPreviews(true);
+    createPdfPagePreviews(files)
+      .then(next => {
+        if (cancelled) {
+          next.forEach(preview => URL.revokeObjectURL(preview.url));
+          return;
+        }
+        next.forEach(preview => previewUrlsRef.current.add(preview.url));
+        setPreviews(next);
+      })
+      .catch(() => {
+        if (!cancelled) setError('Impossible de générer l’aperçu de certaines pages.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingPreviews(false);
+      });
+    return () => { cancelled = true; };
+  }, [files, tool]);
 
   useEffect(() => {
     if (files.length !== 1 || tool === 'images' || tool === 'merge') return;
@@ -84,6 +115,27 @@ const PdfTools = () => {
       return;
     }
     setFiles(nextFiles);
+  };
+
+  const removeFile = (index: number) => {
+    resetResults();
+    setFiles(current => current.filter((_, fileIndex) => fileIndex !== index));
+    setPageCount(null);
+  };
+
+  const moveFile = (index: number, direction: -1 | 1) => {
+    setFiles(current => {
+      const target = index + direction;
+      if (target < 0 || target >= current.length) return current;
+      const next = [...current];
+      [next[index], next[target]] = [next[target], next[index]];
+      return next;
+    });
+  };
+
+  const selectPreviewPage = (pageNumber: number) => {
+    if (tool !== 'organize') return;
+    setPageSelection(current => current ? `${current},${pageNumber}` : String(pageNumber));
   };
 
   const runTool = async () => {
@@ -159,12 +211,49 @@ const PdfTools = () => {
 
             {files.length > 0 && (
               <div className="mt-5 rounded-xl bg-gray-50 border border-gray-100 p-4">
-                <p className="text-sm font-medium text-gray-700 mb-2">{files.length} fichier{files.length > 1 ? 's' : ''} sélectionné{files.length > 1 ? 's' : ''}</p>
-                <div className="space-y-1 max-h-32 overflow-auto">
-                  {files.map(file => <p key={`${file.name}-${file.size}`} className="text-xs text-gray-500 truncate">{file.name}</p>)}
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-medium text-gray-700">{files.length} fichier{files.length > 1 ? 's' : ''} sélectionné{files.length > 1 ? 's' : ''}</p>
+                  <button type="button" onClick={() => setFiles([])} className="text-xs font-medium text-red-600 hover:text-red-700">Tout annuler</button>
+                </div>
+                <div className="space-y-2">
+                  {files.map((file, index) => (
+                    <div key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2">
+                      <span className="flex-1 truncate text-xs text-gray-600"><strong className="mr-2 text-gray-900">{index + 1}.</strong>{file.name}</span>
+                      {multiple && <>
+                        <button type="button" onClick={() => moveFile(index, -1)} disabled={index === 0} aria-label="Monter" className="rounded p-1 text-gray-500 hover:bg-gray-100 disabled:opacity-25"><ArrowUp size={15} /></button>
+                        <button type="button" onClick={() => moveFile(index, 1)} disabled={index === files.length - 1} aria-label="Descendre" className="rounded p-1 text-gray-500 hover:bg-gray-100 disabled:opacity-25"><ArrowDown size={15} /></button>
+                      </>}
+                      <button type="button" onClick={() => removeFile(index)} aria-label={`Retirer ${file.name}`} className="rounded p-1 text-gray-500 hover:bg-red-50 hover:text-red-600"><X size={15} /></button>
+                    </div>
+                  ))}
                 </div>
                 {pageCount !== null && <p className="text-xs text-gray-500 mt-2">{pageCount} page{pageCount > 1 ? 's' : ''}</p>}
               </div>
+            )}
+
+            {files.length > 0 && tool !== 'images' && (
+              <section className="mt-5" aria-label="Aperçu des pages">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-sm font-medium text-gray-700">Aperçu des pages</p>
+                  {tool === 'organize' && <p className="text-xs text-gray-500">Cliquez dans l’ordre souhaité</p>}
+                </div>
+                {loadingPreviews ? (
+                  <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500"><Loader2 size={16} className="animate-spin" /> Génération des aperçus…</div>
+                ) : (
+                  <div className="grid max-h-[32rem] grid-cols-2 gap-3 overflow-auto rounded-xl border border-gray-200 bg-gray-100 p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                    {previews.map(preview => {
+                      const selectedOrder = tool === 'organize' ? pageSelection.split(',').map(value => Number(value.trim())).lastIndexOf(preview.pageNumber) : -1;
+                      return (
+                        <button key={`${preview.fileIndex}-${preview.pageNumber}`} type="button" onClick={() => selectPreviewPage(preview.pageNumber)} disabled={tool !== 'organize'} className="relative overflow-hidden rounded-lg border border-gray-200 bg-white text-left shadow-sm disabled:cursor-default">
+                          <img src={preview.url} alt={`Page ${preview.pageNumber} de ${files[preview.fileIndex]?.name}`} className="aspect-[3/4] w-full object-contain" />
+                          <span className="block truncate border-t border-gray-100 px-2 py-1.5 text-[11px] text-gray-600">{tool === 'merge' ? `${preview.fileIndex + 1}. ` : ''}Page {preview.pageNumber}</span>
+                          {selectedOrder >= 0 && <span className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">{selectedOrder + 1}</span>}
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
             )}
 
             {tool === 'rotate' && (
@@ -182,7 +271,7 @@ const PdfTools = () => {
               <div className="mt-5">
                 <label htmlFor="page-selection" className="block text-sm font-medium text-gray-700 mb-2">Pages à conserver et ordre</label>
                 <input id="page-selection" type="text" value={pageSelection} onChange={event => setPageSelection(event.target.value)} placeholder={pageCount ? `Ex. 1,3,5-${Math.min(8, pageCount)}` : 'Ex. 1,3,5-8'} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400" />
-                <p className="text-xs text-gray-500 mt-2">Utilisez des virgules et des plages. L'ordre saisi devient l'ordre du PDF final. Exemple : <strong>3,1,2</strong> réordonne les trois premières pages.</p>
+                <div className="mt-2 flex items-center justify-between gap-3"><p className="text-xs text-gray-500">Cliquez sur les aperçus ou saisissez les pages. Exemple : <strong>3,1,2</strong>.</p><button type="button" onClick={() => setPageSelection('')} className="shrink-0 text-xs font-medium text-red-600">Effacer l’ordre</button></div>
               </div>
             )}
 
