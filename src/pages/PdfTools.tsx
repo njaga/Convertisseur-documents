@@ -27,28 +27,25 @@ const PdfTools = () => {
   const [error, setError] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [previews, setPreviews] = useState<PdfPagePreview[]>([]);
-  const [loadingPreviews, setLoadingPreviews] = useState(false);
+  const [loadingPreviews, setLoadingPreviews] = useState(Boolean(initialFile));
   const urlsRef = useRef<Set<string>>(new Set());
   const previewUrlsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     const urls = urlsRef.current;
+    const previewUrls = previewUrlsRef.current;
     return () => {
       urls.forEach(url => URL.revokeObjectURL(url));
       urls.clear();
-      previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
-      previewUrlsRef.current.clear();
+      previewUrls.forEach(url => URL.revokeObjectURL(url));
+      previewUrls.clear();
     };
   }, []);
 
   useEffect(() => {
-    previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
-    previewUrlsRef.current.clear();
-    setPreviews([]);
     if (!files.length || tool === 'images') return;
 
     let cancelled = false;
-    setLoadingPreviews(true);
     createPdfPagePreviews(files)
       .then(next => {
         if (cancelled) {
@@ -91,16 +88,25 @@ const PdfTools = () => {
     setError(null);
   };
 
+  const clearPreviews = () => {
+    previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+    previewUrlsRef.current.clear();
+    setPreviews([]);
+  };
+
   const changeTool = (next: Tool) => {
     resetResults();
+    clearPreviews();
     setFiles([]);
     setPageSelection('');
     setPageCount(null);
+    setLoadingPreviews(false);
     setTool(next);
   };
 
   const handleFiles = (selected: FileList | null) => {
     resetResults();
+    clearPreviews();
     setPageCount(null);
     if (!selected) return;
     const nextFiles = Array.from(selected);
@@ -114,16 +120,24 @@ const PdfTools = () => {
       setError(`Le fichier ${invalid.name} n'est pas valide pour cet outil.`);
       return;
     }
+    setLoadingPreviews(tool !== 'images' && nextFiles.length > 0);
     setFiles(nextFiles);
   };
 
   const removeFile = (index: number) => {
     resetResults();
-    setFiles(current => current.filter((_, fileIndex) => fileIndex !== index));
+    clearPreviews();
+    setFiles(current => {
+      const next = current.filter((_, fileIndex) => fileIndex !== index);
+      setLoadingPreviews(tool !== 'images' && next.length > 0);
+      return next;
+    });
     setPageCount(null);
   };
 
   const moveFile = (index: number, direction: -1 | 1) => {
+    clearPreviews();
+    setLoadingPreviews(true);
     setFiles(current => {
       const target = index + direction;
       if (target < 0 || target >= current.length) return current;
@@ -213,7 +227,7 @@ const PdfTools = () => {
               <div className="mt-5 rounded-xl bg-gray-50 border border-gray-100 p-4">
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-sm font-medium text-gray-700">{files.length} fichier{files.length > 1 ? 's' : ''} sélectionné{files.length > 1 ? 's' : ''}</p>
-                  <button type="button" onClick={() => setFiles([])} className="text-xs font-medium text-red-600 hover:text-red-700">Tout annuler</button>
+                  <button type="button" onClick={() => { clearPreviews(); setFiles([]); setLoadingPreviews(false); }} className="text-xs font-medium text-red-600 hover:text-red-700">Tout annuler</button>
                 </div>
                 <div className="space-y-2">
                   {files.map((file, index) => (
