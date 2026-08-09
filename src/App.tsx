@@ -21,6 +21,8 @@ import FilePreview from './components/FilePreview';
 import { createZip } from './services/zip';
 import { saveHistory } from './services/history';
 import HistoryPage from './pages/HistoryPage';
+import LandingPage from './pages/LandingPage';
+import AboutPage from './pages/AboutPage';
 
 function App() {
   const navigate = useNavigate();
@@ -158,7 +160,9 @@ function App() {
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
         <Routes>
-          <Route path="/" element={
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/a-propos" element={<AboutPage />} />
+          <Route path="/convertir" element={
             <main className="flex-grow">
               <div className="relative overflow-hidden">
                 <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e7eb_1px,transparent_1px),linear-gradient(to_bottom,#e5e7eb_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_80%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
