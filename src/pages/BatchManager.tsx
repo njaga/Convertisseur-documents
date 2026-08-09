@@ -4,6 +4,7 @@ import FilePreview from '../components/FilePreview';
 import { convertFile } from '../services/conversionService';
 import { cancelActiveMediaConversion } from '../services/mediaConverter';
 import { createZip } from '../services/zip';
+import { estimateWork, explainError, saveHistory } from '../services/history';
 import { getAvailableOutputFormats, getFileTypeFromExtension } from '../utils/formats';
 
 type Status = 'ready' | 'processing' | 'completed' | 'error' | 'cancelled';
@@ -12,6 +13,7 @@ interface Item { id: string; file: File; output: string; customName: string; sta
 export default function BatchManager() {
   const [items, setItems] = useState<Item[]>([]);
   const [running, setRunning] = useState(false);
+  const estimate = estimateWork(items.map(item => item.file));
   const [naming, setNaming] = useState<'converted'|'original'|'custom'>('converted');
   const cancelled = useRef(false);
   const urls = useRef<string[]>([]);
@@ -40,9 +42,11 @@ export default function BatchManager() {
       const url=await convertFile(item.file,item.output,progress=>setItems(current=>current.map(value=>value.id===item.id?{...value,progress}:value)));
       if(cancelled.current){URL.revokeObjectURL(url);setItems(current=>current.map(value=>value.id===item.id?{...value,status:'cancelled'}:value));return;}
       urls.current.push(url);
+      const resultBlob = await fetch(url).then(response => response.blob());
+      await saveHistory(outputName(item), `${item.file.name} → ${item.output}`, resultBlob).catch(() => undefined);
       setItems(current=>current.map(value=>value.id===item.id?{...value,status:'completed',progress:100,url}:value));
     } catch(error) {
-      setItems(current=>current.map(value=>value.id===item.id?{...value,status:cancelled.current?'cancelled':'error',error:error instanceof Error?error.message:'Conversion impossible'}:value));
+      setItems(current=>current.map(value=>value.id===item.id?{...value,status:cancelled.current?'cancelled':'error',error:explainError(error)}:value));
     }
   };
 
@@ -69,7 +73,7 @@ export default function BatchManager() {
     <div className="mb-8 text-center"><h1 className="text-4xl font-bold tracking-tight">Conversions par lot</h1><p className="mt-3 text-gray-500">Mélangez les formats, choisissez chaque sortie et pilotez la file d’attente.</p></div>
     <section className="rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
       <label className="block cursor-pointer rounded-xl border-2 border-dashed p-8 text-center"><input type="file" multiple className="hidden" onChange={event=>addFiles(event.target.files)}/><p className="font-medium">Ajouter des fichiers compatibles</p><p className="mt-1 text-sm text-gray-500">Images, vidéos, audio et documents peuvent être mélangés.</p></label>
-      {items.length>0&&<><div className="mt-5 flex flex-wrap items-center justify-between gap-3"><div className="flex gap-2">{(['converted','original','custom'] as const).map(value=><button key={value} onClick={()=>setNaming(value)} className={`rounded-lg border px-3 py-2 text-xs font-medium ${naming===value?'bg-gray-900 text-white':'bg-white'}`}>{value==='converted'?'nom-original-converti':value==='original'?'Nom original':'Nom personnalisé'}</button>)}</div><button onClick={()=>setItems([])} className="text-sm font-medium text-red-600">Vider la liste</button></div>
+      {items.length>0&&<><div className="mt-5 rounded-xl border border-blue-100 bg-blue-50 p-3 text-sm text-blue-800">Estimation : environ {estimate.seconds} s · jusqu’à {estimate.memoryMb} MB de mémoire{estimate.warning && <strong className="mt-1 block text-amber-700">{estimate.warning}</strong>}</div><div className="mt-5 flex flex-wrap items-center justify-between gap-3"><div className="flex gap-2">{(['converted','original','custom'] as const).map(value=><button key={value} onClick={()=>setNaming(value)} className={`rounded-lg border px-3 py-2 text-xs font-medium ${naming===value?'bg-gray-900 text-white':'bg-white'}`}>{value==='converted'?'nom-original-converti':value==='original'?'Nom original':'Nom personnalisé'}</button>)}</div><button onClick={()=>setItems([])} className="text-sm font-medium text-red-600">Vider la liste</button></div>
       <div className="mt-4 space-y-3">{items.map(item=>{const ext=item.file.name.split('.').pop()?.toLowerCase()??'';const formats=getAvailableOutputFormats(ext);const type=getFileTypeFromExtension(ext);return <article key={item.id} className="grid gap-3 rounded-xl border border-gray-200 p-3 md:grid-cols-[140px_1fr_auto] md:items-center">
         <FilePreview file={item.file} className="h-24"/>
         <div className="min-w-0"><p className="truncate text-sm font-medium">{item.file.name}</p><p className="text-xs text-gray-500">{type} · {(item.file.size/1024/1024).toFixed(2)} MB</p>

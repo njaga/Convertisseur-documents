@@ -21,6 +21,7 @@ const Navbar = () => {
     { to: '/optimiser', label: 'Compression' },
     { to: '/documents', label: 'Documents' },
     { to: '/batch', label: 'Batch' },
+    { to: '/historique', label: 'Historique' },
     { to: '/formats', label: 'Formats' },
     { to: '/conditions', label: 'Conditions' },
   ];
