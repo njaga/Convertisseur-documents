@@ -1,12 +1,12 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Batch, FilePenLine, FileText, History, Images, LockKeyhole, Minimize2, ScanText, Sparkles } from 'lucide-react';
+import { ArrowRight, Files, FilePenLine, FileText, History, Images, LockKeyhole, Minimize2, ScanText, Sparkles } from 'lucide-react';
 
 const tools = [
   { to: '/convertir', title: 'Convertir', description: 'Images, audio, vidéos et documents, seuls ou par lot.', icon: Sparkles },
   { to: '/pdf', title: 'Éditer un PDF', description: 'Réorganiser, tourner, extraire, signer ou fusionner des pages.', icon: FilePenLine },
   { to: '/optimiser', title: 'Compresser', description: 'Réduire le poids de vos images, PDF et vidéos.', icon: Minimize2 },
   { to: '/documents', title: 'Créer & analyser', description: 'OCR, annotations, signatures et génération de PDF.', icon: ScanText },
-  { to: '/batch', title: 'Traitement par lot', description: 'Piloter plusieurs conversions et récupérer une archive ZIP.', icon: Batch },
+  { to: '/batch', title: 'Traitement par lot', description: 'Piloter plusieurs conversions et récupérer une archive ZIP.', icon: Files },
   { to: '/historique', title: 'Historique local', description: 'Retrouver vos résultats conservés uniquement sur cet appareil.', icon: History },
 ];
 
