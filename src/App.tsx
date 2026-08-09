@@ -9,6 +9,7 @@ import { Image, Video, Music, FileText, ArrowRight, Sparkles, Shield, Zap, Uploa
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import MenuVisibilityHandler from './components/MenuVisibilityHandler';
+import ScrollToTop from './components/ScrollToTop';
 import { convertFile } from './services/conversionService';
 import { getFileTypeFromExtension } from './utils/formats';
 import TermsOfUsePage from './pages/TermsOfUsePage';
@@ -157,6 +158,7 @@ function App() {
   return (
     <>
       <MenuVisibilityHandler />
+      <ScrollToTop />
       <div className="min-h-screen flex flex-col bg-gray-50">
         <Navbar />
         <Routes>
