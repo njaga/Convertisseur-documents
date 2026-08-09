@@ -127,11 +127,9 @@ const PdfTools = () => {
   const removeFile = (index: number) => {
     resetResults();
     clearPreviews();
-    setFiles(current => {
-      const next = current.filter((_, fileIndex) => fileIndex !== index);
-      setLoadingPreviews(tool !== 'images' && next.length > 0);
-      return next;
-    });
+    const next = files.filter((_, fileIndex) => fileIndex !== index);
+    setLoadingPreviews(tool !== 'images' && next.length > 0);
+    setFiles(next);
     setPageCount(null);
   };
 
