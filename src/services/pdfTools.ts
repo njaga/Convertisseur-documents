@@ -205,3 +205,39 @@ export async function organizePdf(file: File, selection: string): Promise<PdfOut
     url: bytesToPdfUrl(bytes),
   };
 }
+
+
+export interface PdfPagePreview {
+  fileIndex: number;
+  pageNumber: number;
+  url: string;
+}
+
+export async function createPdfPagePreviews(files: File[], scale = 0.45): Promise<PdfPagePreview[]> {
+  const { getDocument, GlobalWorkerOptions } = await import('pdfjs-dist');
+  GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+  const previews: PdfPagePreview[] = [];
+
+  for (let fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+    const loadingTask = getDocument({ data: new Uint8Array(await files[fileIndex].arrayBuffer()) });
+    const pdf = await loadingTask.promise;
+    try {
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        const page = await pdf.getPage(pageNumber);
+        const viewport = page.getViewport({ scale });
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.ceil(viewport.width);
+        canvas.height = Math.ceil(viewport.height);
+        const context = canvas.getContext('2d');
+        if (!context) throw new Error('Canvas indisponible dans ce navigateur.');
+        await page.render({ canvas, canvasContext: context, viewport }).promise;
+        const blob = await canvasToPngBlob(canvas);
+        previews.push({ fileIndex, pageNumber, url: URL.createObjectURL(blob) });
+        page.cleanup();
+      }
+    } finally {
+      await loadingTask.destroy();
+    }
+  }
+  return previews;
+}
