@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { FileImage, FilePlus2, Merge, RotateCw, Scissors, Download, Loader2, ShieldCheck, ListOrdered, Images, X, ArrowUp, ArrowDown } from 'lucide-react';
+import PdfVisualEditor from '../components/PdfVisualEditor';
 import { createPdfPagePreviews, getPdfPageCount, imagesToPdf, mergePdfs, organizePdf, pdfToPngs, PdfOutput, PdfPagePreview, rotatePdf, splitPdf } from '../services/pdfTools';
 
-type Tool = 'images' | 'render' | 'merge' | 'split' | 'rotate' | 'organize';
+type Tool = 'editor' | 'images' | 'render' | 'merge' | 'split' | 'rotate' | 'organize';
 type LocationState = { initialFile?: File } | null;
 
 const tools: Array<{ id: Tool; label: string; description: string; icon: typeof FileImage }> = [
+  { id: 'editor', label: 'Éditeur', description: 'Réordonner, tourner, extraire et supprimer', icon: ListOrdered },
   { id: 'images', label: 'Images → PDF', description: 'PNG, JPG, WebP et ICO vers un PDF', icon: FileImage },
   { id: 'render', label: 'PDF → PNG', description: 'Convertir chaque page en image PNG', icon: Images },
   { id: 'merge', label: 'Fusionner', description: 'Regrouper plusieurs PDF en un seul', icon: Merge },
@@ -18,7 +20,7 @@ const tools: Array<{ id: Tool; label: string; description: string; icon: typeof 
 const PdfTools = () => {
   const location = useLocation();
   const initialFile = (location.state as LocationState)?.initialFile;
-  const [tool, setTool] = useState<Tool>(initialFile ? 'organize' : 'images');
+  const [tool, setTool] = useState<Tool>(initialFile ? 'editor' : 'editor');
   const [files, setFiles] = useState<File[]>(initialFile ? [initialFile] : []);
   const [rotation, setRotation] = useState<90 | 180 | 270>(90);
   const [pageSelection, setPageSelection] = useState('');
@@ -43,7 +45,7 @@ const PdfTools = () => {
   }, []);
 
   useEffect(() => {
-    if (!files.length || tool === 'images') return;
+    if (!files.length || tool === 'images' || tool === 'editor') return;
 
     let cancelled = false;
     createPdfPagePreviews(files)
@@ -65,7 +67,7 @@ const PdfTools = () => {
   }, [files, tool]);
 
   useEffect(() => {
-    if (files.length !== 1 || tool === 'images' || tool === 'merge') return;
+    if (files.length !== 1 || tool === 'images' || tool === 'merge' || tool === 'editor') return;
 
     let cancelled = false;
     getPdfPageCount(files[0])
@@ -120,7 +122,7 @@ const PdfTools = () => {
       setError(`Le fichier ${invalid.name} n'est pas valide pour cet outil.`);
       return;
     }
-    setLoadingPreviews(tool !== 'images' && nextFiles.length > 0);
+    setLoadingPreviews(tool !== 'images' && tool !== 'editor' && nextFiles.length > 0);
     setFiles(nextFiles);
   };
 
@@ -128,7 +130,7 @@ const PdfTools = () => {
     resetResults();
     clearPreviews();
     const next = files.filter((_, fileIndex) => fileIndex !== index);
-    setLoadingPreviews(tool !== 'images' && next.length > 0);
+    setLoadingPreviews(tool !== 'images' && tool !== 'editor' && next.length > 0);
     setFiles(next);
     setPageCount(null);
   };
@@ -182,7 +184,9 @@ const PdfTools = () => {
 
   const acceptsImages = tool === 'images';
   const multiple = tool === 'images' || tool === 'merge';
-  const canRun = tool === 'images'
+  const canRun = tool === 'editor'
+    ? false
+    : tool === 'images'
     ? files.length >= 1
     : tool === 'merge'
       ? files.length >= 2
@@ -202,7 +206,7 @@ const PdfTools = () => {
           <p className="mt-3 text-gray-500 max-w-2xl mx-auto">Créez, convertissez et modifiez vos PDF directement dans votre navigateur. Aucun document n'est envoyé vers un serveur.</p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mb-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3 mb-8">
           {tools.map(item => (
             <button key={item.id} type="button" onClick={() => changeTool(item.id)} className={`text-left rounded-2xl border p-5 transition-all ${tool === item.id ? 'bg-gray-900 border-gray-900 text-white shadow-lg' : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'}`}>
               <item.icon size={20} className={tool === item.id ? 'text-white' : 'text-gray-600'} />
@@ -243,7 +247,7 @@ const PdfTools = () => {
               </div>
             )}
 
-            {files.length > 0 && tool !== 'images' && (
+            {files.length > 0 && tool !== 'images' && tool !== 'editor' && (
               <section className="mt-5" aria-label="Aperçu des pages">
                 <div className="mb-3 flex items-center justify-between">
                   <p className="text-sm font-medium text-gray-700">Aperçu des pages</p>
@@ -268,6 +272,8 @@ const PdfTools = () => {
               </section>
             )}
 
+            {tool === 'editor' && files.length === 1 && <PdfVisualEditor key={`${files[0].name}-${files[0].size}-${files[0].lastModified}`} file={files[0]} />}
+
             {tool === 'rotate' && (
               <div className="mt-5">
                 <p className="text-sm font-medium text-gray-700 mb-2">Angle de rotation</p>
@@ -291,9 +297,9 @@ const PdfTools = () => {
 
             {error && <p role="alert" className="mt-5 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg p-3">{error}</p>}
 
-            <button type="button" disabled={!canRun || processing} onClick={runTool} className="mt-6 w-full h-12 rounded-xl bg-gray-900 text-white font-medium disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
+            {tool !== 'editor' && <button type="button" disabled={!canRun || processing} onClick={runTool} className="mt-6 w-full h-12 rounded-xl bg-gray-900 text-white font-medium disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
               {processing ? <><Loader2 size={18} className="animate-spin" /> Traitement en cours</> : tools.find(item => item.id === tool)?.label}
-            </button>
+            </button>}
           </div>
 
           {outputs.length > 0 && (
