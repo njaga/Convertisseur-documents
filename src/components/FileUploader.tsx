@@ -4,46 +4,47 @@ import { Upload } from 'lucide-react';
 import { getAllAcceptedExtensions } from '../utils/formats';
 
 interface FileUploaderProps {
-  onFileSelect: (file: File) => void;
+  onFilesSelect: (files: File[]) => void;
   onPdfSelect?: (file: File) => void;
 }
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024;
 const acceptedExtensions = new Set([...getAllAcceptedExtensions(), 'pdf']);
 
-const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect, onPdfSelect }) => {
+const FileUploader: React.FC<FileUploaderProps> = ({ onFilesSelect, onPdfSelect }) => {
   const [error, setError] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
     setError(null);
     if (rejectedFiles.length > 0) {
-      setError('Le fichier dépasse 100 MB ou ne peut pas être lu.');
+      setError('Un ou plusieurs fichiers dépassent 100 MB ou ne peuvent pas être lus.');
       return;
     }
 
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    const extension = file.name.split('.').pop()?.toLowerCase() || '';
-    if (!acceptedExtensions.has(extension)) {
-      setError(`Le format .${extension || '?'} n'est pas encore pris en charge.`);
+    const valid = acceptedFiles.filter(file => acceptedExtensions.has(file.name.split('.').pop()?.toLowerCase() || ''));
+    if (valid.length !== acceptedFiles.length) {
+      setError('Un ou plusieurs formats ne sont pas encore pris en charge.');
       return;
     }
 
-    if (extension === 'pdf') {
-      if (onPdfSelect) onPdfSelect(file);
+    if (valid.length === 1 && valid[0].name.toLowerCase().endsWith('.pdf')) {
+      if (onPdfSelect) onPdfSelect(valid[0]);
       else setError('Utilisez l’espace Outils PDF pour ce fichier.');
       return;
     }
 
-    onFileSelect(file);
-  }, [onFileSelect, onPdfSelect]);
+    if (valid.some(file => file.name.toLowerCase().endsWith('.pdf'))) {
+      setError('Les PDF se traitent dans l’espace Outils PDF. Ne les mélangez pas avec les autres formats.');
+      return;
+    }
+
+    if (valid.length) onFilesSelect(valid);
+  }, [onFilesSelect, onPdfSelect]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    maxFiles: 1,
     maxSize: MAX_FILE_SIZE,
-    multiple: false,
+    multiple: true,
   });
 
   return (
@@ -55,8 +56,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect, onPdfSelect }
             <Upload size={24} strokeWidth={1.5} />
           </div>
           <div>
-            <p className="text-base font-medium text-gray-900">{isDragActive ? 'Déposez le fichier' : 'Déposez un fichier ici'}</p>
-            <p className="text-sm text-gray-500 mt-1">ou cliquez pour parcourir · 100 MB max.</p>
+            <p className="text-base font-medium text-gray-900">{isDragActive ? 'Déposez les fichiers' : 'Déposez un ou plusieurs fichiers ici'}</p>
+            <p className="text-sm text-gray-500 mt-1">ou cliquez pour parcourir · 100 MB max. par fichier</p>
           </div>
           <div className="flex flex-wrap justify-center gap-2 mt-2">
             {['Images', 'PDF', 'Vidéos', 'Audio', 'Texte'].map(type => <span key={type} className="text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">{type}</span>)}
