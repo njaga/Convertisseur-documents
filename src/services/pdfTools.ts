@@ -270,3 +270,51 @@ export async function buildEditedPdf(file: File, pages: PdfPageEdit[], suffix = 
     url: bytesToPdfUrl(bytes),
   };
 }
+
+
+export interface CompositePdfPage {
+  kind: 'pdf' | 'image';
+  file: File;
+  sourceIndex: number;
+  rotation: 0 | 90 | 180 | 270;
+}
+
+export async function buildCompositePdf(pages: CompositePdfPage[], name = 'document-modifie.pdf'): Promise<PdfOutput> {
+  if (!pages.length) throw new Error('Le document final doit contenir au moins une page.');
+  const output = await PDFDocument.create();
+  const pdfCache = new Map<File, PDFDocument>();
+
+  for (const item of pages) {
+    if (item.kind === 'image') {
+      const pngBytes = await fileToPngBytes(item.file);
+      const image = await output.embedPng(pngBytes);
+      const natural = image.scale(1);
+      const landscape = item.rotation === 90 || item.rotation === 270;
+      const page = output.addPage(landscape ? [natural.height, natural.width] : [natural.width, natural.height]);
+      page.drawImage(image, {
+        x: landscape ? (natural.height - natural.width) / 2 : 0,
+        y: landscape ? (natural.width - natural.height) / 2 : 0,
+        width: natural.width,
+        height: natural.height,
+        rotate: degrees(item.rotation),
+      });
+      continue;
+    }
+
+    let source = pdfCache.get(item.file);
+    if (!source) {
+      source = await PDFDocument.load(await item.file.arrayBuffer());
+      pdfCache.set(item.file, source);
+    }
+    if (item.sourceIndex < 0 || item.sourceIndex >= source.getPageCount()) {
+      throw new Error(`Page invalide dans ${item.file.name}.`);
+    }
+    const [page] = await output.copyPages(source, [item.sourceIndex]);
+    const current = page.getRotation().angle;
+    page.setRotation(degrees((current + item.rotation) % 360));
+    output.addPage(page);
+  }
+
+  const bytes = await output.save();
+  return { name, url: bytesToPdfUrl(bytes) };
+}
