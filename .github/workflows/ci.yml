@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - fix/conversion-engine-hardening
+      - feat/v2-pdf-ico
   pull_request:
 
 jobs:
@@ -34,6 +35,14 @@ jobs:
 
       - name: Unit tests
         run: npm test
+
+      - name: Check Office service syntax
+        run: node --check server/office-converter/server.mjs
+
+      - name: Verify vendored FFmpeg assets
+        run: |
+          test -s public/ffmpeg/ffmpeg-core.js
+          test -s public/ffmpeg/ffmpeg-core.wasm
 
       - name: Build
         run: npm run build

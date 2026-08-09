@@ -5,12 +5,13 @@ import { getAllAcceptedExtensions } from '../utils/formats';
 
 interface FileUploaderProps {
   onFileSelect: (file: File) => void;
+  onPdfSelect?: (file: File) => void;
 }
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024;
-const acceptedExtensions = new Set(getAllAcceptedExtensions());
+const acceptedExtensions = new Set([...getAllAcceptedExtensions(), 'pdf']);
 
-const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
+const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect, onPdfSelect }) => {
   const [error, setError] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
@@ -19,15 +20,24 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
       setError('Le fichier dépasse 100 MB ou ne peut pas être lu.');
       return;
     }
+
     const file = acceptedFiles[0];
     if (!file) return;
+
     const extension = file.name.split('.').pop()?.toLowerCase() || '';
     if (!acceptedExtensions.has(extension)) {
       setError(`Le format .${extension || '?'} n'est pas encore pris en charge.`);
       return;
     }
+
+    if (extension === 'pdf') {
+      if (onPdfSelect) onPdfSelect(file);
+      else setError('Utilisez l’espace Outils PDF pour ce fichier.');
+      return;
+    }
+
     onFileSelect(file);
-  }, [onFileSelect]);
+  }, [onFileSelect, onPdfSelect]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -45,11 +55,11 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFileSelect }) => {
             <Upload size={24} strokeWidth={1.5} />
           </div>
           <div>
-            <p className="text-base font-medium text-gray-900">{isDragActive ? 'Deposez le fichier' : 'Deposez un fichier ici'}</p>
+            <p className="text-base font-medium text-gray-900">{isDragActive ? 'Déposez le fichier' : 'Déposez un fichier ici'}</p>
             <p className="text-sm text-gray-500 mt-1">ou cliquez pour parcourir · 100 MB max.</p>
           </div>
           <div className="flex flex-wrap justify-center gap-2 mt-2">
-            {['Images', 'Videos', 'Audio', 'Texte'].map(type => <span key={type} className="text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">{type}</span>)}
+            {['Images', 'PDF', 'Vidéos', 'Audio', 'Texte'].map(type => <span key={type} className="text-xs text-gray-400 bg-gray-100 px-2.5 py-1 rounded-full">{type}</span>)}
           </div>
         </div>
       </div>

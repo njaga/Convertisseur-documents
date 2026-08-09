@@ -1,6 +1,7 @@
 import { convertImage } from './imageConverter';
 import { convertVideo, convertAudio } from './mediaConverter';
 import { convertTextDocument } from './textConverter';
+import { convertOfficeDocument, isOfficeInputFormat } from './officeConverter';
 import { getFileTypeFromExtension, isConversionSupported } from '../utils/formats';
 
 export class ConversionError extends Error {
@@ -25,7 +26,7 @@ export async function convertFile(
 
   if (!isConversionSupported(inputFormat, output)) {
     throw new ConversionError(
-      `La conversion ${inputFormat.toUpperCase()} vers ${output.toUpperCase()} n'est pas disponible.`,
+      `La conversion ${inputFormat.toUpperCase()} vers ${output.toUpperCase()} n'est pas disponible sur ce déploiement.`,
       'UNSUPPORTED_CONVERSION'
     );
   }
@@ -38,7 +39,9 @@ export async function convertFile(
     case 'audio':
       return convertAudio(file, output, onProgress);
     case 'document':
-      return convertTextDocument(file, output, onProgress);
+      return isOfficeInputFormat(inputFormat)
+        ? convertOfficeDocument(file, output, onProgress)
+        : convertTextDocument(file, output, onProgress);
     default:
       throw new ConversionError('Aucun moteur de conversion disponible.', 'NO_PROVIDER');
   }

@@ -9,7 +9,8 @@ import {
 describe('conversionMatrix', () => {
   it('only exposes source-aware conversion pairs', () => {
     expect(getAvailableOutputFormats('pdf')).toEqual([]);
-    expect(getAvailableOutputFormats('png').map(format => format.extension)).toEqual(['jpg', 'jpeg', 'webp']);
+    expect(getAvailableOutputFormats('png').map(format => format.extension)).toEqual(['jpg', 'jpeg', 'webp', 'ico']);
+    expect(getAvailableOutputFormats('ico').map(format => format.extension)).toEqual(['png', 'jpg', 'jpeg', 'webp']);
     expect(getAvailableOutputFormats('txt').map(format => format.extension)).toEqual(['html', 'md']);
   });
 
@@ -27,6 +28,8 @@ describe('conversionMatrix', () => {
 
   it('answers support checks consistently', () => {
     expect(isConversionSupported('png', 'webp')).toBe(true);
+    expect(isConversionSupported('png', 'ico')).toBe(true);
+    expect(isConversionSupported('ico', 'png')).toBe(true);
     expect(isConversionSupported('pdf', 'xlsx')).toBe(false);
     expect(isConversionSupported('md', 'html')).toBe(true);
     expect(isConversionSupported('mp3', 'png')).toBe(false);
@@ -36,6 +39,7 @@ describe('conversionMatrix', () => {
 describe('getFileTypeFromExtension', () => {
   it('detects supported file families', () => {
     expect(getFileTypeFromExtension('PNG')).toBe('image');
+    expect(getFileTypeFromExtension('ICO')).toBe('image');
     expect(getFileTypeFromExtension('mp4')).toBe('video');
     expect(getFileTypeFromExtension('FLAC')).toBe('audio');
     expect(getFileTypeFromExtension('md')).toBe('document');

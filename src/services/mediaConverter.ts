@@ -1,5 +1,5 @@
 import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile, toBlobURL } from '@ffmpeg/util';
+import { fetchFile } from '@ffmpeg/util';
 
 let ffmpeg: FFmpeg | null = null;
 let ffmpegLoaded = false;
@@ -22,10 +22,9 @@ async function initFFmpeg(): Promise<FFmpeg> {
     currentProgressCallback(Math.min(Math.max(mappedProgress, 30), 90));
   });
 
-  const baseURL = 'https://unpkg.com/@ffmpeg/core@0.12.6/dist/esm';
   await instance.load({
-    coreURL: await toBlobURL(`${baseURL}/ffmpeg-core.js`, 'text/javascript'),
-    wasmURL: await toBlobURL(`${baseURL}/ffmpeg-core.wasm`, 'application/wasm'),
+    coreURL: '/ffmpeg/ffmpeg-core.js',
+    wasmURL: '/ffmpeg/ffmpeg-core.wasm',
   });
 
   ffmpeg = instance;
@@ -66,7 +65,7 @@ export function convertVideo(
 
     const format = outputFormat.toLowerCase();
     const args = getVideoArgs(format);
-    if (!args) throw new Error(`Le format video ${format.toUpperCase()} n'est pas supporte.`);
+    if (!args) throw new Error(`Le format vidéo ${format.toUpperCase()} n'est pas supporté.`);
 
     const { inputName, outputName } = makeJobNames(file, format);
 
@@ -75,7 +74,7 @@ export function convertVideo(
       onProgress(25);
 
       const exitCode = await ff.exec(['-i', inputName, ...args, outputName]);
-      if (exitCode !== 0) throw new Error(`FFmpeg a termine avec le code ${exitCode}.`);
+      if (exitCode !== 0) throw new Error(`FFmpeg a terminé avec le code ${exitCode}.`);
 
       const data = await ff.readFile(outputName);
       onProgress(95);
@@ -103,7 +102,7 @@ export function convertAudio(
 
     const format = outputFormat.toLowerCase();
     const args = getAudioArgs(format);
-    if (!args) throw new Error(`Le format audio ${format.toUpperCase()} n'est pas supporte.`);
+    if (!args) throw new Error(`Le format audio ${format.toUpperCase()} n'est pas supporté.`);
 
     const { inputName, outputName } = makeJobNames(file, format);
 
@@ -112,7 +111,7 @@ export function convertAudio(
       onProgress(25);
 
       const exitCode = await ff.exec(['-i', inputName, ...args, outputName]);
-      if (exitCode !== 0) throw new Error(`FFmpeg a termine avec le code ${exitCode}.`);
+      if (exitCode !== 0) throw new Error(`FFmpeg a terminé avec le code ${exitCode}.`);
 
       const data = await ff.readFile(outputName);
       onProgress(95);
