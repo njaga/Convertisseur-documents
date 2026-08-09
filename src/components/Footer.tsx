@@ -13,7 +13,7 @@ const Footer = () => {
           <div className="text-center md:text-left flex flex-col items-center md:items-start gap-2">
             <Link to="/" className="flex items-center gap-2">
               <Logo size={24} />
-              <span className="text-lg font-bold text-gray-900">FileConvert</span>
+              <span className="text-lg font-bold text-gray-900">Doxali</span>
             </Link>
             <p className="text-sm text-gray-500">
               Conversion de fichiers simple et gratuite
@@ -53,7 +53,7 @@ const Footer = () => {
 
         <div className="mt-8 pt-6 border-t border-gray-100">
           <p className="text-center text-xs text-gray-400">
-            {currentYear} FileConvert. Developpe par{' '}
+            {currentYear} Doxali. Developpe par{' '}
             <a
               href="https://ndiagandiaye.com"
               target="_blank"

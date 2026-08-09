@@ -1,74 +1,35 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 import Logo from './Logo';
 
-const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+const mainLinks = [
+  { to: '/', label: 'Accueil' },
+  { to: '/pdf', label: 'PDF' },
+  { to: '/optimiser', label: 'Compression' },
+  { to: '/documents', label: 'Documents' },
+];
+const moreLinks = [
+  { to: '/convertir', label: 'Convertir des fichiers' },
+  { to: '/batch', label: 'Conversions par lot' },
+  { to: '/historique', label: 'Historique local' },
+  { to: '/a-propos', label: 'À propos' },
+];
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  const navLinks = [
-    { to: '/', label: 'Accueil' },
-    { to: '/pdf', label: 'Outils PDF' },
-    { to: '/optimiser', label: 'Compression' },
-    { to: '/documents', label: 'Documents' },
-    { to: '/batch', label: 'Batch' },
-    { to: '/historique', label: 'Historique' },
-    { to: '/formats', label: 'Formats' },
-    { to: '/conditions', label: 'Conditions' },
-  ];
-
-  return (
-    <nav className={`fixed w-full z-50 transition-all duration-200 ${isScrolled ? 'bg-white shadow-sm' : 'bg-white/95'
-      }`}>
-      <div className="max-w-5xl mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <Logo size={32} className="transition-transform group-hover:scale-110 duration-200" />
-            <span className="text-lg font-bold text-gray-900 tracking-tight">FileConvert</span>
-          </Link>
-
-          <div className="hidden md:flex items-center gap-7">
-            {navLinks.map(link => (
-              <Link key={link.to} to={link.to} className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-                {link.label}
-              </Link>
-            ))}
-            <a href="https://github.com/njaga" target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 px-4 py-2 rounded-lg transition-colors">
-              GitHub
-            </a>
-          </div>
-
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors" aria-label="Menu">
-            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-
-        {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-100 animate-in slide-in-from-top-2">
-            <div className="flex flex-col gap-1">
-              {navLinks.map(link => (
-                <Link key={link.to} to={link.to} className="px-3 py-2.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors" onClick={() => setIsMobileMenuOpen(false)}>
-                  {link.label}
-                </Link>
-              ))}
-              <a href="https://github.com/njaga" target="_blank" rel="noopener noreferrer" className="mt-2 px-3 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg text-center" onClick={() => setIsMobileMenuOpen(false)}>
-                GitHub
-              </a>
-            </div>
-          </div>
-        )}
+export default function Navbar(){
+  const [isScrolled,setIsScrolled]=useState(false);
+  const [mobile,setMobile]=useState(false);
+  useEffect(()=>{const handle=()=>setIsScrolled(window.scrollY>20);window.addEventListener('scroll',handle);return()=>window.removeEventListener('scroll',handle)},[]);
+  return <nav className={`fixed z-50 w-full border-b border-gray-100 transition ${isScrolled?'bg-white shadow-sm':'bg-white/95 backdrop-blur'}`}>
+    <div className="mx-auto max-w-6xl px-6"><div className="flex h-16 items-center justify-between">
+      <Link to="/" className="flex items-center gap-2.5"><Logo size={32}/><span className="text-lg font-bold tracking-tight text-gray-950">Doxali</span></Link>
+      <div className="hidden items-center gap-7 md:flex">
+        {mainLinks.map(link=><Link key={link.to} to={link.to} className="text-sm font-medium text-gray-600 hover:text-gray-950">{link.label}</Link>)}
+        <div className="group relative"><button type="button" className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-950">Plus <ChevronDown size={14}/></button><div className="invisible absolute right-0 top-full z-50 mt-3 w-56 translate-y-1 rounded-xl border border-gray-200 bg-white p-2 opacity-0 shadow-xl transition group-hover:visible group-hover:translate-y-0 group-hover:opacity-100">{moreLinks.map(link=><Link key={link.to} to={link.to} className="block rounded-lg px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-950">{link.label}</Link>)}</div></div>
       </div>
-    </nav>
-  );
-};
-
-export default Navbar;
+      <button onClick={()=>setMobile(!mobile)} className="rounded-lg p-2 text-gray-600 md:hidden" aria-label="Menu">{mobile?<X size={20}/>:<Menu size={20}/>}</button>
+    </div>
+    {mobile&&<div className="border-t border-gray-100 py-3 md:hidden">{[...mainLinks,...moreLinks].map(link=><Link key={link.to} to={link.to} onClick={()=>setMobile(false)} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50">{link.label}</Link>)}</div>}
+    </div>
+  </nav>;
+}
