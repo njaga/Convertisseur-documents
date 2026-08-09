@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FileText } from 'lucide-react';
 
 interface FilePreviewProps {
@@ -7,7 +7,6 @@ interface FilePreviewProps {
 }
 
 export default function FilePreview({ file, className = '' }: FilePreviewProps) {
-  const [url, setUrl] = useState('');
   const [text, setText] = useState('');
   const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
   const isImage = file.type.startsWith('image/') || ['png', 'jpg', 'jpeg', 'webp', 'gif', 'ico'].includes(extension);
@@ -16,14 +15,20 @@ export default function FilePreview({ file, className = '' }: FilePreviewProps) 
   const isPdf = file.type === 'application/pdf' || extension === 'pdf';
   const isText = file.type.startsWith('text/') || ['txt', 'md', 'html'].includes(extension);
 
+  const url = useMemo(() => isText ? '' : URL.createObjectURL(file), [file, isText]);
+
   useEffect(() => {
-    if (isText) {
-      file.slice(0, 12000).text().then(value => setText(value.slice(0, 2000))).catch(() => setText(''));
-      return;
-    }
-    const objectUrl = URL.createObjectURL(file);
-    setUrl(objectUrl);
-    return () => URL.revokeObjectURL(objectUrl);
+    if (!url) return;
+    return () => URL.revokeObjectURL(url);
+  }, [url]);
+
+  useEffect(() => {
+    if (!isText) return;
+    let cancelled = false;
+    file.slice(0, 12000).text()
+      .then(value => { if (!cancelled) setText(value.slice(0, 2000)); })
+      .catch(() => { if (!cancelled) setText(''); });
+    return () => { cancelled = true; };
   }, [file, isText]);
 
   const frameClass = `w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100 ${className}`;
