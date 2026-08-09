@@ -241,3 +241,32 @@ export async function createPdfPagePreviews(files: File[], scale = 0.45): Promis
   }
   return previews;
 }
+
+
+export interface PdfPageEdit {
+  sourceIndex: number;
+  rotation: 0 | 90 | 180 | 270;
+}
+
+export async function buildEditedPdf(file: File, pages: PdfPageEdit[], suffix = 'modifie'): Promise<PdfOutput> {
+  if (!pages.length) throw new Error('Le document final doit contenir au moins une page.');
+  const source = await PDFDocument.load(await file.arrayBuffer());
+  const pageCount = source.getPageCount();
+  if (pages.some(page => page.sourceIndex < 0 || page.sourceIndex >= pageCount)) {
+    throw new Error('La sélection contient une page invalide.');
+  }
+
+  const output = await PDFDocument.create();
+  for (const edit of pages) {
+    const [page] = await output.copyPages(source, [edit.sourceIndex]);
+    const current = page.getRotation().angle;
+    page.setRotation(degrees((current + edit.rotation) % 360));
+    output.addPage(page);
+  }
+
+  const bytes = await output.save();
+  return {
+    name: `${file.name.replace(/\.pdf$/i, '')}-${suffix}.pdf`,
+    url: bytesToPdfUrl(bytes),
+  };
+}
