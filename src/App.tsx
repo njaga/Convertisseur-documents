@@ -13,6 +13,7 @@ import { convertFile } from './services/conversionService';
 import { getFileTypeFromExtension } from './utils/formats';
 import TermsOfUsePage from './pages/TermsOfUsePage';
 import PdfTools from './pages/PdfTools';
+import OptimizeTools from './pages/OptimizeTools';
 import NotFound from './pages/NotFound';
 import FilePreview from './components/FilePreview';
 import { createZip } from './services/zip';
@@ -280,6 +281,7 @@ function App() {
             </main>
           } />
           <Route path="/pdf" element={<PdfTools />} />
+          <Route path="/optimiser" element={<OptimizeTools />} />
           <Route path="/formats" element={<SupportedFormats />} />
           <Route path="/conditions" element={<TermsOfUsePage />} />
           <Route path="*" element={<NotFound />} />
