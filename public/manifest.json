@@ -1,7 +1,7 @@
 {
-  "name": "FileConvert — Convertisseur de fichiers",
-  "short_name": "FileConvert",
-  "description": "Convertissez images, audio, vidéo, ICO, texte et manipulez vos PDF localement dans votre navigateur.",
+  "name": "Doxali — Vos documents, sans limites",
+  "short_name": "Doxali",
+  "description": "Suite documentaire locale pour convertir, éditer, compresser, signer et analyser vos fichiers sans quota quotidien.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
