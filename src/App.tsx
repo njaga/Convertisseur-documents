@@ -5,7 +5,7 @@ import { FileType, ConversionJob, ConversionFormat } from './types/converter';
 import FileUploader from './components/FileUploader';
 import FormatSelector from './components/FormatSelector';
 import ConversionProgress from './components/ConversionProgress';
-import { Image, Video, Music, FileText, ArrowRight, Sparkles, Shield, Zap, Upload } from 'lucide-react';
+import { Image, Video, Music, FileText, ArrowRight, Sparkles, Shield, Zap, Upload, X, Download } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import MenuVisibilityHandler from './components/MenuVisibilityHandler';
@@ -14,10 +14,14 @@ import { getFileTypeFromExtension } from './utils/formats';
 import TermsOfUsePage from './pages/TermsOfUsePage';
 import PdfTools from './pages/PdfTools';
 import NotFound from './pages/NotFound';
+import FilePreview from './components/FilePreview';
+import { createZip } from './services/zip';
 
 function App() {
   const navigate = useNavigate();
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectionError, setSelectionError] = useState<string | null>(null);
+  const [batchDownload, setBatchDownload] = useState<{ url: string; name: string } | null>(null);
   const [fileType, setFileType] = useState<FileType | null>(null);
   const [conversionJobs, setConversionJobs] = useState<ConversionJob[]>([]);
   const [sourceFormat, setSourceFormat] = useState<string>('');
@@ -31,14 +35,37 @@ function App() {
     };
   }, []);
 
-  const handleFileSelect = (file: File) => {
-    const extension = file.name.split('.').pop()?.toLowerCase() || '';
-    const detectedType = getFileTypeFromExtension(extension);
-    if (!detectedType) return;
+  const handleFilesSelect = (files: File[]) => {
+    const extensions = files.map(file => file.name.split('.').pop()?.toLowerCase() || '');
+    const types = extensions.map(getFileTypeFromExtension);
+    if (!types[0] || types.some(type => type !== types[0]) || extensions.some(extension => extension !== extensions[0])) {
+      setSelectionError('Pour une conversion groupée, sélectionnez des fichiers du même format.');
+      return;
+    }
+    setSelectionError(null);
+    setSelectedFiles(prev => [...prev, ...files].filter((file, index, all) =>
+      all.findIndex(candidate => candidate.name === file.name && candidate.size === file.size && candidate.lastModified === file.lastModified) === index
+    ));
+    setSourceFormat(extensions[0]);
+    setFileType(types[0]);
+  };
 
-    setSelectedFile(file);
-    setSourceFormat(extension);
-    setFileType(detectedType);
+  const removeSelectedFile = (index: number) => {
+    setSelectedFiles(prev => {
+      const next = prev.filter((_, fileIndex) => fileIndex !== index);
+      if (!next.length) {
+        setFileType(null);
+        setSourceFormat('');
+      }
+      return next;
+    });
+  };
+
+  const clearSelection = () => {
+    setSelectedFiles([]);
+    setFileType(null);
+    setSourceFormat('');
+    setSelectionError(null);
   };
 
   const handlePdfSelect = (file: File) => {
@@ -46,48 +73,46 @@ function App() {
   };
 
   const handleFormatSelect = async (format: ConversionFormat) => {
-    if (!selectedFile) return;
+    if (!selectedFiles.length) return;
+    const filesToConvert = [...selectedFiles];
+    if (batchDownload) {
+      URL.revokeObjectURL(batchDownload.url);
+      outputUrlsRef.current.delete(batchDownload.url);
+      setBatchDownload(null);
+    }
 
-    const inputFile = selectedFile;
-    const newJob: ConversionJob = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    const jobs = filesToConvert.map((inputFile, index): ConversionJob => ({
+      id: `${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`,
       inputFile,
       outputFormat: format.extension,
       status: 'pending',
       progress: 0,
-    };
+    }));
+    setConversionJobs(prev => [...prev, ...jobs]);
+    clearSelection();
 
-    setConversionJobs(prev => [...prev, newJob]);
-    setSelectedFile(null);
-    setFileType(null);
-    setSourceFormat('');
+    const completed: Array<{ name: string; url: string }> = [];
+    for (const job of jobs) {
+      try {
+        const outputUrl = await convertFile(job.inputFile, format.extension, progress => {
+          setConversionJobs(prev => prev.map(item => item.id === job.id ? { ...item, progress, status: 'processing' } : item));
+        });
+        outputUrlsRef.current.add(outputUrl);
+        const base = job.inputFile.name.replace(/\.[^.]+$/, '');
+        completed.push({ name: `${base}.${format.extension}`, url: outputUrl });
+        setConversionJobs(prev => prev.map(item => item.id === job.id ? { ...item, status: 'completed', progress: 100, outputUrl } : item));
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Une erreur inattendue est survenue.';
+        setConversionJobs(prev => prev.map(item => item.id === job.id ? { ...item, status: 'error', error: message } : item));
+      }
+    }
 
-    try {
-      const outputUrl = await convertFile(inputFile, format.extension, progress => {
-        setConversionJobs(prev =>
-          prev.map(job =>
-            job.id === newJob.id ? { ...job, progress, status: 'processing' } : job
-          )
-        );
-      });
-
-      outputUrlsRef.current.add(outputUrl);
-      setConversionJobs(prev =>
-        prev.map(job =>
-          job.id === newJob.id
-            ? { ...job, status: 'completed', progress: 100, outputUrl }
-            : job
-        )
-      );
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Une erreur inattendue est survenue.';
-      setConversionJobs(prev =>
-        prev.map(job =>
-          job.id === newJob.id
-            ? { ...job, status: 'error', error: message }
-            : job
-        )
-      );
+    if (completed.length > 1) {
+      const entries = await Promise.all(completed.map(async output => ({ name: output.name, blob: await fetch(output.url).then(response => response.blob()) })));
+      const zip = await createZip(entries);
+      const zipUrl = URL.createObjectURL(zip);
+      outputUrlsRef.current.add(zipUrl);
+      setBatchDownload({ url: zipUrl, name: `conversions-${format.extension}.zip` });
     }
   };
 
@@ -173,17 +198,31 @@ function App() {
                         </div>
                       </div>
                       <div className="p-6">
-                        <FileUploader onFileSelect={handleFileSelect} onPdfSelect={handlePdfSelect} />
+                        <FileUploader onFilesSelect={handleFilesSelect} onPdfSelect={handlePdfSelect} />
                       </div>
 
-                      {selectedFile && fileType && (
+                      {selectionError && <p role="alert" className="mx-6 mb-6 rounded-lg border border-red-100 bg-red-50 p-3 text-sm text-red-600">{selectionError}</p>}
+
+                      {selectedFiles.length > 0 && fileType && (
                         <div className="px-6 pb-6">
-                          <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-                            <div className="p-3 bg-white rounded-xl border border-gray-200 shadow-sm">{getFileTypeIcon(fileType)}</div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-gray-900 truncate">{selectedFile.name}</p>
-                              <p className="text-sm text-gray-500">{formatFileSize(selectedFile.size)} • {fileType}</p>
-                            </div>
+                          <div className="mb-3 flex items-center justify-between">
+                            <p className="text-sm font-medium text-gray-700">{selectedFiles.length} fichier{selectedFiles.length > 1 ? 's' : ''} prêt{selectedFiles.length > 1 ? 's' : ''}</p>
+                            <button type="button" onClick={clearSelection} className="text-xs font-medium text-red-600 hover:text-red-700">Tout annuler</button>
+                          </div>
+                          <div className="grid gap-3 sm:grid-cols-2">
+                            {selectedFiles.map((file, index) => (
+                              <article key={`${file.name}-${file.size}-${file.lastModified}`} className="relative rounded-xl border border-gray-200 bg-gray-50 p-3">
+                                <button type="button" onClick={() => removeSelectedFile(index)} aria-label={`Retirer ${file.name}`} className="absolute right-2 top-2 z-10 rounded-full bg-white p-1.5 text-gray-600 shadow hover:bg-red-50 hover:text-red-600"><X size={15} /></button>
+                                <FilePreview file={file} />
+                                <div className="mt-3 flex items-center gap-2">
+                                  <div className="rounded-lg border border-gray-200 bg-white p-2">{getFileTypeIcon(fileType)}</div>
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-medium text-gray-900">{file.name}</p>
+                                    <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
+                                  </div>
+                                </div>
+                              </article>
+                            ))}
                           </div>
                         </div>
                       )}
@@ -199,6 +238,12 @@ function App() {
                       )}
                     </div>
                   </div>
+
+                  {batchDownload && (
+                    <a href={batchDownload.url} download={batchDownload.name} className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-gray-900 px-5 py-4 font-medium text-white hover:bg-gray-800">
+                      <Download size={18} /> Télécharger toutes les conversions en ZIP
+                    </a>
+                  )}
 
                   {conversionJobs.length > 0 && (
                     <div className="mt-6 bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
