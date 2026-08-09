@@ -66,7 +66,7 @@ export default function PdfVisualEditor({ file }: { file: File }) {
   };
 
   const undo = () => {
-    const previous = undoStack.at(-1);
+    const previous = undoStack[undoStack.length - 1];
     if (!previous) return;
     setRedoStack(stack => [...stack, clonePages(pages)]);
     setUndoStack(stack => stack.slice(0, -1));
@@ -75,7 +75,7 @@ export default function PdfVisualEditor({ file }: { file: File }) {
   };
 
   const redo = () => {
-    const next = redoStack.at(-1);
+    const next = redoStack[redoStack.length - 1];
     if (!next) return;
     setUndoStack(stack => [...stack, clonePages(pages)]);
     setRedoStack(stack => stack.slice(0, -1));
