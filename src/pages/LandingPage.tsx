@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, FileArchive, FileImage, Files, History, Image, Layers3, ListOrdered, Merge, RotateCw, Scissors, ShieldCheck, Sparkles, Video } from 'lucide-react';
+import { ArrowRight, FileArchive, FileImage, FileSignature, FileText, Files, History, Image, Infinity, Layers3, ListOrdered, Merge, RotateCw, ScanText, Scissors, ShieldCheck, UserRoundX, Video } from 'lucide-react';
 
 const popularTools = [
   { to: '/fusionner-pdf', title: 'Fusionner PDF', description: 'Combinez plusieurs fichiers PDF dans l’ordre de votre choix.', icon: Merge, iconClass: 'bg-orange-50 text-orange-600' },
@@ -9,6 +9,7 @@ const popularTools = [
 ];
 
 const pdfTools = [
+  { to: '/signer-pdf', title: 'Signer PDF', description: 'Placez visuellement une signature ou un cachet sur votre document.', icon: FileSignature, iconClass: 'bg-blue-50 text-blue-600' },
   { to: '/modifier-pdf', title: 'Modifier PDF', description: 'Réorganiser, tourner, extraire ou supprimer des pages.', icon: ListOrdered, iconClass: 'bg-violet-50 text-violet-600' },
   { to: '/organiser-pdf', title: 'Organiser PDF', description: 'Choisir précisément les pages et leur ordre final.', icon: Layers3, iconClass: 'bg-indigo-50 text-indigo-600' },
   { to: '/pivoter-pdf', title: 'Faire pivoter PDF', description: 'Tourner les pages à 90°, 180° ou 270°.', icon: RotateCw, iconClass: 'bg-fuchsia-50 text-fuchsia-600' },
@@ -17,14 +18,17 @@ const pdfTools = [
 ];
 
 const moreTools = [
+  { to: '/ocr-pdf', title: 'OCR PDF & images', description: 'Extraire le texte d’un document pour le copier ou le corriger.', icon: ScanText, iconClass: 'bg-purple-50 text-purple-600' },
+  { to: '/creer-pdf', title: 'Créer un PDF', description: 'Rédiger rapidement un document simple avec logo et pied de page.', icon: FileText, iconClass: 'bg-slate-100 text-slate-700' },
   { to: '/optimiser-images', title: 'Optimiser des images', description: 'Compresser, redimensionner, recadrer et convertir.', icon: Image, iconClass: 'bg-sky-50 text-sky-600' },
   { to: '/compresser-video', title: 'Compresser une vidéo', description: 'Réduire le poids d’une vidéo avant partage ou stockage.', icon: Video, iconClass: 'bg-red-50 text-red-600' },
   { to: '/batch', title: 'Conversions par lot', description: 'Traiter plusieurs fichiers et télécharger les résultats en ZIP.', icon: Layers3, iconClass: 'bg-lime-50 text-lime-700' },
-  { to: '/documents', title: 'Créer et analyser', description: 'OCR, annotations, signatures et autres outils documentaires.', icon: Sparkles, iconClass: 'bg-purple-50 text-purple-600' },
   { to: '/historique', title: 'Historique local', description: 'Retrouver les derniers fichiers traités sur cet appareil.', icon: History, iconClass: 'bg-gray-100 text-gray-700' },
 ];
 
-function ToolCard({ tool }: { tool: typeof popularTools[number] }) {
+type ToolCardItem = typeof popularTools[number];
+
+function ToolCard({ tool }: { tool: ToolCardItem }) {
   return (
     <Link to={tool.to} className="group rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-lg">
       <div className={`mb-5 flex h-11 w-11 items-center justify-center rounded-xl ${tool.iconClass}`}><tool.icon size={21} strokeWidth={1.9} /></div>
@@ -42,11 +46,11 @@ export default function LandingPage() {
         <div className="mx-auto max-w-5xl text-center">
           <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-blue-600">Doxali · boîte à outils documentaire</p>
           <h1 className="mx-auto max-w-4xl text-4xl font-bold leading-[1.08] tracking-[-0.035em] md:text-6xl">Tous les outils essentiels pour vos documents, au même endroit.</h1>
-          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-gray-600">Fusionnez, divisez, compressez, convertissez et modifiez vos fichiers sans parcours compliqué. Choisissez simplement ce que vous voulez faire.</p>
-          <div className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-500">
+          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-gray-600">Fusionnez, divisez, compressez, convertissez, signez et modifiez vos fichiers sans parcours compliqué. Choisissez simplement ce que vous voulez faire.</p>
+          <div className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-gray-500">
             <span className="inline-flex items-center gap-2"><ShieldCheck size={16} className="text-emerald-600" /> Traitement local en priorité</span>
-            <span>Sans compte</span>
-            <span>Sans quota quotidien</span>
+            <span className="inline-flex items-center gap-2"><UserRoundX size={16} className="text-blue-600" /> Sans compte</span>
+            <span className="inline-flex items-center gap-2"><Infinity size={17} className="text-violet-600" /> Sans quota quotidien</span>
           </div>
         </div>
       </section>
@@ -64,8 +68,8 @@ export default function LandingPage() {
 
       <section className="px-6 pb-14">
         <div className="mx-auto max-w-7xl rounded-3xl border border-gray-200 bg-white p-6 md:p-8">
-          <div className="mb-6"><p className="text-xs font-bold uppercase tracking-wider text-gray-400">PDF</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Organiser et transformer vos PDF</h2></div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="mb-6"><p className="text-xs font-bold uppercase tracking-wider text-gray-400">PDF</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Organiser, signer et transformer vos PDF</h2></div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {pdfTools.map(tool => <ToolCard key={tool.to} tool={tool} />)}
           </div>
         </div>
@@ -73,8 +77,8 @@ export default function LandingPage() {
 
       <section className="px-6 pb-20">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-6"><p className="text-xs font-bold uppercase tracking-wider text-gray-400">Plus d’outils</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Optimisation et workflows</h2></div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+          <div className="mb-6"><p className="text-xs font-bold uppercase tracking-wider text-gray-400">Plus d’outils</p><h2 className="mt-1 text-2xl font-bold tracking-tight">OCR, création et optimisation</h2></div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {moreTools.map(tool => <ToolCard key={tool.to} tool={tool} />)}
           </div>
         </div>
