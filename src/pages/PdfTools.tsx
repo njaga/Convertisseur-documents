@@ -1,26 +1,44 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { FileImage, FilePlus2, Merge, RotateCw, Scissors, Download, Loader2, ShieldCheck, ListOrdered, Images, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { useLocation, useSearchParams } from 'react-router-dom';
+import { ArrowDown, ArrowUp, Download, FileImage, Images, ListOrdered, Loader2, Merge, RotateCw, Scissors, ShieldCheck, X } from 'lucide-react';
+import FileDropZone from '../components/FileDropZone';
 import PdfVisualEditor from '../components/PdfVisualEditor';
 import { createPdfPagePreviews, getPdfPageCount, imagesToPdf, mergePdfs, organizePdf, pdfToPngs, PdfOutput, PdfPagePreview, rotatePdf, splitPdf } from '../services/pdfTools';
 
 type Tool = 'editor' | 'images' | 'render' | 'merge' | 'split' | 'rotate' | 'organize';
 type LocationState = { initialFile?: File } | null;
 
-const tools: Array<{ id: Tool; label: string; description: string; icon: typeof FileImage }> = [
-  { id: 'editor', label: 'Éditeur', description: 'Réordonner, tourner, extraire et supprimer', icon: ListOrdered },
-  { id: 'images', label: 'Images → PDF', description: 'PNG, JPG, WebP et ICO vers un PDF', icon: FileImage },
-  { id: 'render', label: 'PDF → PNG', description: 'Convertir chaque page en image PNG', icon: Images },
-  { id: 'merge', label: 'Fusionner', description: 'Regrouper plusieurs PDF en un seul', icon: Merge },
-  { id: 'split', label: 'Séparer', description: 'Créer un PDF par page', icon: Scissors },
-  { id: 'rotate', label: 'Rotation', description: 'Tourner toutes les pages', icon: RotateCw },
-  { id: 'organize', label: 'Organiser', description: 'Extraire ou réordonner des pages', icon: ListOrdered },
+type ToolDefinition = {
+  id: Tool;
+  label: string;
+  title: string;
+  description: string;
+  action: string;
+  icon: typeof FileImage;
+};
+
+const tools: ToolDefinition[] = [
+  { id: 'merge', label: 'Fusionner', title: 'Fusionner des fichiers PDF', description: 'Combinez plusieurs PDF et choisissez leur ordre avant de créer un seul document.', action: 'Fusionner les PDF', icon: Merge },
+  { id: 'split', label: 'Diviser', title: 'Diviser un fichier PDF', description: 'Séparez votre document pour obtenir un fichier PDF indépendant pour chaque page.', action: 'Diviser le PDF', icon: Scissors },
+  { id: 'editor', label: 'Modifier', title: 'Modifier un PDF', description: 'Réorganisez, tournez, extrayez ou supprimez des pages visuellement.', action: 'Modifier le PDF', icon: ListOrdered },
+  { id: 'organize', label: 'Organiser', title: 'Organiser les pages d’un PDF', description: 'Choisissez précisément les pages à conserver et l’ordre dans lequel elles doivent apparaître.', action: 'Organiser le PDF', icon: ListOrdered },
+  { id: 'rotate', label: 'Pivoter', title: 'Faire pivoter un PDF', description: 'Tournez toutes les pages de votre PDF à 90°, 180° ou 270°.', action: 'Faire pivoter le PDF', icon: RotateCw },
+  { id: 'render', label: 'PDF → PNG', title: 'Convertir un PDF en PNG', description: 'Transformez chaque page de votre document en image PNG haute résolution.', action: 'Convertir en PNG', icon: Images },
+  { id: 'images', label: 'Images → PDF', title: 'Convertir des images en PDF', description: 'Regroupez vos images PNG, JPG, WebP ou ICO dans un document PDF.', action: 'Créer le PDF', icon: FileImage },
 ];
+
+const validTools = new Set<Tool>(tools.map(item => item.id));
+const isTool = (value: string | null): value is Tool => Boolean(value && validTools.has(value as Tool));
 
 const PdfTools = () => {
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const initialFile = (location.state as LocationState)?.initialFile;
-  const [tool, setTool] = useState<Tool>(initialFile ? 'editor' : 'editor');
+  const [fallbackTool] = useState<Tool>(initialFile ? 'editor' : 'merge');
+  const requestedTool = searchParams.get('tool');
+  const tool: Tool = isTool(requestedTool) ? requestedTool : fallbackTool;
+  const selectedTool = tools.find(item => item.id === tool) ?? tools[0];
+
   const [files, setFiles] = useState<File[]>(initialFile ? [initialFile] : []);
   const [rotation, setRotation] = useState<90 | 180 | 270>(90);
   const [pageSelection, setPageSelection] = useState('');
@@ -48,6 +66,7 @@ const PdfTools = () => {
     if (!files.length || tool === 'images' || tool === 'editor') return;
 
     let cancelled = false;
+    setLoadingPreviews(true);
     createPdfPagePreviews(files)
       .then(next => {
         if (cancelled) {
@@ -103,16 +122,14 @@ const PdfTools = () => {
     setPageSelection('');
     setPageCount(null);
     setLoadingPreviews(false);
-    setTool(next);
+    setSearchParams({ tool: next });
   };
 
-  const handleFiles = (selected: FileList | null) => {
+  const handleFiles = (selected: File[]) => {
     resetResults();
     clearPreviews();
     setPageCount(null);
-    if (!selected) return;
-    const nextFiles = Array.from(selected);
-    const invalid = nextFiles.find(file => {
+    const invalid = selected.find(file => {
       const extension = file.name.split('.').pop()?.toLowerCase();
       if (tool === 'images') return !['png', 'jpg', 'jpeg', 'webp', 'ico'].includes(extension ?? '');
       return extension !== 'pdf';
@@ -122,8 +139,8 @@ const PdfTools = () => {
       setError(`Le fichier ${invalid.name} n'est pas valide pour cet outil.`);
       return;
     }
-    setLoadingPreviews(tool !== 'images' && tool !== 'editor' && nextFiles.length > 0);
-    setFiles(nextFiles);
+    setLoadingPreviews(tool !== 'images' && tool !== 'editor' && selected.length > 0);
+    setFiles(selected);
   };
 
   const removeFile = (index: number) => {
@@ -187,135 +204,171 @@ const PdfTools = () => {
   const canRun = tool === 'editor'
     ? false
     : tool === 'images'
-    ? files.length >= 1
-    : tool === 'merge'
-      ? files.length >= 2
-      : tool === 'organize'
-        ? files.length === 1 && pageSelection.trim().length > 0
-        : files.length === 1;
+      ? files.length >= 1
+      : tool === 'merge'
+        ? files.length >= 2
+        : tool === 'organize'
+          ? files.length === 1 && pageSelection.trim().length > 0
+          : files.length === 1;
+
+  const accept = acceptsImages
+    ? { 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'], 'image/webp': ['.webp'], 'image/x-icon': ['.ico'] }
+    : { 'application/pdf': ['.pdf'] };
+
+  const uploadTitle = acceptsImages
+    ? 'Sélectionner les images'
+    : multiple
+      ? 'Sélectionner les fichiers PDF'
+      : tool === 'editor'
+        ? 'Sélectionner le PDF à modifier'
+        : 'Sélectionner le fichier PDF';
+
+  const uploadHint = acceptsImages
+    ? 'ou glissez-déposez vos images ici · PNG, JPG, WebP ou ICO'
+    : `ou glissez-déposez ${multiple ? 'vos PDF' : 'votre PDF'} ici · 150 MB max. par fichier`;
 
   return (
-    <main className="flex-grow pt-28 pb-20 px-6">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-full text-sm text-gray-600 mb-5">
-            <ShieldCheck size={15} />
-            Traitement 100 % local
+    <main className="flex-grow bg-[#f7f8fb] px-6 pb-20 pt-28">
+      <div className="mx-auto max-w-6xl">
+        <header className="mx-auto mb-8 max-w-3xl text-center">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm">
+            <ShieldCheck size={14} /> Traitement local, sans envoi vers un serveur
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">Outils PDF</h1>
-          <p className="mt-3 text-gray-500 max-w-2xl mx-auto">Créez, convertissez et modifiez vos PDF directement dans votre navigateur. Aucun document n'est envoyé vers un serveur.</p>
-        </div>
+          <h1 className="text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">{selectedTool.title}</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-gray-600 md:text-lg">{selectedTool.description}</p>
+        </header>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3 mb-8">
-          {tools.map(item => (
-            <button key={item.id} type="button" onClick={() => changeTool(item.id)} className={`text-left rounded-2xl border p-5 transition-all ${tool === item.id ? 'bg-gray-900 border-gray-900 text-white shadow-lg' : 'bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm'}`}>
-              <item.icon size={20} className={tool === item.id ? 'text-white' : 'text-gray-600'} />
-              <p className="font-semibold mt-3">{item.label}</p>
-              <p className={`text-xs mt-1 leading-relaxed ${tool === item.id ? 'text-gray-300' : 'text-gray-500'}`}>{item.description}</p>
-            </button>
-          ))}
-        </div>
-
-        <div className="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden">
-          <div className="p-6 md:p-8">
-            <label className="block border-2 border-dashed border-gray-200 hover:border-gray-400 rounded-2xl p-10 text-center cursor-pointer transition-colors">
-              <input type="file" className="hidden" multiple={multiple} accept={acceptsImages ? '.png,.jpg,.jpeg,.webp,.ico,image/*' : '.pdf,application/pdf'} onChange={event => handleFiles(event.target.files)} />
-              <FilePlus2 size={30} className="mx-auto text-gray-500 mb-3" />
-              <p className="font-medium text-gray-900">Sélectionnez {multiple ? 'vos fichiers' : 'un fichier'}</p>
-              <p className="text-sm text-gray-500 mt-1">{acceptsImages ? 'PNG, JPG, JPEG, WebP ou ICO' : 'PDF uniquement'}</p>
-            </label>
-
-            {files.length > 0 && (
-              <div className="mt-5 rounded-xl bg-gray-50 border border-gray-100 p-4">
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-700">{files.length} fichier{files.length > 1 ? 's' : ''} sélectionné{files.length > 1 ? 's' : ''}</p>
-                  <button type="button" onClick={() => { clearPreviews(); setFiles([]); setLoadingPreviews(false); }} className="text-xs font-medium text-red-600 hover:text-red-700">Tout annuler</button>
-                </div>
-                <div className="space-y-2">
-                  {files.map((file, index) => (
-                    <div key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-2">
-                      <span className="flex-1 truncate text-xs text-gray-600"><strong className="mr-2 text-gray-900">{index + 1}.</strong>{file.name}</span>
-                      {multiple && <>
-                        <button type="button" onClick={() => moveFile(index, -1)} disabled={index === 0} aria-label="Monter" className="rounded p-1 text-gray-500 hover:bg-gray-100 disabled:opacity-25"><ArrowUp size={15} /></button>
-                        <button type="button" onClick={() => moveFile(index, 1)} disabled={index === files.length - 1} aria-label="Descendre" className="rounded p-1 text-gray-500 hover:bg-gray-100 disabled:opacity-25"><ArrowDown size={15} /></button>
-                      </>}
-                      <button type="button" onClick={() => removeFile(index)} aria-label={`Retirer ${file.name}`} className="rounded p-1 text-gray-500 hover:bg-red-50 hover:text-red-600"><X size={15} /></button>
-                    </div>
-                  ))}
-                </div>
-                {pageCount !== null && <p className="text-xs text-gray-500 mt-2">{pageCount} page{pageCount > 1 ? 's' : ''}</p>}
-              </div>
-            )}
-
-            {files.length > 0 && tool !== 'images' && tool !== 'editor' && (
-              <section className="mt-5" aria-label="Aperçu des pages">
-                <div className="mb-3 flex items-center justify-between">
-                  <p className="text-sm font-medium text-gray-700">Aperçu des pages</p>
-                  {tool === 'organize' && <p className="text-xs text-gray-500">Cliquez dans l’ordre souhaité</p>}
-                </div>
-                {loadingPreviews ? (
-                  <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500"><Loader2 size={16} className="animate-spin" /> Génération des aperçus…</div>
-                ) : (
-                  <div className="grid max-h-[32rem] grid-cols-2 gap-3 overflow-auto rounded-xl border border-gray-200 bg-gray-100 p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-                    {previews.map(preview => {
-                      const selectedOrder = tool === 'organize' ? pageSelection.split(',').map(value => Number(value.trim())).lastIndexOf(preview.pageNumber) : -1;
-                      return (
-                        <button key={`${preview.fileIndex}-${preview.pageNumber}`} type="button" onClick={() => selectPreviewPage(preview.pageNumber)} disabled={tool !== 'organize'} className="relative overflow-hidden rounded-lg border border-gray-200 bg-white text-left shadow-sm disabled:cursor-default">
-                          <img src={preview.url} alt={`Page ${preview.pageNumber} de ${files[preview.fileIndex]?.name}`} className="aspect-[3/4] w-full object-contain" />
-                          <span className="block truncate border-t border-gray-100 px-2 py-1.5 text-[11px] text-gray-600">{tool === 'merge' ? `${preview.fileIndex + 1}. ` : ''}Page {preview.pageNumber}</span>
-                          {selectedOrder >= 0 && <span className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-gray-900 text-xs font-bold text-white">{selectedOrder + 1}</span>}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </section>
-            )}
-
-            {tool === 'editor' && files.length === 1 && <PdfVisualEditor key={`${files[0].name}-${files[0].size}-${files[0].lastModified}`} file={files[0]} />}
-
-            {tool === 'rotate' && (
-              <div className="mt-5">
-                <p className="text-sm font-medium text-gray-700 mb-2">Angle de rotation</p>
-                <div className="flex gap-2">
-                  {([90, 180, 270] as const).map(angle => (
-                    <button key={angle} type="button" onClick={() => setRotation(angle)} className={`px-4 py-2 rounded-lg text-sm font-medium border ${rotation === angle ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-700 border-gray-200'}`}>{angle}°</button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {tool === 'organize' && (
-              <div className="mt-5">
-                <label htmlFor="page-selection" className="block text-sm font-medium text-gray-700 mb-2">Pages à conserver et ordre</label>
-                <input id="page-selection" type="text" value={pageSelection} onChange={event => setPageSelection(event.target.value)} placeholder={pageCount ? `Ex. 1,3,5-${Math.min(8, pageCount)}` : 'Ex. 1,3,5-8'} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-900/10 focus:border-gray-400" />
-                <div className="mt-2 flex items-center justify-between gap-3"><p className="text-xs text-gray-500">Cliquez sur les aperçus ou saisissez les pages. Exemple : <strong>3,1,2</strong>.</p><button type="button" onClick={() => setPageSelection('')} className="shrink-0 text-xs font-medium text-red-600">Effacer l’ordre</button></div>
-              </div>
-            )}
-
-            {tool === 'render' && <p className="mt-5 text-xs text-gray-500">Chaque page sera rendue en PNG haute résolution. Les gros PDF peuvent utiliser beaucoup de mémoire sur mobile.</p>}
-
-            {error && <p role="alert" className="mt-5 text-sm text-red-600 bg-red-50 border border-red-100 rounded-lg p-3">{error}</p>}
-
-            {tool !== 'editor' && <button type="button" disabled={!canRun || processing} onClick={runTool} className="mt-6 w-full h-12 rounded-xl bg-gray-900 text-white font-medium disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors flex items-center justify-center gap-2">
-              {processing ? <><Loader2 size={18} className="animate-spin" /> Traitement en cours</> : tools.find(item => item.id === tool)?.label}
-            </button>}
-          </div>
-
-          {outputs.length > 0 && (
-            <div className="border-t border-gray-100 bg-gray-50/70 p-6 md:p-8">
-              <p className="text-sm font-semibold text-gray-900 mb-3">Résultat{outputs.length > 1 ? 's' : ''}</p>
-              <div className="space-y-2 max-h-80 overflow-auto">
-                {outputs.map(output => (
-                  <a key={output.url} href={output.url} download={output.name} className="flex items-center justify-between gap-3 bg-white border border-gray-200 rounded-xl px-4 py-3 hover:border-gray-300 hover:shadow-sm transition-all">
-                    <span className="text-sm text-gray-700 truncate">{output.name}</span>
-                    <span className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-900"><Download size={15} /> Télécharger</span>
-                  </a>
-                ))}
-              </div>
-            </div>
+        <div className="mx-auto max-w-3xl">
+          {files.length === 0 && (
+            <FileDropZone onFiles={handleFiles} accept={accept} multiple={multiple} title={uploadTitle} hint={uploadHint} />
           )}
         </div>
+
+        <nav className="my-8 flex flex-wrap justify-center gap-2" aria-label="Autres outils PDF">
+          {tools.map(item => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => changeTool(item.id)}
+              className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition ${tool === item.id ? 'border-gray-950 bg-gray-950 text-white' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-950'}`}
+            >
+              <item.icon size={15} /> {item.label}
+            </button>
+          ))}
+        </nav>
+
+        {files.length > 0 && (
+          <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+            <div className="p-5 md:p-8">
+              <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-gray-950">{files.length} fichier{files.length > 1 ? 's' : ''} prêt{files.length > 1 ? 's' : ''}</p>
+                  <p className="mt-1 text-xs text-gray-500">{tool === 'merge' ? 'L’ordre ci-dessous sera utilisé dans le PDF final.' : 'Vous pouvez remplacer le fichier en recommençant la sélection.'}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => handleFiles([])} className="text-sm font-medium text-red-600 hover:text-red-700">Tout retirer</button>
+                </div>
+              </div>
+
+              <div className="space-y-2 rounded-2xl bg-gray-50 p-3">
+                {files.map((file, index) => (
+                  <div key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-3">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-xs font-semibold text-gray-600">{index + 1}</span>
+                    <span className="min-w-0 flex-1 truncate text-sm text-gray-700">{file.name}</span>
+                    <span className="hidden text-xs text-gray-400 sm:block">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                    {multiple && <>
+                      <button type="button" onClick={() => moveFile(index, -1)} disabled={index === 0} aria-label="Monter" className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-25"><ArrowUp size={15} /></button>
+                      <button type="button" onClick={() => moveFile(index, 1)} disabled={index === files.length - 1} aria-label="Descendre" className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-25"><ArrowDown size={15} /></button>
+                    </>}
+                    <button type="button" onClick={() => removeFile(index)} aria-label={`Retirer ${file.name}`} className="rounded-lg p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600"><X size={15} /></button>
+                  </div>
+                ))}
+              </div>
+
+              {pageCount !== null && <p className="mt-2 text-xs text-gray-500">{pageCount} page{pageCount > 1 ? 's' : ''}</p>}
+
+              <div className="mt-4">
+                <FileDropZone
+                  onFiles={handleFiles}
+                  accept={accept}
+                  multiple={multiple}
+                  title={multiple ? 'Remplacer la sélection' : 'Choisir un autre fichier'}
+                  hint="Cliquez ou glissez-déposez pour remplacer les fichiers actuels"
+                />
+              </div>
+
+              {files.length > 0 && tool !== 'images' && tool !== 'editor' && (
+                <section className="mt-6" aria-label="Aperçu des pages">
+                  <div className="mb-3 flex items-center justify-between">
+                    <p className="text-sm font-semibold text-gray-800">Aperçu des pages</p>
+                    {tool === 'organize' && <p className="text-xs text-gray-500">Cliquez dans l’ordre souhaité</p>}
+                  </div>
+                  {loadingPreviews ? (
+                    <div className="flex items-center gap-2 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-500"><Loader2 size={16} className="animate-spin" /> Génération des aperçus…</div>
+                  ) : (
+                    <div className="grid max-h-[32rem] grid-cols-2 gap-3 overflow-auto rounded-2xl border border-gray-200 bg-gray-100 p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                      {previews.map(preview => {
+                        const selectedOrder = tool === 'organize' ? pageSelection.split(',').map(value => Number(value.trim())).lastIndexOf(preview.pageNumber) : -1;
+                        return (
+                          <button key={`${preview.fileIndex}-${preview.pageNumber}`} type="button" onClick={() => selectPreviewPage(preview.pageNumber)} disabled={tool !== 'organize'} className="relative overflow-hidden rounded-xl border border-gray-200 bg-white text-left shadow-sm disabled:cursor-default">
+                            <img src={preview.url} alt={`Page ${preview.pageNumber} de ${files[preview.fileIndex]?.name}`} className="aspect-[3/4] w-full object-contain" />
+                            <span className="block truncate border-t border-gray-100 px-2 py-1.5 text-[11px] text-gray-600">{tool === 'merge' ? `${preview.fileIndex + 1}. ` : ''}Page {preview.pageNumber}</span>
+                            {selectedOrder >= 0 && <span className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-gray-950 text-xs font-bold text-white">{selectedOrder + 1}</span>}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </section>
+              )}
+
+              {tool === 'editor' && files.length === 1 && <PdfVisualEditor key={`${files[0].name}-${files[0].size}-${files[0].lastModified}`} file={files[0]} />}
+
+              {tool === 'rotate' && (
+                <div className="mt-6">
+                  <p className="mb-2 text-sm font-semibold text-gray-800">Angle de rotation</p>
+                  <div className="flex gap-2">
+                    {([90, 180, 270] as const).map(angle => (
+                      <button key={angle} type="button" onClick={() => setRotation(angle)} className={`rounded-xl border px-5 py-2.5 text-sm font-medium ${rotation === angle ? 'border-gray-950 bg-gray-950 text-white' : 'border-gray-200 bg-white text-gray-700'}`}>{angle}°</button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {tool === 'organize' && (
+                <div className="mt-6">
+                  <label htmlFor="page-selection" className="mb-2 block text-sm font-semibold text-gray-800">Pages à conserver et ordre</label>
+                  <input id="page-selection" type="text" value={pageSelection} onChange={event => setPageSelection(event.target.value)} placeholder={pageCount ? `Ex. 1,3,5-${Math.min(8, pageCount)}` : 'Ex. 1,3,5-8'} className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm focus:border-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-900/10" />
+                  <div className="mt-2 flex items-center justify-between gap-3"><p className="text-xs text-gray-500">Cliquez sur les aperçus ou saisissez les pages. Exemple : <strong>3,1,2</strong>.</p><button type="button" onClick={() => setPageSelection('')} className="shrink-0 text-xs font-medium text-red-600">Effacer l’ordre</button></div>
+                </div>
+              )}
+
+              {tool === 'render' && <p className="mt-5 text-xs text-gray-500">Chaque page sera rendue en PNG haute résolution. Les gros PDF peuvent utiliser beaucoup de mémoire sur mobile.</p>}
+
+              {error && <p role="alert" className="mt-5 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-600">{error}</p>}
+
+              {tool !== 'editor' && (
+                <button type="button" disabled={!canRun || processing} onClick={runTool} className="mt-7 flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-gray-950 px-5 py-3.5 font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300">
+                  {processing ? <><Loader2 size={18} className="animate-spin" /> Traitement en cours</> : selectedTool.action}
+                </button>
+              )}
+            </div>
+
+            {outputs.length > 0 && (
+              <div className="border-t border-gray-100 bg-emerald-50/40 p-6 md:p-8">
+                <p className="mb-3 text-sm font-semibold text-gray-900">Résultat{outputs.length > 1 ? 's' : ''} prêt{outputs.length > 1 ? 's' : ''}</p>
+                <div className="max-h-80 space-y-2 overflow-auto">
+                  {outputs.map(output => (
+                    <a key={output.url} href={output.url} download={output.name} className="flex items-center justify-between gap-3 rounded-xl border border-emerald-100 bg-white px-4 py-3 transition-all hover:shadow-sm">
+                      <span className="truncate text-sm text-gray-700">{output.name}</span>
+                      <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-gray-950"><Download size={15} /> Télécharger</span>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        )}
       </div>
     </main>
   );
