@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import type { Accept } from 'react-dropzone';
 import { Download, FileArchive, Image as ImageIcon, Loader2, RotateCw, Video, X } from 'lucide-react';
 import FileDropZone from '../components/FileDropZone';
@@ -10,9 +10,9 @@ import { createZip } from '../services/zip';
 type Mode = 'image' | 'pdf' | 'video';
 const defaults: ImageEditOptions = { rotation: 0, flipX: false, flipY: false, quality: 'balanced', background: 'transparent', crop: { x: 0, y: 0, width: 100, height: 100 }, format: 'webp' };
 const modes = [
-  { id: 'pdf', label: 'PDF', title: 'Compresser PDF', description: 'Réduisez la taille de vos fichiers PDF tout en choisissant le niveau de qualité adapté.', icon: FileArchive },
-  { id: 'image', label: 'Images', title: 'Optimiser des images', description: 'Redimensionnez, convertissez et compressez vos images directement dans le navigateur.', icon: ImageIcon },
-  { id: 'video', label: 'Vidéos', title: 'Compresser une vidéo', description: 'Réduisez le poids de vos vidéos avec un profil adapté au partage ou au stockage.', icon: Video },
+  { id: 'pdf', path: '/compresser-pdf', label: 'PDF', title: 'Compresser PDF', description: 'Réduisez la taille de vos fichiers PDF tout en choisissant le niveau de qualité adapté.', icon: FileArchive },
+  { id: 'image', path: '/optimiser-images', label: 'Images', title: 'Optimiser des images', description: 'Redimensionnez, convertissez et compressez vos images directement dans le navigateur.', icon: ImageIcon },
+  { id: 'video', path: '/compresser-video', label: 'Vidéos', title: 'Compresser une vidéo', description: 'Réduisez le poids de vos vidéos avec un profil adapté au partage ou au stockage.', icon: Video },
 ] as const;
 
 const accepts: Record<Mode, Accept> = {
@@ -27,11 +27,14 @@ const presets: Array<{ id: QualityPreset; label: string; description: string }> 
   { id: 'small', label: 'Taille minimale', description: 'Compression plus forte pour obtenir le fichier le plus léger.' },
 ];
 
+const pathToMode = new Map<string, Mode>(modes.map(item => [item.path, item.id]));
 const isMode = (value: string | null): value is Mode => value === 'image' || value === 'pdf' || value === 'video';
 
 export default function OptimizeTools() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const requestedMode = searchParams.get('type');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const requestedMode = pathToMode.get(location.pathname) ?? searchParams.get('type');
   const mode: Mode = isMode(requestedMode) ? requestedMode : 'pdf';
   const modeInfo = modes.find(item => item.id === mode) ?? modes[0];
   const accept = accepts[mode];
@@ -49,6 +52,36 @@ export default function OptimizeTools() {
     return () => values.forEach(URL.revokeObjectURL);
   }, []);
 
+  useEffect(() => {
+    const previousTitle = document.title;
+    const existingMeta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const meta = existingMeta ?? document.head.appendChild(document.createElement('meta'));
+    const previousDescription = meta.getAttribute('content');
+    if (!existingMeta) meta.name = 'description';
+
+    const existingCanonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    const canonical = existingCanonical ?? document.head.appendChild(document.createElement('link'));
+    const previousCanonical = canonical.getAttribute('href');
+    if (!existingCanonical) canonical.rel = 'canonical';
+
+    document.title = `${modeInfo.title} gratuitement | Doxali`;
+    meta.setAttribute('content', `${modeInfo.description} Outil gratuit, sans inscription et avec traitement local en priorité.`);
+    canonical.setAttribute('href', `${window.location.origin}${modeInfo.path}`);
+
+    return () => {
+      document.title = previousTitle;
+      if (existingMeta) {
+        if (previousDescription === null) meta.removeAttribute('content');
+        else meta.setAttribute('content', previousDescription);
+      } else meta.remove();
+
+      if (existingCanonical) {
+        if (previousCanonical === null) canonical.removeAttribute('href');
+        else canonical.setAttribute('href', previousCanonical);
+      } else canonical.remove();
+    };
+  }, [modeInfo]);
+
   const clearResults = () => {
     urls.current.forEach(URL.revokeObjectURL);
     urls.current.length = 0;
@@ -59,7 +92,8 @@ export default function OptimizeTools() {
     clearResults();
     setFiles([]);
     setProgress(0);
-    setSearchParams({ type: next });
+    const destination = modes.find(item => item.id === next)?.path ?? '/compresser-pdf';
+    navigate(destination);
   };
 
   const addFiles = (selected: File[]) => {
