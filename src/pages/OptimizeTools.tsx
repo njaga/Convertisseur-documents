@@ -44,7 +44,7 @@ export default function OptimizeTools() {
           urls.current.push(url);
           next.push({ name: `${file.name.replace(/\.[^.]+$/, '')}.${options.format === 'jpeg' ? 'jpg' : options.format}`, url, before: file.size, after: output.blob.size, dimensions: `${output.width} × ${output.height}` });
         } else if (mode === 'pdf') {
-          const blob = await compressPdf(file);
+          const blob = await compressPdf(file, preset, value => setProgress(Math.round((index + value / 100) / files.length * 100)));
           const url = URL.createObjectURL(blob);
           urls.current.push(url);
           next.push({ name: `${file.name.replace(/\.pdf$/i, '')}-optimise.pdf`, url, before: file.size, after: blob.size });
