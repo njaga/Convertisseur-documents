@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useSearchParams } from 'react-router-dom';
+import type { Accept } from 'react-dropzone';
 import { ArrowDown, ArrowUp, Download, FileImage, Images, ListOrdered, Loader2, Merge, RotateCw, Scissors, ShieldCheck, X } from 'lucide-react';
 import FileDropZone from '../components/FileDropZone';
 import PdfVisualEditor from '../components/PdfVisualEditor';
@@ -210,7 +211,7 @@ const PdfTools = () => {
           ? files.length === 1 && pageSelection.trim().length > 0
           : files.length === 1;
 
-  const accept = acceptsImages
+  const accept: Accept = acceptsImages
     ? { 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'], 'image/webp': ['.webp'], 'image/x-icon': ['.ico'] }
     : { 'application/pdf': ['.pdf'] };
 
