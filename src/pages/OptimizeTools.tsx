@@ -4,6 +4,7 @@ import type { Accept } from 'react-dropzone';
 import { Download, FileArchive, Image as ImageIcon, Loader2, RotateCw, Video, X } from 'lucide-react';
 import FileDropZone from '../components/FileDropZone';
 import FilePreview from '../components/FilePreview';
+import ResultPreview from '../components/ResultPreview';
 import { compressPdf, compressVideo, ImageEditOptions, processImage, QualityPreset, savings } from '../services/optimizer';
 import { createZip } from '../services/zip';
 
@@ -215,8 +216,8 @@ export default function OptimizeTools() {
                   <label className="text-sm">Qualité<select value={options.quality} onChange={event => setOptions(current => ({ ...current, quality: event.target.value as QualityPreset }))} className="mt-1 w-full rounded-lg border px-3 py-2"><option value="high">Élevée</option><option value="balanced">Équilibrée</option><option value="small">Taille minimale</option></select></label>
                   <label className="text-sm">Recadrage X %<input type="range" min="0" max="80" value={options.crop.x} onChange={event => setOptions(current => ({ ...current, crop: { ...current.crop, x: Number(event.target.value) } }))} className="mt-2 w-full" /></label>
                   <label className="text-sm">Recadrage Y %<input type="range" min="0" max="80" value={options.crop.y} onChange={event => setOptions(current => ({ ...current, crop: { ...current.crop, y: Number(event.target.value) } }))} className="mt-2 w-full" /></label>
-                  <button onClick={() => setOptions(current => ({ ...current, rotation: ((current.rotation + 90) % 360) as ImageEditOptions['rotation'] }))} className="inline-flex items-center justify-center gap-2 rounded-lg border bg-white px-3 py-2 text-sm"><RotateCw size={15} /> Rotation {options.rotation}°</button>
-                  <div className="flex gap-2"><button onClick={() => setOptions(current => ({ ...current, flipX: !current.flipX }))} className={`flex-1 rounded-lg border px-2 py-2 text-sm ${options.flipX ? 'bg-gray-950 text-white' : 'bg-white'}`}>Miroir H</button><button onClick={() => setOptions(current => ({ ...current, flipY: !current.flipY }))} className={`flex-1 rounded-lg border px-2 py-2 text-sm ${options.flipY ? 'bg-gray-950 text-white' : 'bg-white'}`}>Miroir V</button></div>
+                  <button type="button" onClick={() => setOptions(current => ({ ...current, rotation: ((current.rotation + 90) % 360) as ImageEditOptions['rotation'] }))} className="inline-flex items-center justify-center gap-2 rounded-lg border bg-white px-3 py-2 text-sm"><RotateCw size={15} /> Rotation {options.rotation}°</button>
+                  <div className="flex gap-2"><button type="button" onClick={() => setOptions(current => ({ ...current, flipX: !current.flipX }))} className={`flex-1 rounded-lg border px-2 py-2 text-sm ${options.flipX ? 'bg-gray-950 text-white' : 'bg-white'}`}>Miroir H</button><button type="button" onClick={() => setOptions(current => ({ ...current, flipY: !current.flipY }))} className={`flex-1 rounded-lg border px-2 py-2 text-sm ${options.flipY ? 'bg-gray-950 text-white' : 'bg-white'}`}>Miroir V</button></div>
                   <label className="text-sm">Fond<select value={options.background} onChange={event => setOptions(current => ({ ...current, background: event.target.value as ImageEditOptions['background'] }))} className="mt-1 w-full rounded-lg border px-3 py-2"><option value="transparent">Transparent</option><option value="white">Blanc</option></select></label>
                 </div>
               )}
@@ -245,13 +246,14 @@ export default function OptimizeTools() {
         {results.length > 0 && (
           <section className="mt-6 rounded-3xl border border-emerald-100 bg-white p-6 shadow-sm">
             <div className="mb-4 flex items-center justify-between gap-3">
-              <div><h2 className="font-semibold text-gray-950">Résultats</h2><p className="mt-1 text-xs text-gray-500">Comparez la taille avant et après traitement.</p></div>
-              {results.length > 1 && <button onClick={() => void downloadZip()} className="rounded-xl bg-gray-950 px-4 py-2 text-sm font-medium text-white">Télécharger en ZIP</button>}
+              <div><h2 className="font-semibold text-gray-950">Résultats</h2><p className="mt-1 text-xs text-gray-500">Vérifiez visuellement le résultat et comparez la taille avant/après.</p></div>
+              {results.length > 1 && <button type="button" onClick={() => void downloadZip()} className="rounded-xl bg-gray-950 px-4 py-2 text-sm font-medium text-white">Télécharger en ZIP</button>}
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               {results.map(result => (
                 <article key={result.url} className="rounded-2xl border border-gray-200 p-4">
                   <p className="truncate font-medium text-gray-900">{result.name}</p>
+                  <div className="mt-3"><ResultPreview url={result.url} name={result.name} /></div>
                   <div className="mt-3 grid grid-cols-3 gap-2 text-center text-xs">
                     <div className="rounded-xl bg-gray-50 p-2"><strong className="block text-sm">{(result.before / 1024 / 1024).toFixed(2)} MB</strong>Avant</div>
                     <div className="rounded-xl bg-gray-50 p-2"><strong className="block text-sm">{(result.after / 1024 / 1024).toFixed(2)} MB</strong>Après</div>

@@ -1,6 +1,7 @@
 import React from 'react';
+import { Check, Download, Eye, Loader, X } from 'lucide-react';
 import { ConversionJob } from '../types/converter';
-import { Check, X, Loader, Download } from 'lucide-react';
+import ResultPreview from './ResultPreview';
 
 interface ConversionProgressProps {
   job: ConversionJob;
@@ -21,41 +22,41 @@ const ConversionProgress: React.FC<ConversionProgressProps> = ({ job }) => {
     switch (job.status) {
       case 'completed': return <Check size={16} className={`${baseClass} text-green-600`} />;
       case 'error': return <X size={16} className={`${baseClass} text-red-500`} />;
-      default: return <Loader size={16} className={`${baseClass} text-gray-400 animate-spin`} />;
+      default: return <Loader size={16} className={`${baseClass} animate-spin text-gray-400`} />;
     }
   };
 
   return (
-    <div className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-      <div className="p-2 bg-white rounded-lg border border-gray-200">{getStatusIcon()}</div>
+    <article className="rounded-xl bg-gray-50 p-3">
+      <div className="flex items-center gap-4">
+        <div className="rounded-lg border border-gray-200 bg-white p-2">{getStatusIcon()}</div>
 
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-gray-900 truncate" title={outputName}>
-          {displayName}.{job.outputFormat}
-        </p>
-        {job.status === 'processing' && (
-          <div className="mt-1.5 h-1 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-gray-900 rounded-full transition-all duration-300" style={{ width: `${job.progress}%` }} />
-          </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium text-gray-900" title={outputName}>{displayName}.{job.outputFormat}</p>
+          {job.status === 'processing' && (
+            <div className="mt-1.5 h-1 overflow-hidden rounded-full bg-gray-200">
+              <div className="h-full rounded-full bg-gray-900 transition-all duration-300" style={{ width: `${job.progress}%` }} />
+            </div>
+          )}
+          {job.error && <p className="mt-1 text-xs text-red-500">{job.error}</p>}
+        </div>
+
+        {job.status === 'completed' && job.outputUrl && (
+          <a href={job.outputUrl} download={outputName} className="flex items-center gap-1.5 rounded-lg bg-gray-900 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-gray-800">
+            <Download size={14} /> <span className="hidden sm:inline">Télécharger</span>
+          </a>
         )}
-        {job.error && <p className="text-xs text-red-500 mt-1">{job.error}</p>}
+
+        {(job.status === 'processing' || job.status === 'pending') && <span className="text-xs tabular-nums text-gray-400">{job.progress}%</span>}
       </div>
 
       {job.status === 'completed' && job.outputUrl && (
-        <a
-          href={job.outputUrl}
-          download={outputName}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-gray-900 hover:bg-gray-800 rounded-lg transition-colors"
-        >
-          <Download size={14} />
-          <span className="hidden sm:inline">Telecharger</span>
-        </a>
+        <details className="mt-3 border-t border-gray-200 pt-3">
+          <summary className="inline-flex cursor-pointer list-none items-center gap-2 text-xs font-semibold text-gray-600 hover:text-gray-950"><Eye size={14} /> Voir l’aperçu du résultat</summary>
+          <div className="mt-3"><ResultPreview url={job.outputUrl} name={outputName} /></div>
+        </details>
       )}
-
-      {(job.status === 'processing' || job.status === 'pending') && (
-        <span className="text-xs text-gray-400 tabular-nums">{job.progress}%</span>
-      )}
-    </div>
+    </article>
   );
 };
 
