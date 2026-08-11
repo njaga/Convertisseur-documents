@@ -117,7 +117,7 @@ export default function Navbar() {
                         <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-gray-400">{group.title}</p>
                         <div className="space-y-1">
                           {group.links.map(link => (
-                            <Link key={link.to} to={link.to} role="menuitem" onClick={() => setMoreOpen(false)} className="flex items-center gap-2.5 rounded-xl px-2 py-2.5 text-sm font-medium text-gray-650 transition-colors hover:bg-blue-50 hover:text-blue-700">
+                            <Link key={link.to} to={link.to} role="menuitem" onClick={() => setMoreOpen(false)} className="flex items-center gap-2.5 rounded-xl px-2 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-700">
                               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600"><link.icon size={15} /></span>
                               <span>{link.label}</span>
                             </Link>
