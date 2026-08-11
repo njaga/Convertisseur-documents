@@ -2,23 +2,23 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, FileArchive, FileImage, Files, History, Image, Layers3, ListOrdered, Merge, RotateCw, Scissors, ShieldCheck, Sparkles, Video } from 'lucide-react';
 
 const popularTools = [
-  { to: '/pdf?tool=merge', title: 'Fusionner PDF', description: 'Combinez plusieurs fichiers PDF dans l’ordre de votre choix.', icon: Merge, iconClass: 'bg-orange-50 text-orange-600' },
-  { to: '/pdf?tool=split', title: 'Diviser PDF', description: 'Séparez rapidement les pages d’un document PDF.', icon: Scissors, iconClass: 'bg-rose-50 text-rose-600' },
-  { to: '/optimiser?type=pdf', title: 'Compresser PDF', description: 'Réduisez le poids d’un PDF avec trois niveaux de qualité.', icon: FileArchive, iconClass: 'bg-emerald-50 text-emerald-600' },
+  { to: '/fusionner-pdf', title: 'Fusionner PDF', description: 'Combinez plusieurs fichiers PDF dans l’ordre de votre choix.', icon: Merge, iconClass: 'bg-orange-50 text-orange-600' },
+  { to: '/diviser-pdf', title: 'Diviser PDF', description: 'Séparez rapidement les pages d’un document PDF.', icon: Scissors, iconClass: 'bg-rose-50 text-rose-600' },
+  { to: '/compresser-pdf', title: 'Compresser PDF', description: 'Réduisez le poids d’un PDF avec trois niveaux de qualité.', icon: FileArchive, iconClass: 'bg-emerald-50 text-emerald-600' },
   { to: '/convertir', title: 'Convertir un fichier', description: 'Images, vidéos, audio et texte : choisissez le format de sortie.', icon: Files, iconClass: 'bg-blue-50 text-blue-600' },
 ];
 
 const pdfTools = [
-  { to: '/pdf?tool=editor', title: 'Modifier PDF', description: 'Réorganiser, tourner, extraire ou supprimer des pages.', icon: ListOrdered, iconClass: 'bg-violet-50 text-violet-600' },
-  { to: '/pdf?tool=organize', title: 'Organiser PDF', description: 'Choisir précisément les pages et leur ordre final.', icon: Layers3, iconClass: 'bg-indigo-50 text-indigo-600' },
-  { to: '/pdf?tool=rotate', title: 'Faire pivoter PDF', description: 'Tourner les pages à 90°, 180° ou 270°.', icon: RotateCw, iconClass: 'bg-fuchsia-50 text-fuchsia-600' },
-  { to: '/pdf?tool=render', title: 'PDF en PNG', description: 'Convertir chaque page du PDF en image PNG.', icon: FileImage, iconClass: 'bg-amber-50 text-amber-600' },
-  { to: '/pdf?tool=images', title: 'Images en PDF', description: 'Créer un PDF à partir de fichiers PNG, JPG ou WebP.', icon: Image, iconClass: 'bg-cyan-50 text-cyan-600' },
+  { to: '/modifier-pdf', title: 'Modifier PDF', description: 'Réorganiser, tourner, extraire ou supprimer des pages.', icon: ListOrdered, iconClass: 'bg-violet-50 text-violet-600' },
+  { to: '/organiser-pdf', title: 'Organiser PDF', description: 'Choisir précisément les pages et leur ordre final.', icon: Layers3, iconClass: 'bg-indigo-50 text-indigo-600' },
+  { to: '/pivoter-pdf', title: 'Faire pivoter PDF', description: 'Tourner les pages à 90°, 180° ou 270°.', icon: RotateCw, iconClass: 'bg-fuchsia-50 text-fuchsia-600' },
+  { to: '/pdf-en-png', title: 'PDF en PNG', description: 'Convertir chaque page du PDF en image PNG.', icon: FileImage, iconClass: 'bg-amber-50 text-amber-600' },
+  { to: '/images-en-pdf', title: 'Images en PDF', description: 'Créer un PDF à partir de fichiers PNG, JPG ou WebP.', icon: Image, iconClass: 'bg-cyan-50 text-cyan-600' },
 ];
 
 const moreTools = [
-  { to: '/optimiser?type=image', title: 'Optimiser des images', description: 'Compresser, redimensionner, recadrer et convertir.', icon: Image, iconClass: 'bg-sky-50 text-sky-600' },
-  { to: '/optimiser?type=video', title: 'Compresser une vidéo', description: 'Réduire le poids d’une vidéo avant partage ou stockage.', icon: Video, iconClass: 'bg-red-50 text-red-600' },
+  { to: '/optimiser-images', title: 'Optimiser des images', description: 'Compresser, redimensionner, recadrer et convertir.', icon: Image, iconClass: 'bg-sky-50 text-sky-600' },
+  { to: '/compresser-video', title: 'Compresser une vidéo', description: 'Réduire le poids d’une vidéo avant partage ou stockage.', icon: Video, iconClass: 'bg-red-50 text-red-600' },
   { to: '/batch', title: 'Conversions par lot', description: 'Traiter plusieurs fichiers et télécharger les résultats en ZIP.', icon: Layers3, iconClass: 'bg-lime-50 text-lime-700' },
   { to: '/documents', title: 'Créer et analyser', description: 'OCR, annotations, signatures et autres outils documentaires.', icon: Sparkles, iconClass: 'bg-purple-50 text-purple-600' },
   { to: '/historique', title: 'Historique local', description: 'Retrouver les derniers fichiers traités sur cet appareil.', icon: History, iconClass: 'bg-gray-100 text-gray-700' },
