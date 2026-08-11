@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import type { Accept } from 'react-dropzone';
 import { Download, FileArchive, Image as ImageIcon, Loader2, RotateCw, Video, X } from 'lucide-react';
@@ -15,6 +15,12 @@ const modes = [
   { id: 'video', label: 'Vidéos', title: 'Compresser une vidéo', description: 'Réduisez le poids de vos vidéos avec un profil adapté au partage ou au stockage.', icon: Video },
 ] as const;
 
+const accepts: Record<Mode, Accept> = {
+  image: { 'image/*': ['.png', '.jpg', '.jpeg', '.webp', '.ico'] },
+  pdf: { 'application/pdf': ['.pdf'] },
+  video: { 'video/*': ['.mp4', '.webm', '.avi', '.mkv', '.mov'] },
+};
+
 const presets: Array<{ id: QualityPreset; label: string; description: string }> = [
   { id: 'high', label: 'Qualité élevée', description: 'Réduction légère, rendu plus proche de l’original.' },
   { id: 'balanced', label: 'Équilibré', description: 'Bon compromis entre qualité visuelle et taille.' },
@@ -28,6 +34,7 @@ export default function OptimizeTools() {
   const requestedMode = searchParams.get('type');
   const mode: Mode = isMode(requestedMode) ? requestedMode : 'pdf';
   const modeInfo = modes.find(item => item.id === mode) ?? modes[0];
+  const accept = accepts[mode];
 
   const [files, setFiles] = useState<File[]>([]);
   const [options, setOptions] = useState(defaults);
@@ -41,12 +48,6 @@ export default function OptimizeTools() {
     const values = urls.current;
     return () => values.forEach(URL.revokeObjectURL);
   }, []);
-
-  const accept = useMemo<Accept>(() => {
-    if (mode === 'image') return { 'image/*': ['.png', '.jpg', '.jpeg', '.webp', '.ico'] };
-    if (mode === 'pdf') return { 'application/pdf': ['.pdf'] };
-    return { 'video/*': ['.mp4', '.webm', '.avi', '.mkv', '.mov'] };
-  }, [mode]);
 
   const clearResults = () => {
     urls.current.forEach(URL.revokeObjectURL);
