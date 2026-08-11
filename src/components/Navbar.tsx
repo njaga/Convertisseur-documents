@@ -4,9 +4,9 @@ import { ChevronDown, FileArchive, FileImage, Files, History, Image, Layers3, Me
 import Logo from './Logo';
 
 const mainLinks = [
-  { to: '/pdf?tool=merge', label: 'Fusionner PDF' },
-  { to: '/pdf?tool=split', label: 'Diviser PDF' },
-  { to: '/optimiser?type=pdf', label: 'Compresser PDF' },
+  { to: '/fusionner-pdf', label: 'Fusionner PDF' },
+  { to: '/diviser-pdf', label: 'Diviser PDF' },
+  { to: '/compresser-pdf', label: 'Compresser PDF' },
   { to: '/convertir', label: 'Convertir' },
 ];
 
@@ -14,26 +14,26 @@ const toolGroups = [
   {
     title: 'Organiser PDF',
     links: [
-      { to: '/pdf?tool=merge', label: 'Fusionner PDF', icon: Layers3 },
-      { to: '/pdf?tool=split', label: 'Diviser PDF', icon: Scissors },
-      { to: '/pdf?tool=editor', label: 'Modifier les pages', icon: Settings2 },
-      { to: '/pdf?tool=organize', label: 'Organiser PDF', icon: Split },
-      { to: '/pdf?tool=rotate', label: 'Faire pivoter', icon: RotateCw },
+      { to: '/fusionner-pdf', label: 'Fusionner PDF', icon: Layers3 },
+      { to: '/diviser-pdf', label: 'Diviser PDF', icon: Scissors },
+      { to: '/modifier-pdf', label: 'Modifier les pages', icon: Settings2 },
+      { to: '/organiser-pdf', label: 'Organiser PDF', icon: Split },
+      { to: '/pivoter-pdf', label: 'Faire pivoter', icon: RotateCw },
     ],
   },
   {
     title: 'Optimiser',
     links: [
-      { to: '/optimiser?type=pdf', label: 'Compresser PDF', icon: FileArchive },
-      { to: '/optimiser?type=image', label: 'Optimiser des images', icon: Image },
-      { to: '/optimiser?type=video', label: 'Compresser une vidéo', icon: Zap },
+      { to: '/compresser-pdf', label: 'Compresser PDF', icon: FileArchive },
+      { to: '/optimiser-images', label: 'Optimiser des images', icon: Image },
+      { to: '/compresser-video', label: 'Compresser une vidéo', icon: Zap },
     ],
   },
   {
     title: 'Convertir',
     links: [
-      { to: '/pdf?tool=images', label: 'Images en PDF', icon: FileImage },
-      { to: '/pdf?tool=render', label: 'PDF en PNG', icon: FileImage },
+      { to: '/images-en-pdf', label: 'Images en PDF', icon: FileImage },
+      { to: '/pdf-en-png', label: 'PDF en PNG', icon: FileImage },
       { to: '/convertir', label: 'Convertir un fichier', icon: Files },
       { to: '/batch', label: 'Conversions par lot', icon: Layers3 },
     ],
@@ -117,7 +117,7 @@ export default function Navbar() {
                         <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-gray-400">{group.title}</p>
                         <div className="space-y-1">
                           {group.links.map(link => (
-                            <Link key={link.to} to={link.to} role="menuitem" onClick={() => setMoreOpen(false)} className="flex items-center gap-2.5 rounded-xl px-2 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-blue-50 hover:text-blue-700">
+                            <Link key={link.to} to={link.to} role="menuitem" onClick={() => setMoreOpen(false)} className="flex items-center gap-2.5 rounded-xl px-2 py-2.5 text-sm font-medium text-gray-650 transition-colors hover:bg-blue-50 hover:text-blue-700">
                               <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600"><link.icon size={15} /></span>
                               <span>{link.label}</span>
                             </Link>
