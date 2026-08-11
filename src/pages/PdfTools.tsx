@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import type { Accept } from 'react-dropzone';
 import { ArrowDown, ArrowUp, Download, FileImage, Images, ListOrdered, Loader2, Merge, RotateCw, Scissors, ShieldCheck, X } from 'lucide-react';
 import FileDropZone from '../components/FileDropZone';
@@ -11,6 +11,7 @@ type LocationState = { initialFile?: File } | null;
 
 type ToolDefinition = {
   id: Tool;
+  path: string;
   label: string;
   title: string;
   description: string;
@@ -19,24 +20,27 @@ type ToolDefinition = {
 };
 
 const tools: ToolDefinition[] = [
-  { id: 'merge', label: 'Fusionner', title: 'Fusionner des fichiers PDF', description: 'Combinez plusieurs PDF et choisissez leur ordre avant de créer un seul document.', action: 'Fusionner les PDF', icon: Merge },
-  { id: 'split', label: 'Diviser', title: 'Diviser un fichier PDF', description: 'Séparez votre document pour obtenir un fichier PDF indépendant pour chaque page.', action: 'Diviser le PDF', icon: Scissors },
-  { id: 'editor', label: 'Modifier', title: 'Modifier un PDF', description: 'Réorganisez, tournez, extrayez ou supprimez des pages visuellement.', action: 'Modifier le PDF', icon: ListOrdered },
-  { id: 'organize', label: 'Organiser', title: 'Organiser les pages d’un PDF', description: 'Choisissez précisément les pages à conserver et l’ordre dans lequel elles doivent apparaître.', action: 'Organiser le PDF', icon: ListOrdered },
-  { id: 'rotate', label: 'Pivoter', title: 'Faire pivoter un PDF', description: 'Tournez toutes les pages de votre PDF à 90°, 180° ou 270°.', action: 'Faire pivoter le PDF', icon: RotateCw },
-  { id: 'render', label: 'PDF → PNG', title: 'Convertir un PDF en PNG', description: 'Transformez chaque page de votre document en image PNG haute résolution.', action: 'Convertir en PNG', icon: Images },
-  { id: 'images', label: 'Images → PDF', title: 'Convertir des images en PDF', description: 'Regroupez vos images PNG, JPG, WebP ou ICO dans un document PDF.', action: 'Créer le PDF', icon: FileImage },
+  { id: 'merge', path: '/fusionner-pdf', label: 'Fusionner', title: 'Fusionner des fichiers PDF', description: 'Combinez plusieurs PDF et choisissez leur ordre avant de créer un seul document.', action: 'Fusionner les PDF', icon: Merge },
+  { id: 'split', path: '/diviser-pdf', label: 'Diviser', title: 'Diviser un fichier PDF', description: 'Séparez votre document pour obtenir un fichier PDF indépendant pour chaque page.', action: 'Diviser le PDF', icon: Scissors },
+  { id: 'editor', path: '/modifier-pdf', label: 'Modifier', title: 'Modifier un PDF', description: 'Réorganisez, tournez, extrayez ou supprimez des pages visuellement.', action: 'Modifier le PDF', icon: ListOrdered },
+  { id: 'organize', path: '/organiser-pdf', label: 'Organiser', title: 'Organiser les pages d’un PDF', description: 'Choisissez précisément les pages à conserver et l’ordre dans lequel elles doivent apparaître.', action: 'Organiser le PDF', icon: ListOrdered },
+  { id: 'rotate', path: '/pivoter-pdf', label: 'Pivoter', title: 'Faire pivoter un PDF', description: 'Tournez toutes les pages de votre PDF à 90°, 180° ou 270°.', action: 'Faire pivoter le PDF', icon: RotateCw },
+  { id: 'render', path: '/pdf-en-png', label: 'PDF → PNG', title: 'Convertir un PDF en PNG', description: 'Transformez chaque page de votre document en image PNG haute résolution.', action: 'Convertir en PNG', icon: Images },
+  { id: 'images', path: '/images-en-pdf', label: 'Images → PDF', title: 'Convertir des images en PDF', description: 'Regroupez vos images PNG, JPG, WebP ou ICO dans un document PDF.', action: 'Créer le PDF', icon: FileImage },
 ];
 
 const validTools = new Set<Tool>(tools.map(item => item.id));
+const pathToTool = new Map<string, Tool>(tools.map(item => [item.path, item.id]));
 const isTool = (value: string | null): value is Tool => Boolean(value && validTools.has(value as Tool));
 
 const PdfTools = () => {
   const location = useLocation();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const initialFile = (location.state as LocationState)?.initialFile;
   const [fallbackTool] = useState<Tool>(initialFile ? 'editor' : 'merge');
-  const requestedTool = searchParams.get('tool');
+  const pathTool = pathToTool.get(location.pathname);
+  const requestedTool = pathTool ?? searchParams.get('tool');
   const tool: Tool = isTool(requestedTool) ? requestedTool : fallbackTool;
   const selectedTool = tools.find(item => item.id === tool) ?? tools[0];
 
@@ -62,6 +66,36 @@ const PdfTools = () => {
       previewUrls.clear();
     };
   }, []);
+
+  useEffect(() => {
+    const previousTitle = document.title;
+    const existingMeta = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const meta = existingMeta ?? document.head.appendChild(document.createElement('meta'));
+    const previousDescription = meta.getAttribute('content');
+    if (!existingMeta) meta.name = 'description';
+
+    const existingCanonical = document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    const canonical = existingCanonical ?? document.head.appendChild(document.createElement('link'));
+    const previousCanonical = canonical.getAttribute('href');
+    if (!existingCanonical) canonical.rel = 'canonical';
+
+    document.title = `${selectedTool.title} gratuitement | Doxali`;
+    meta.setAttribute('content', `${selectedTool.description} Outil gratuit, sans inscription et avec traitement local en priorité.`);
+    canonical.setAttribute('href', `${window.location.origin}${selectedTool.path}`);
+
+    return () => {
+      document.title = previousTitle;
+      if (existingMeta) {
+        if (previousDescription === null) meta.removeAttribute('content');
+        else meta.setAttribute('content', previousDescription);
+      } else meta.remove();
+
+      if (existingCanonical) {
+        if (previousCanonical === null) canonical.removeAttribute('href');
+        else canonical.setAttribute('href', previousCanonical);
+      } else canonical.remove();
+    };
+  }, [selectedTool]);
 
   useEffect(() => {
     if (!files.length || tool === 'images' || tool === 'editor') return;
@@ -122,7 +156,8 @@ const PdfTools = () => {
     setPageSelection('');
     setPageCount(null);
     setLoadingPreviews(false);
-    setSearchParams({ tool: next });
+    const destination = tools.find(item => item.id === next)?.path ?? '/fusionner-pdf';
+    navigate(destination);
   };
 
   const handleFiles = (selected: File[]) => {
