@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import type { Accept } from 'react-dropzone';
 import { Download, FileArchive, Image as ImageIcon, Loader2, RotateCw, Video, X } from 'lucide-react';
 import FileDropZone from '../components/FileDropZone';
 import FilePreview from '../components/FilePreview';
@@ -41,7 +42,7 @@ export default function OptimizeTools() {
     return () => values.forEach(URL.revokeObjectURL);
   }, []);
 
-  const accept = useMemo<Record<string, string[]>>(() => {
+  const accept = useMemo<Accept>(() => {
     if (mode === 'image') return { 'image/*': ['.png', '.jpg', '.jpeg', '.webp', '.ico'] };
     if (mode === 'pdf') return { 'application/pdf': ['.pdf'] };
     return { 'video/*': ['.mp4', '.webm', '.avi', '.mkv', '.mov'] };
