@@ -77,7 +77,7 @@ function App() {
   };
 
   const handlePdfSelect = (file: File) => {
-    navigate('/pdf', { state: { initialFile: file } });
+    navigate('/modifier-pdf', { state: { initialFile: file } });
   };
 
   const handleFormatSelect = async (format: ConversionFormat) => {
@@ -192,7 +192,7 @@ function App() {
                         </div>
                       ))}
                     </div>
-                    <Link to="/pdf" className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900">
+                    <Link to="/fusionner-pdf" className="inline-flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-gray-900">
                       Outils PDF : convertir, fusionner, séparer, tourner et organiser <ArrowRight size={15} />
                     </Link>
                   </div>
@@ -292,8 +292,21 @@ function App() {
               </div>
             </main>
           } />
+
+          <Route path="/fusionner-pdf" element={<PdfTools />} />
+          <Route path="/diviser-pdf" element={<PdfTools />} />
+          <Route path="/modifier-pdf" element={<PdfTools />} />
+          <Route path="/organiser-pdf" element={<PdfTools />} />
+          <Route path="/pivoter-pdf" element={<PdfTools />} />
+          <Route path="/pdf-en-png" element={<PdfTools />} />
+          <Route path="/images-en-pdf" element={<PdfTools />} />
           <Route path="/pdf" element={<PdfTools />} />
+
+          <Route path="/compresser-pdf" element={<OptimizeTools />} />
+          <Route path="/optimiser-images" element={<OptimizeTools />} />
+          <Route path="/compresser-video" element={<OptimizeTools />} />
           <Route path="/optimiser" element={<OptimizeTools />} />
+
           <Route path="/documents" element={<DocumentLab />} />
           <Route path="/batch" element={<BatchManager />} />
           <Route path="/historique" element={<HistoryPage />} />
