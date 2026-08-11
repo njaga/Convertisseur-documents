@@ -1,20 +1,51 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, Menu, X } from 'lucide-react';
+import { ChevronDown, FileArchive, FileImage, Files, History, Image, Layers3, Menu, RotateCw, Scissors, Settings2, Split, X, Zap } from 'lucide-react';
 import Logo from './Logo';
 
 const mainLinks = [
-  { to: '/', label: 'Accueil' },
-  { to: '/pdf', label: 'PDF' },
-  { to: '/optimiser', label: 'Compression' },
-  { to: '/documents', label: 'Documents' },
+  { to: '/pdf?tool=merge', label: 'Fusionner PDF' },
+  { to: '/pdf?tool=split', label: 'Diviser PDF' },
+  { to: '/optimiser?type=pdf', label: 'Compresser PDF' },
+  { to: '/convertir', label: 'Convertir' },
 ];
 
-const moreLinks = [
-  { to: '/convertir', label: 'Convertir des fichiers' },
-  { to: '/batch', label: 'Conversions par lot' },
-  { to: '/historique', label: 'Historique local' },
-  { to: '/a-propos', label: 'À propos' },
+const toolGroups = [
+  {
+    title: 'Organiser PDF',
+    links: [
+      { to: '/pdf?tool=merge', label: 'Fusionner PDF', icon: Layers3 },
+      { to: '/pdf?tool=split', label: 'Diviser PDF', icon: Scissors },
+      { to: '/pdf?tool=editor', label: 'Modifier les pages', icon: Settings2 },
+      { to: '/pdf?tool=organize', label: 'Organiser PDF', icon: Split },
+      { to: '/pdf?tool=rotate', label: 'Faire pivoter', icon: RotateCw },
+    ],
+  },
+  {
+    title: 'Optimiser',
+    links: [
+      { to: '/optimiser?type=pdf', label: 'Compresser PDF', icon: FileArchive },
+      { to: '/optimiser?type=image', label: 'Optimiser des images', icon: Image },
+      { to: '/optimiser?type=video', label: 'Compresser une vidéo', icon: Zap },
+    ],
+  },
+  {
+    title: 'Convertir',
+    links: [
+      { to: '/pdf?tool=images', label: 'Images en PDF', icon: FileImage },
+      { to: '/pdf?tool=render', label: 'PDF en PNG', icon: FileImage },
+      { to: '/convertir', label: 'Convertir un fichier', icon: Files },
+      { to: '/batch', label: 'Conversions par lot', icon: Layers3 },
+    ],
+  },
+  {
+    title: 'Documents',
+    links: [
+      { to: '/documents', label: 'Créer et analyser', icon: Files },
+      { to: '/historique', label: 'Historique local', icon: History },
+      { to: '/a-propos', label: 'À propos de Doxali', icon: FileArchive },
+    ],
+  },
 ];
 
 export default function Navbar() {
@@ -31,9 +62,7 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleOutsideClick = (event: PointerEvent) => {
-      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) {
-        setMoreOpen(false);
-      }
+      if (moreMenuRef.current && !moreMenuRef.current.contains(event.target as Node)) setMoreOpen(false);
     };
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setMoreOpen(false);
@@ -47,18 +76,23 @@ export default function Navbar() {
     };
   }, []);
 
+  const closeMenus = () => {
+    setMoreOpen(false);
+    setMobile(false);
+  };
+
   return (
     <nav className={`fixed z-50 w-full border-b border-gray-100 transition ${isScrolled ? 'bg-white shadow-sm' : 'bg-white/95 backdrop-blur'}`}>
-      <div className="mx-auto max-w-6xl px-6">
-        <div className="flex h-16 items-center justify-between">
-          <Link to="/" onClick={() => setMoreOpen(false)} className="flex items-center gap-2.5">
+      <div className="mx-auto max-w-7xl px-5 lg:px-6">
+        <div className="flex h-16 items-center justify-between gap-6">
+          <Link to="/" onClick={closeMenus} className="flex shrink-0 items-center gap-2.5">
             <Logo size={32} />
             <span className="text-lg font-bold tracking-tight text-gray-950">Doxali</span>
           </Link>
 
-          <div className="hidden items-center gap-7 md:flex">
+          <div className="hidden flex-1 items-center justify-end gap-6 lg:flex">
             {mainLinks.map(link => (
-              <Link key={link.to} to={link.to} onClick={() => setMoreOpen(false)} className="text-sm font-medium text-gray-600 hover:text-gray-950">
+              <Link key={link.to} to={link.to} onClick={() => setMoreOpen(false)} className="whitespace-nowrap text-sm font-semibold text-gray-700 transition-colors hover:text-blue-600">
                 {link.label}
               </Link>
             ))}
@@ -69,41 +103,56 @@ export default function Navbar() {
                 aria-haspopup="menu"
                 aria-expanded={moreOpen}
                 onClick={() => setMoreOpen(open => !open)}
-                className="inline-flex items-center gap-1 text-sm font-medium text-gray-600 hover:text-gray-950"
+                className={`inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold transition-colors ${moreOpen ? 'text-blue-600' : 'text-gray-700 hover:text-blue-600'}`}
               >
-                Plus
+                Tous les outils
                 <ChevronDown size={14} className={`transition-transform ${moreOpen ? 'rotate-180' : ''}`} />
               </button>
+
               {moreOpen && (
-                <div role="menu" className="absolute right-0 top-full z-50 mt-2 w-56 rounded-xl border border-gray-200 bg-white p-2 shadow-xl">
-                  {moreLinks.map(link => (
-                    <Link
-                      key={link.to}
-                      to={link.to}
-                      role="menuitem"
-                      onClick={() => setMoreOpen(false)}
-                      className="block rounded-lg px-3 py-2.5 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-950"
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
+                <div role="menu" className="absolute right-0 top-full z-50 mt-4 w-[760px] rounded-2xl border border-gray-200 bg-white p-5 shadow-2xl">
+                  <div className="grid grid-cols-4 gap-5">
+                    {toolGroups.map(group => (
+                      <section key={group.title}>
+                        <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-gray-400">{group.title}</p>
+                        <div className="space-y-1">
+                          {group.links.map(link => (
+                            <Link key={link.to} to={link.to} role="menuitem" onClick={() => setMoreOpen(false)} className="flex items-center gap-2.5 rounded-xl px-2 py-2.5 text-sm font-medium text-gray-650 transition-colors hover:bg-blue-50 hover:text-blue-700">
+                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600"><link.icon size={15} /></span>
+                              <span>{link.label}</span>
+                            </Link>
+                          ))}
+                        </div>
+                      </section>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
           </div>
 
-          <button onClick={() => setMobile(open => !open)} className="rounded-lg p-2 text-gray-600 md:hidden" aria-label="Menu" aria-expanded={mobile}>
+          <button onClick={() => setMobile(open => !open)} className="rounded-lg p-2 text-gray-600 lg:hidden" aria-label="Menu" aria-expanded={mobile}>
             {mobile ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
         {mobile && (
-          <div className="border-t border-gray-100 py-3 md:hidden">
-            {[...mainLinks, ...moreLinks].map(link => (
-              <Link key={link.to} to={link.to} onClick={() => setMobile(false)} className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50">
-                {link.label}
-              </Link>
-            ))}
+          <div className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-gray-100 py-4 lg:hidden">
+            <div className="grid gap-1 sm:grid-cols-2">
+              {mainLinks.map(link => (
+                <Link key={link.to} to={link.to} onClick={closeMenus} className="rounded-xl px-3 py-3 text-sm font-semibold text-gray-800 hover:bg-gray-50">{link.label}</Link>
+              ))}
+            </div>
+            <div className="mt-4 grid gap-5 border-t border-gray-100 pt-4 sm:grid-cols-2">
+              {toolGroups.map(group => (
+                <section key={group.title}>
+                  <p className="mb-1 px-3 text-[11px] font-bold uppercase tracking-wider text-gray-400">{group.title}</p>
+                  {group.links.map(link => (
+                    <Link key={link.to} to={link.to} onClick={closeMenus} className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-gray-700 hover:bg-gray-50"><link.icon size={15} /> {link.label}</Link>
+                  ))}
+                </section>
+              ))}
+            </div>
           </div>
         )}
       </div>
