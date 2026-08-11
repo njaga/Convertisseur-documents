@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, FileArchive, FileImage, FileSignature, FileText, Files, History, Image, Infinity as InfinityIcon, Layers3, ListOrdered, Merge, RotateCw, ScanText, Scissors, ShieldCheck, UserRoundX, Video } from 'lucide-react';
+import { ArrowRight, FileArchive, FileImage, FileSignature, FileText, Files, History, Image, Infinity as InfinityIcon, Layers3, Merge, PencilLine, RotateCw, ScanText, Scissors, ShieldCheck, UserRoundX, Video } from 'lucide-react';
 
 const popularTools = [
   { to: '/fusionner-pdf', title: 'Fusionner PDF', description: 'Combinez plusieurs fichiers PDF dans l’ordre de votre choix.', icon: Merge, iconClass: 'bg-orange-50 text-orange-600' },
@@ -10,7 +10,7 @@ const popularTools = [
 
 const pdfTools = [
   { to: '/signer-pdf', title: 'Signer PDF', description: 'Placez visuellement une signature ou un cachet sur votre document.', icon: FileSignature, iconClass: 'bg-blue-50 text-blue-600' },
-  { to: '/modifier-pdf', title: 'Modifier PDF', description: 'Réorganiser, tourner, extraire ou supprimer des pages.', icon: ListOrdered, iconClass: 'bg-violet-50 text-violet-600' },
+  { to: '/modifier-pdf', title: 'Modifier PDF', description: 'Ajoutez texte, images, signatures, annotations et dessins, puis organisez les pages.', icon: PencilLine, iconClass: 'bg-violet-50 text-violet-600' },
   { to: '/organiser-pdf', title: 'Organiser PDF', description: 'Choisir précisément les pages et leur ordre final.', icon: Layers3, iconClass: 'bg-indigo-50 text-indigo-600' },
   { to: '/pivoter-pdf', title: 'Faire pivoter PDF', description: 'Tourner les pages à 90°, 180° ou 270°.', icon: RotateCw, iconClass: 'bg-fuchsia-50 text-fuchsia-600' },
   { to: '/pdf-en-png', title: 'PDF en PNG', description: 'Convertir chaque page du PDF en image PNG.', icon: FileImage, iconClass: 'bg-amber-50 text-amber-600' },
@@ -68,7 +68,7 @@ export default function LandingPage() {
 
       <section className="px-6 pb-14">
         <div className="mx-auto max-w-7xl rounded-3xl border border-gray-200 bg-white p-6 md:p-8">
-          <div className="mb-6"><p className="text-xs font-bold uppercase tracking-wider text-gray-400">PDF</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Organiser, signer et transformer vos PDF</h2></div>
+          <div className="mb-6"><p className="text-xs font-bold uppercase tracking-wider text-gray-400">PDF</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Organiser, signer et éditer vos PDF</h2></div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {pdfTools.map(tool => <ToolCard key={tool.to} tool={tool} />)}
           </div>
