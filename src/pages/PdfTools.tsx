@@ -66,7 +66,6 @@ const PdfTools = () => {
     if (!files.length || tool === 'images' || tool === 'editor') return;
 
     let cancelled = false;
-    setLoadingPreviews(true);
     createPdfPagePreviews(files)
       .then(next => {
         if (cancelled) {
@@ -265,9 +264,7 @@ const PdfTools = () => {
                   <p className="font-semibold text-gray-950">{files.length} fichier{files.length > 1 ? 's' : ''} prêt{files.length > 1 ? 's' : ''}</p>
                   <p className="mt-1 text-xs text-gray-500">{tool === 'merge' ? 'L’ordre ci-dessous sera utilisé dans le PDF final.' : 'Vous pouvez remplacer le fichier en recommençant la sélection.'}</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <button type="button" onClick={() => handleFiles([])} className="text-sm font-medium text-red-600 hover:text-red-700">Tout retirer</button>
-                </div>
+                <button type="button" onClick={() => handleFiles([])} className="text-sm font-medium text-red-600 hover:text-red-700">Tout retirer</button>
               </div>
 
               <div className="space-y-2 rounded-2xl bg-gray-50 p-3">
@@ -288,13 +285,7 @@ const PdfTools = () => {
               {pageCount !== null && <p className="mt-2 text-xs text-gray-500">{pageCount} page{pageCount > 1 ? 's' : ''}</p>}
 
               <div className="mt-4">
-                <FileDropZone
-                  onFiles={handleFiles}
-                  accept={accept}
-                  multiple={multiple}
-                  title={multiple ? 'Remplacer la sélection' : 'Choisir un autre fichier'}
-                  hint="Cliquez ou glissez-déposez pour remplacer les fichiers actuels"
-                />
+                <FileDropZone onFiles={handleFiles} accept={accept} multiple={multiple} title={multiple ? 'Remplacer la sélection' : 'Choisir un autre fichier'} hint="Cliquez ou glissez-déposez pour remplacer les fichiers actuels" />
               </div>
 
               {files.length > 0 && tool !== 'images' && tool !== 'editor' && (
@@ -348,7 +339,7 @@ const PdfTools = () => {
               {error && <p role="alert" className="mt-5 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-600">{error}</p>}
 
               {tool !== 'editor' && (
-                <button type="button" disabled={!canRun || processing} onClick={runTool} className="mt-7 flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-gray-950 px-5 py-3.5 font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300">
+                <button type="button" disabled={!canRun || processing} onClick={runTool} className="mt-7 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-gray-950 px-5 py-3.5 font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300">
                   {processing ? <><Loader2 size={18} className="animate-spin" /> Traitement en cours</> : selectedTool.action}
                 </button>
               )}
