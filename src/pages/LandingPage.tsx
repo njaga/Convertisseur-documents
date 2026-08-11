@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, FileArchive, FileImage, FileSignature, FileText, Files, History, Image, Infinity, Layers3, ListOrdered, Merge, RotateCw, ScanText, Scissors, ShieldCheck, UserRoundX, Video } from 'lucide-react';
+import { ArrowRight, FileArchive, FileImage, FileSignature, FileText, Files, History, Image, Infinity as InfinityIcon, Layers3, ListOrdered, Merge, RotateCw, ScanText, Scissors, ShieldCheck, UserRoundX, Video } from 'lucide-react';
 
 const popularTools = [
   { to: '/fusionner-pdf', title: 'Fusionner PDF', description: 'Combinez plusieurs fichiers PDF dans l’ordre de votre choix.', icon: Merge, iconClass: 'bg-orange-50 text-orange-600' },
@@ -50,7 +50,7 @@ export default function LandingPage() {
           <div className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-gray-500">
             <span className="inline-flex items-center gap-2"><ShieldCheck size={16} className="text-emerald-600" /> Traitement local en priorité</span>
             <span className="inline-flex items-center gap-2"><UserRoundX size={16} className="text-blue-600" /> Sans compte</span>
-            <span className="inline-flex items-center gap-2"><Infinity size={17} className="text-violet-600" /> Sans quota quotidien</span>
+            <span className="inline-flex items-center gap-2"><InfinityIcon size={17} className="text-violet-600" /> Sans quota quotidien</span>
           </div>
         </div>
       </section>
