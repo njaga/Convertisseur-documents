@@ -307,6 +307,9 @@ function App() {
           <Route path="/compresser-video" element={<OptimizeTools />} />
           <Route path="/optimiser" element={<OptimizeTools />} />
 
+          <Route path="/signer-pdf" element={<DocumentLab />} />
+          <Route path="/ocr-pdf" element={<DocumentLab />} />
+          <Route path="/creer-pdf" element={<DocumentLab />} />
           <Route path="/documents" element={<DocumentLab />} />
           <Route path="/batch" element={<BatchManager />} />
           <Route path="/historique" element={<HistoryPage />} />
