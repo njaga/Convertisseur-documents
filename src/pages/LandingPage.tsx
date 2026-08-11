@@ -1,91 +1,81 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, FileArchive, FileImage, Files, History, Image, Layers3, ListOrdered, Merge, RotateCw, Scissors, ShieldCheck, Sparkles, Video } from 'lucide-react';
 
-const tools = [
-  { to: '/pdf', number: '01', title: 'Travailler un PDF', description: 'Réorganiser, tourner, extraire, fusionner et signer des pages.' },
-  { to: '/convertir', number: '02', title: 'Convertir des fichiers', description: 'Transformer images, audio, vidéos et documents dans le navigateur.' },
-  { to: '/optimiser', number: '03', title: 'Réduire le poids', description: 'Compresser vos images, PDF et vidéos selon la qualité souhaitée.' },
-  { to: '/documents', number: '04', title: 'Créer et analyser', description: 'Utiliser l’OCR, annoter, signer ou générer un nouveau document.' },
-  { to: '/batch', number: '05', title: 'Traiter plusieurs fichiers', description: 'Lancer des opérations en lot et récupérer les résultats dans une archive ZIP.' },
-  { to: '/historique', number: '06', title: 'Retrouver un résultat', description: 'Consulter les opérations conservées localement sur cet appareil.' },
+const popularTools = [
+  { to: '/pdf?tool=merge', title: 'Fusionner PDF', description: 'Combinez plusieurs fichiers PDF dans l’ordre de votre choix.', icon: Merge, iconClass: 'bg-orange-50 text-orange-600' },
+  { to: '/pdf?tool=split', title: 'Diviser PDF', description: 'Séparez rapidement les pages d’un document PDF.', icon: Scissors, iconClass: 'bg-rose-50 text-rose-600' },
+  { to: '/optimiser?type=pdf', title: 'Compresser PDF', description: 'Réduisez le poids d’un PDF avec trois niveaux de qualité.', icon: FileArchive, iconClass: 'bg-emerald-50 text-emerald-600' },
+  { to: '/convertir', title: 'Convertir un fichier', description: 'Images, vidéos, audio et texte : choisissez le format de sortie.', icon: Files, iconClass: 'bg-blue-50 text-blue-600' },
 ];
+
+const pdfTools = [
+  { to: '/pdf?tool=editor', title: 'Modifier PDF', description: 'Réorganiser, tourner, extraire ou supprimer des pages.', icon: ListOrdered, iconClass: 'bg-violet-50 text-violet-600' },
+  { to: '/pdf?tool=organize', title: 'Organiser PDF', description: 'Choisir précisément les pages et leur ordre final.', icon: Layers3, iconClass: 'bg-indigo-50 text-indigo-600' },
+  { to: '/pdf?tool=rotate', title: 'Faire pivoter PDF', description: 'Tourner les pages à 90°, 180° ou 270°.', icon: RotateCw, iconClass: 'bg-fuchsia-50 text-fuchsia-600' },
+  { to: '/pdf?tool=render', title: 'PDF en PNG', description: 'Convertir chaque page du PDF en image PNG.', icon: FileImage, iconClass: 'bg-amber-50 text-amber-600' },
+  { to: '/pdf?tool=images', title: 'Images en PDF', description: 'Créer un PDF à partir de fichiers PNG, JPG ou WebP.', icon: Image, iconClass: 'bg-cyan-50 text-cyan-600' },
+];
+
+const moreTools = [
+  { to: '/optimiser?type=image', title: 'Optimiser des images', description: 'Compresser, redimensionner, recadrer et convertir.', icon: Image, iconClass: 'bg-sky-50 text-sky-600' },
+  { to: '/optimiser?type=video', title: 'Compresser une vidéo', description: 'Réduire le poids d’une vidéo avant partage ou stockage.', icon: Video, iconClass: 'bg-red-50 text-red-600' },
+  { to: '/batch', title: 'Conversions par lot', description: 'Traiter plusieurs fichiers et télécharger les résultats en ZIP.', icon: Layers3, iconClass: 'bg-lime-50 text-lime-700' },
+  { to: '/documents', title: 'Créer et analyser', description: 'OCR, annotations, signatures et autres outils documentaires.', icon: Sparkles, iconClass: 'bg-purple-50 text-purple-600' },
+  { to: '/historique', title: 'Historique local', description: 'Retrouver les derniers fichiers traités sur cet appareil.', icon: History, iconClass: 'bg-gray-100 text-gray-700' },
+];
+
+function ToolCard({ tool }: { tool: typeof popularTools[number] }) {
+  return (
+    <Link to={tool.to} className="group rounded-2xl border border-gray-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-gray-300 hover:shadow-lg">
+      <div className={`mb-5 flex h-11 w-11 items-center justify-center rounded-xl ${tool.iconClass}`}><tool.icon size={21} strokeWidth={1.9} /></div>
+      <h3 className="text-base font-semibold text-gray-950">{tool.title}</h3>
+      <p className="mt-2 text-sm leading-6 text-gray-500">{tool.description}</p>
+      <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-gray-700 transition-colors group-hover:text-blue-600">Ouvrir <ArrowRight size={14} className="transition-transform group-hover:translate-x-0.5" /></span>
+    </Link>
+  );
+}
 
 export default function LandingPage() {
   return (
-    <main className="flex-grow bg-white pt-16 text-gray-950">
-      <section className="border-b border-gray-200 px-6 py-20 md:py-28">
-        <div className="mx-auto grid max-w-6xl gap-14 lg:grid-cols-[1.35fr_.65fr] lg:items-end">
-          <div>
-            <p className="mb-6 text-xs font-semibold uppercase tracking-[0.24em] text-gray-500">Suite documentaire locale</p>
-            <h1 className="max-w-4xl text-4xl font-semibold leading-[1.08] tracking-[-0.035em] md:text-6xl">
-              Les outils essentiels pour vos documents, réunis au même endroit.
-            </h1>
-            <p className="mt-7 max-w-2xl text-lg leading-8 text-gray-600">
-              Doxali permet de convertir, éditer, compresser et analyser vos fichiers sans compte et sans quota quotidien. La majorité des opérations s’effectuent directement sur votre appareil.
-            </p>
-            <div className="mt-9 flex flex-wrap items-center gap-6">
-              <Link to="/pdf" className="inline-flex items-center gap-2 bg-gray-950 px-5 py-3 text-sm font-semibold text-white hover:bg-gray-800">
-                Ouvrir les outils PDF <ArrowRight size={16} />
-              </Link>
-              <Link to="/convertir" className="text-sm font-semibold text-gray-700 underline decoration-gray-300 underline-offset-4 hover:text-gray-950">
-                Convertir un fichier
-              </Link>
-            </div>
-          </div>
-
-          <dl className="border-l border-gray-300 pl-6">
-            <div className="border-b border-gray-200 pb-5">
-              <dt className="text-xs uppercase tracking-wider text-gray-500">Compte requis</dt>
-              <dd className="mt-1 text-xl font-medium">Non</dd>
-            </div>
-            <div className="border-b border-gray-200 py-5">
-              <dt className="text-xs uppercase tracking-wider text-gray-500">Quota quotidien</dt>
-              <dd className="mt-1 text-xl font-medium">Aucun</dd>
-            </div>
-            <div className="pt-5">
-              <dt className="text-xs uppercase tracking-wider text-gray-500">Traitement</dt>
-              <dd className="mt-1 text-xl font-medium">Local en priorité</dd>
-            </div>
-          </dl>
-        </div>
-      </section>
-
-      <section className="px-6 py-20">
-        <div className="mx-auto max-w-6xl">
-          <div className="grid gap-8 border-b border-gray-300 pb-8 md:grid-cols-2 md:items-end">
-            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Que voulez-vous faire ?</h2>
-            <p className="max-w-lg text-base leading-7 text-gray-600 md:justify-self-end">
-              Choisissez une tâche. Chaque espace regroupe uniquement les commandes utiles, sans parcours inutile.
-            </p>
-          </div>
-
-          <div>
-            {tools.map(tool => (
-              <Link
-                key={tool.to}
-                to={tool.to}
-                className="group grid gap-3 border-b border-gray-200 py-7 transition-colors hover:bg-gray-50 md:grid-cols-[64px_1fr_1.4fr_auto] md:items-center md:px-4"
-              >
-                <span className="text-xs font-medium tabular-nums text-gray-400">{tool.number}</span>
-                <h3 className="text-lg font-semibold">{tool.title}</h3>
-                <p className="max-w-xl text-sm leading-6 text-gray-600">{tool.description}</p>
-                <ArrowRight size={18} className="text-gray-400 transition-transform group-hover:translate-x-1 group-hover:text-gray-950" />
-              </Link>
-            ))}
+    <main className="flex-grow bg-[#f7f8fb] pt-16 text-gray-950">
+      <section className="border-b border-gray-200 bg-white px-6 py-16 md:py-20">
+        <div className="mx-auto max-w-5xl text-center">
+          <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-blue-600">Doxali · boîte à outils documentaire</p>
+          <h1 className="mx-auto max-w-4xl text-4xl font-bold leading-[1.08] tracking-[-0.035em] md:text-6xl">Tous les outils essentiels pour vos documents, au même endroit.</h1>
+          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-gray-600">Fusionnez, divisez, compressez, convertissez et modifiez vos fichiers sans parcours compliqué. Choisissez simplement ce que vous voulez faire.</p>
+          <div className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-500">
+            <span className="inline-flex items-center gap-2"><ShieldCheck size={16} className="text-emerald-600" /> Traitement local en priorité</span>
+            <span>Sans compte</span>
+            <span>Sans quota quotidien</span>
           </div>
         </div>
       </section>
 
-      <section className="border-t border-gray-200 bg-gray-50 px-6 py-16">
-        <div className="mx-auto grid max-w-6xl gap-8 md:grid-cols-[1fr_1.5fr]">
-          <h2 className="text-2xl font-semibold tracking-tight">Pourquoi Doxali existe</h2>
-          <div>
-            <p className="text-lg leading-8 text-gray-700">
-              Parce qu’un outil simple ne devrait pas bloquer votre travail après dix conversions. Doxali est conçu comme une boîte à outils documentaire accessible, directe et respectueuse de vos fichiers.
-            </p>
-            <Link to="/a-propos" className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-gray-950">
-              En savoir plus sur le projet <ArrowRight size={15} />
-            </Link>
+      <section className="px-6 py-14">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div><p className="text-xs font-bold uppercase tracking-wider text-gray-400">Accès rapide</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Les outils les plus utilisés</h2></div>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {popularTools.map(tool => <ToolCard key={tool.to} tool={tool} />)}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 pb-14">
+        <div className="mx-auto max-w-7xl rounded-3xl border border-gray-200 bg-white p-6 md:p-8">
+          <div className="mb-6"><p className="text-xs font-bold uppercase tracking-wider text-gray-400">PDF</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Organiser et transformer vos PDF</h2></div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            {pdfTools.map(tool => <ToolCard key={tool.to} tool={tool} />)}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-6 pb-20">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-6"><p className="text-xs font-bold uppercase tracking-wider text-gray-400">Plus d’outils</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Optimisation et workflows</h2></div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            {moreTools.map(tool => <ToolCard key={tool.to} tool={tool} />)}
           </div>
         </div>
       </section>
