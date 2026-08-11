@@ -1,10 +1,10 @@
 import { useCallback, useState } from 'react';
-import { FileRejection, useDropzone } from 'react-dropzone';
+import { Accept, FileRejection, useDropzone } from 'react-dropzone';
 import { UploadCloud } from 'lucide-react';
 
 interface FileDropZoneProps {
   onFiles: (files: File[]) => void;
-  accept?: Record<string, string[]>;
+  accept?: Accept;
   multiple?: boolean;
   title: string;
   hint: string;
@@ -34,12 +34,7 @@ export default function FileDropZone({
     if (acceptedFiles.length) onFiles(acceptedFiles);
   }, [maxSize, onFiles]);
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept,
-    multiple,
-    maxSize,
-  });
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept, multiple, maxSize });
 
   return (
     <div>
