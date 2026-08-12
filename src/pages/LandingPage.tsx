@@ -11,7 +11,7 @@ const popularTools = [
 const pdfTools = [
   { to: '/signer-pdf', title: 'Signer PDF', description: 'Placez visuellement une signature ou un cachet sur votre document.', icon: FileSignature, iconClass: 'bg-blue-50 text-blue-600' },
   { to: '/modifier-pdf', title: 'Modifier PDF', description: 'Ajoutez texte, images, signatures, annotations et dessins, puis organisez les pages.', icon: PencilLine, iconClass: 'bg-violet-50 text-violet-600' },
-  { to: '/pdf?tool=forms', title: 'Formulaires PDF', description: 'Remplissez les champs existants ou créez vos propres champs interactifs.', icon: FormInput, iconClass: 'bg-teal-50 text-teal-700' },
+  { to: '/formulaires-pdf', title: 'Formulaires PDF', description: 'Remplissez les champs existants ou créez vos propres champs interactifs.', icon: FormInput, iconClass: 'bg-teal-50 text-teal-700' },
   { to: '/organiser-pdf', title: 'Organiser PDF', description: 'Choisir précisément les pages et leur ordre final.', icon: Layers3, iconClass: 'bg-indigo-50 text-indigo-600' },
   { to: '/pivoter-pdf', title: 'Faire pivoter PDF', description: 'Tourner les pages à 90°, 180° ou 270°.', icon: RotateCw, iconClass: 'bg-fuchsia-50 text-fuchsia-600' },
   { to: '/pdf-en-png', title: 'PDF en PNG', description: 'Convertir chaque page du PDF en image PNG.', icon: FileImage, iconClass: 'bg-amber-50 text-amber-600' },
