@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import type { Accept } from 'react-dropzone';
-import { ArrowDown, ArrowUp, Download, FileImage, Images, ListOrdered, Loader2, Merge, RotateCw, Scissors, ShieldCheck, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Download, FileImage, FormInput, Images, ListOrdered, Loader2, Merge, RotateCw, Scissors, ShieldCheck, X } from 'lucide-react';
 import FileDropZone from '../components/FileDropZone';
+import PdfFormEditor from '../components/PdfFormEditor';
 import PdfVisualEditor from '../components/PdfVisualEditor';
 import { createPdfPagePreviews, getPdfPageCount, imagesToPdf, mergePdfs, organizePdf, pdfToPngs, PdfOutput, PdfPagePreview, rotatePdf, splitPdf } from '../services/pdfTools';
 
-type Tool = 'editor' | 'images' | 'render' | 'merge' | 'split' | 'rotate' | 'organize';
+type Tool = 'editor' | 'forms' | 'images' | 'render' | 'merge' | 'split' | 'rotate' | 'organize';
 type LocationState = { initialFile?: File } | null;
 
 type ToolDefinition = {
@@ -22,7 +23,8 @@ type ToolDefinition = {
 const tools: ToolDefinition[] = [
   { id: 'merge', path: '/fusionner-pdf', label: 'Fusionner', title: 'Fusionner des fichiers PDF', description: 'Combinez plusieurs PDF et choisissez leur ordre avant de créer un seul document.', action: 'Fusionner les PDF', icon: Merge },
   { id: 'split', path: '/diviser-pdf', label: 'Diviser', title: 'Diviser un fichier PDF', description: 'Séparez votre document pour obtenir un fichier PDF indépendant pour chaque page.', action: 'Diviser le PDF', icon: Scissors },
-  { id: 'editor', path: '/modifier-pdf', label: 'Modifier', title: 'Modifier un PDF', description: 'Réorganisez, tournez, extrayez ou supprimez des pages visuellement.', action: 'Modifier le PDF', icon: ListOrdered },
+  { id: 'editor', path: '/modifier-pdf', label: 'Modifier', title: 'Modifier un PDF', description: 'Ajoutez du texte, des images, des annotations et des dessins, puis réorganisez les pages visuellement.', action: 'Modifier le PDF', icon: ListOrdered },
+  { id: 'forms', path: '/formulaires-pdf', label: 'Formulaires', title: 'Remplir et créer des formulaires PDF', description: 'Détectez les champs existants, remplissez-les et ajoutez visuellement vos propres champs interactifs.', action: 'Modifier le formulaire', icon: FormInput },
   { id: 'organize', path: '/organiser-pdf', label: 'Organiser', title: 'Organiser les pages d’un PDF', description: 'Choisissez précisément les pages à conserver et l’ordre dans lequel elles doivent apparaître.', action: 'Organiser le PDF', icon: ListOrdered },
   { id: 'rotate', path: '/pivoter-pdf', label: 'Pivoter', title: 'Faire pivoter un PDF', description: 'Tournez toutes les pages de votre PDF à 90°, 180° ou 270°.', action: 'Faire pivoter le PDF', icon: RotateCw },
   { id: 'render', path: '/pdf-en-png', label: 'PDF → PNG', title: 'Convertir un PDF en PNG', description: 'Transformez chaque page de votre document en image PNG haute résolution.', action: 'Convertir en PNG', icon: Images },
@@ -32,6 +34,7 @@ const tools: ToolDefinition[] = [
 const validTools = new Set<Tool>(tools.map(item => item.id));
 const pathToTool = new Map<string, Tool>(tools.map(item => [item.path, item.id]));
 const isTool = (value: string | null): value is Tool => Boolean(value && validTools.has(value as Tool));
+const hasOwnPreview = (tool: Tool) => tool === 'editor' || tool === 'forms';
 
 const PdfTools = () => {
   const location = useLocation();
@@ -98,7 +101,7 @@ const PdfTools = () => {
   }, [selectedTool]);
 
   useEffect(() => {
-    if (!files.length || tool === 'images' || tool === 'editor') return;
+    if (!files.length || tool === 'images' || hasOwnPreview(tool)) return;
 
     let cancelled = false;
     createPdfPagePreviews(files)
@@ -120,7 +123,7 @@ const PdfTools = () => {
   }, [files, tool]);
 
   useEffect(() => {
-    if (files.length !== 1 || tool === 'images' || tool === 'merge' || tool === 'editor') return;
+    if (files.length !== 1 || tool === 'images' || tool === 'merge' || hasOwnPreview(tool)) return;
 
     let cancelled = false;
     getPdfPageCount(files[0])
@@ -174,7 +177,7 @@ const PdfTools = () => {
       setError(`Le fichier ${invalid.name} n'est pas valide pour cet outil.`);
       return;
     }
-    setLoadingPreviews(tool !== 'images' && tool !== 'editor' && selected.length > 0);
+    setLoadingPreviews(tool !== 'images' && !hasOwnPreview(tool) && selected.length > 0);
     setFiles(selected);
   };
 
@@ -182,7 +185,7 @@ const PdfTools = () => {
     resetResults();
     clearPreviews();
     const next = files.filter((_, fileIndex) => fileIndex !== index);
-    setLoadingPreviews(tool !== 'images' && tool !== 'editor' && next.length > 0);
+    setLoadingPreviews(tool !== 'images' && !hasOwnPreview(tool) && next.length > 0);
     setFiles(next);
     setPageCount(null);
   };
@@ -236,7 +239,7 @@ const PdfTools = () => {
 
   const acceptsImages = tool === 'images';
   const multiple = tool === 'images' || tool === 'merge';
-  const canRun = tool === 'editor'
+  const canRun = hasOwnPreview(tool)
     ? false
     : tool === 'images'
       ? files.length >= 1
@@ -256,7 +259,9 @@ const PdfTools = () => {
       ? 'Sélectionner les fichiers PDF'
       : tool === 'editor'
         ? 'Sélectionner le PDF à modifier'
-        : 'Sélectionner le fichier PDF';
+        : tool === 'forms'
+          ? 'Sélectionner le formulaire PDF'
+          : 'Sélectionner le fichier PDF';
 
   const uploadHint = acceptsImages
     ? 'ou glissez-déposez vos images ici · PNG, JPG, WebP ou ICO'
@@ -324,7 +329,7 @@ const PdfTools = () => {
                 <FileDropZone onFiles={handleFiles} accept={accept} multiple={multiple} title={multiple ? 'Remplacer la sélection' : 'Choisir un autre fichier'} hint="Cliquez ou glissez-déposez pour remplacer les fichiers actuels" />
               </div>
 
-              {files.length > 0 && tool !== 'images' && tool !== 'editor' && (
+              {files.length > 0 && tool !== 'images' && !hasOwnPreview(tool) && (
                 <section className="mt-6" aria-label="Aperçu des pages">
                   <div className="mb-3 flex items-center justify-between">
                     <p className="text-sm font-semibold text-gray-800">Aperçu des pages</p>
@@ -350,6 +355,7 @@ const PdfTools = () => {
               )}
 
               {tool === 'editor' && files.length === 1 && <PdfVisualEditor key={`${files[0].name}-${files[0].size}-${files[0].lastModified}`} file={files[0]} />}
+              {tool === 'forms' && files.length === 1 && <PdfFormEditor key={`${files[0].name}-${files[0].size}-${files[0].lastModified}`} file={files[0]} />}
 
               {tool === 'rotate' && (
                 <div className="mt-6">
@@ -374,7 +380,7 @@ const PdfTools = () => {
 
               {error && <p role="alert" className="mt-5 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-600">{error}</p>}
 
-              {tool !== 'editor' && (
+              {!hasOwnPreview(tool) && (
                 <button type="button" disabled={!canRun || processing} onClick={runTool} className="mt-7 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-gray-950 px-5 py-3.5 font-semibold text-white transition-colors hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300">
                   {processing ? <><Loader2 size={18} className="animate-spin" /> Traitement en cours</> : selectedTool.action}
                 </button>
