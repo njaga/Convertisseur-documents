@@ -38,7 +38,7 @@ Production: https://convertisseur-documents.vercel.app
 ### Document utilities
 
 - Visual PDF signing.
-- Local OCR when the browser exposes the required text-detection API.
+- Browser OCR for French and English using direct PDF text extraction when possible and Tesseract WebAssembly for scans and images.
 - Simple PDF document generation.
 - Batch conversion with sequential processing to limit memory pressure.
 - Local history for recent outputs from conversion, PDF, optimization and document workflows.
@@ -53,7 +53,8 @@ Browser
 │   ├── services       conversion and document engines
 │   ├── utils          format registry and shared helpers
 │   └── content        route metadata and editorial content
-├── pdf-lib / PDF.js   PDF editing and rendering
+├── pdf-lib / PDF.js   PDF editing, rendering and text extraction
+├── Tesseract.js/WASM  OCR for scanned pages and images
 ├── Canvas             image processing
 ├── FFmpeg.wasm        audio and video processing
 └── IndexedDB          local drafts and history
@@ -102,6 +103,14 @@ npm run build
 
 `npm run build` runs Vite and then generates the SEO prerendered documents and sitemap.
 
+## OCR runtime assets
+
+OCR no longer depends on an experimental browser text-detection API. For text-native PDFs, Doxali first extracts the embedded text layer with PDF.js. Scanned PDF pages and image files are recognized in the browser with Tesseract.js 7 and WebAssembly.
+
+To keep the application bundle smaller, the OCR engine, its Web Worker/core and the French/English trained-data files are downloaded on demand from pinned public endpoints when OCR is first used. The document itself is not uploaded to those endpoints; only runtime assets are fetched. A network connection is therefore required the first time those assets are not already available in the browser cache.
+
+The URLs and pinned OCR version live in `src/services/ocrEngine.ts` so this network boundary is explicit and easy to replace with self-hosted assets in deployments that require it.
+
 ## Optional Office → PDF service
 
 Office conversion is deliberately separated from browser-only processing. The frontend exposes Office inputs only when `VITE_OFFICE_CONVERTER_URL` is configured.
@@ -123,7 +132,7 @@ See [server/office-converter/README.md](server/office-converter/README.md) for d
 | Image conversion and optimization | Browser |
 | Audio and video conversion | Browser via FFmpeg.wasm |
 | TXT / Markdown / HTML conversion | Browser |
-| OCR | Browser when the native API is available |
+| OCR | Browser; OCR runtime/language assets are fetched on demand |
 | Local drafts and history | IndexedDB on the device |
 | Office → PDF | Optional configured LibreOffice service |
 
@@ -133,7 +142,8 @@ The Office service is stateless by design and removes temporary files after conv
 
 - PDF compression currently rebuilds pages from their rendered appearance. Interactive elements such as links or form behavior may therefore be flattened.
 - A watermark is a visual mark, not encryption, DRM or a certified electronic signature.
-- OCR depends on a browser capability that is not available everywhere.
+- OCR accuracy depends on scan quality, typography and resolution. Large multi-page scans can use significant CPU and memory.
+- The first OCR run needs access to the pinned runtime and language assets unless they are already cached by the browser.
 - Office conversion is available only when the optional LibreOffice service is deployed and configured.
 - Large media files and long PDFs may be constrained by browser memory, especially on mobile devices.
 
