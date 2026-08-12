@@ -6,6 +6,7 @@
     { "source": "/diviser-pdf", "destination": "/__prerender/diviser-pdf.html" },
     { "source": "/compresser-pdf", "destination": "/__prerender/compresser-pdf.html" },
     { "source": "/signer-pdf", "destination": "/__prerender/signer-pdf.html" },
+    { "source": "/filigrane-pdf", "destination": "/__prerender/filigrane-pdf.html" },
     { "source": "/formulaires-pdf", "destination": "/__prerender/formulaires-pdf.html" },
     { "source": "/organiser-pdf", "destination": "/__prerender/organiser-pdf.html" },
     { "source": "/pivoter-pdf", "destination": "/__prerender/pivoter-pdf.html" },

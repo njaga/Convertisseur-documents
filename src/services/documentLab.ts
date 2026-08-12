@@ -1,4 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { saveHistory } from './history';
 import { createPdfPagePreviews, PdfOutput } from './pdfTools';
 
 declare global {
@@ -7,8 +8,14 @@ declare global {
   }
 }
 
-function urlFromBytes(bytes: Uint8Array): string {
-  return URL.createObjectURL(new Blob([new Uint8Array(bytes)], { type: 'application/pdf' }));
+function pdfBlobFromBytes(bytes: Uint8Array): Blob {
+  return new Blob([new Uint8Array(bytes)], { type: 'application/pdf' });
+}
+
+async function outputFromPdfBytes(name: string, operation: string, bytes: Uint8Array): Promise<PdfOutput> {
+  const blob = pdfBlobFromBytes(bytes);
+  await saveHistory(name, operation, blob).catch(() => undefined);
+  return { name, url: URL.createObjectURL(blob) };
 }
 
 async function imageAsPng(file: File): Promise<Uint8Array> {
@@ -68,7 +75,8 @@ export async function generateDocument(input: { title: string; body: string; foo
   }
   if (input.footer) page.drawText(input.footer, { x: margin, y: 30, size: 8, font: regular, color: rgb(.45, .48, .52) });
   const bytes = await pdf.save();
-  return { name: `${(input.title || 'document').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf`, url: urlFromBytes(bytes) };
+  const name = `${(input.title || 'document').toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf`;
+  return outputFromPdfBytes(name, 'Création de PDF', bytes);
 }
 
 export interface AnnotatePdfInput {
@@ -130,7 +138,8 @@ export async function annotatePdf(input: AnnotatePdfInput): Promise<PdfOutput> {
   }
 
   const bytes = await document.save();
-  return { name: `${input.pdf.name.replace(/\.pdf$/i, '')}-annote.pdf`, url: urlFromBytes(bytes) };
+  const name = `${input.pdf.name.replace(/\.pdf$/i, '')}-annote.pdf`;
+  return outputFromPdfBytes(name, input.signature ? 'Signature et annotation PDF' : 'Annotation PDF', bytes);
 }
 
 async function detectImage(file: Blob, languages: string[]): Promise<string> {
@@ -144,16 +153,28 @@ async function detectImage(file: Blob, languages: string[]): Promise<string> {
   }
 }
 
+async function saveOcrResult(file: File, text: string) {
+  if (!text.trim()) return;
+  const name = `${file.name.replace(/\.[^.]+$/, '')}-ocr.txt`;
+  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  await saveHistory(name, 'OCR PDF & images', blob).catch(() => undefined);
+}
+
 export async function runLocalOcr(file: File, languages: string[]): Promise<string> {
+  let result: string;
   if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
     const previews = await createPdfPagePreviews([file], 1.5);
     try {
       const pages = [];
       for (const preview of previews) pages.push(await detectImage(await fetch(preview.url).then(response => response.blob()), languages));
-      return pages.map((text, index) => `--- Page ${index + 1} ---\n${text}`).join('\n\n');
+      result = pages.map((text, index) => `--- Page ${index + 1} ---\n${text}`).join('\n\n');
     } finally {
       previews.forEach(preview => URL.revokeObjectURL(preview.url));
     }
+  } else {
+    result = await detectImage(file, languages);
   }
-  return detectImage(file, languages);
+
+  await saveOcrResult(file, result);
+  return result;
 }

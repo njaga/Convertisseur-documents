@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, FileArchive, FileImage, FileSignature, FileText, Files, FormInput, History, Image, Layers3, Menu, PencilLine, RotateCw, Save, ScanText, Scissors, Split, X, Zap } from 'lucide-react';
+import { ChevronDown, FileArchive, FileImage, FileSignature, FileText, Files, FormInput, History, Image, Layers3, Menu, PencilLine, RotateCw, Save, ScanText, Scissors, Split, Stamp, X, Zap } from 'lucide-react';
 import Logo from './Logo';
 
 const mainLinks = [
@@ -21,6 +21,7 @@ const toolGroups = [
       { to: '/organiser-pdf', label: 'Organiser PDF', icon: Split },
       { to: '/pivoter-pdf', label: 'Faire pivoter', icon: RotateCw },
       { to: '/signer-pdf', label: 'Signer & annoter', icon: FileSignature },
+      { to: '/filigrane-pdf', label: 'Ajouter un filigrane', icon: Stamp },
     ],
   },
   {

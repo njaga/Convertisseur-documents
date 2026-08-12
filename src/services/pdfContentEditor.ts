@@ -1,4 +1,5 @@
 import { degrees, PDFDocument, PDFFont, PDFPage, rgb, StandardFonts } from 'pdf-lib';
+import { saveHistory } from './history';
 import type { CompositePdfPage, PdfOutput } from './pdfTools';
 
 export type PdfPoint = { x: number; y: number };
@@ -66,10 +67,10 @@ function colorFromHex(value: string) {
   );
 }
 
-function bytesToPdfUrl(bytes: Uint8Array): string {
+function pdfBlobFromBytes(bytes: Uint8Array): Blob {
   const copy = new Uint8Array(bytes.byteLength);
   copy.set(bytes);
-  return URL.createObjectURL(new Blob([copy.buffer], { type: 'application/pdf' }));
+  return new Blob([copy.buffer], { type: 'application/pdf' });
 }
 
 async function imageAsPngBytes(file: File): Promise<Uint8Array> {
@@ -260,5 +261,7 @@ export async function buildRichCompositePdf(pages: RichCompositePdfPage[], name 
   }
 
   const bytes = await output.save();
-  return { name, url: bytesToPdfUrl(bytes) };
+  const blob = pdfBlobFromBytes(bytes);
+  await saveHistory(name, 'Modification PDF', blob).catch(() => undefined);
+  return { name, url: URL.createObjectURL(blob) };
 }

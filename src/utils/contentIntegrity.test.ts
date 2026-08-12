@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import routeMetadata from '../../content/route-metadata.json';
 import editorialContent from '../../content/tool-editorial.json';
+import editorialAdditions from '../../content/tool-editorial-additions.json';
 
 const toolRoutes = [
   '/fusionner-pdf',
@@ -13,6 +14,7 @@ const toolRoutes = [
   '/images-en-pdf',
   '/compresser-pdf',
   '/signer-pdf',
+  '/filigrane-pdf',
   '/ocr-pdf',
   '/creer-pdf',
   '/optimiser-images',
@@ -21,14 +23,19 @@ const toolRoutes = [
   '/batch',
 ] as const;
 
-const routePaths = new Set(routeMetadata.map(route => route.path));
-const editorial = editorialContent as Record<string, {
+type EditorialEntry = {
   heading: string;
   intro: string[];
   steps: Array<{ title: string; description: string }>;
   faqs: Array<{ question: string; answer: string }>;
   related: Array<{ href: string; label: string; description: string }>;
-}>;
+};
+
+const routePaths = new Set(routeMetadata.map(route => route.path));
+const editorial = {
+  ...(editorialContent as Record<string, EditorialEntry>),
+  ...(editorialAdditions as Record<string, EditorialEntry>),
+};
 
 describe('route metadata', () => {
   it('contains unique paths and useful metadata', () => {

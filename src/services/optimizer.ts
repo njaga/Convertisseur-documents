@@ -1,5 +1,6 @@
 import { PDFDocument } from 'pdf-lib';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import { saveHistory } from './history';
 import { convertVideo } from './mediaConverter';
 
 export type QualityPreset = 'high' | 'balanced' | 'small';
@@ -68,6 +69,9 @@ export async function processImage(file: File, options: ImageEditOptions): Promi
 
   const mime = options.format === 'jpeg' ? 'image/jpeg' : `image/${options.format}`;
   const blob = await new Promise<Blob>((resolve, reject) => canvas.toBlob(value => value ? resolve(value) : reject(new Error('Encodage impossible.')), mime, qualities[options.quality]));
+  const extension = options.format === 'jpeg' ? 'jpg' : options.format;
+  const name = `${file.name.replace(/\.[^.]+$/, '')}.${extension}`;
+  await saveHistory(name, 'Optimisation d’image', blob).catch(() => undefined);
   return { blob, width: canvas.width, height: canvas.height };
 }
 
@@ -113,19 +117,24 @@ export async function compressPdf(
 
     const bytes = await output.save({ useObjectStreams: true, addDefaultPage: false, objectsPerTick: 100 });
     const compressed = new Blob([new Uint8Array(bytes)], { type: 'application/pdf' });
-
-    // Never replace a PDF with a larger version. Already optimized PDFs can hit this path.
-    return compressed.size < file.size ? compressed : file;
+    const result = compressed.size < file.size ? compressed : file;
+    const name = `${file.name.replace(/\.pdf$/i, '')}-optimise.pdf`;
+    await saveHistory(name, `Compression PDF · ${preset}`, result).catch(() => undefined);
+    return result;
   } finally {
     await loadingTask.destroy();
   }
 }
 
-export function compressVideo(file: File, preset: QualityPreset, onProgress: (progress: number) => void): Promise<string> {
+export async function compressVideo(file: File, preset: QualityPreset, onProgress: (progress: number) => void): Promise<string> {
   // Existing FFmpeg presets already use H.264 CRF 23. The profile is represented
   // through the chosen output container until custom FFmpeg arguments are exposed.
   const output = preset === 'small' ? 'webm' : 'mp4';
-  return convertVideo(file, output, onProgress);
+  const url = await convertVideo(file, output, onProgress);
+  const blob = await fetch(url).then(response => response.blob());
+  const name = `${file.name.replace(/\.[^.]+$/, '')}-compresse.${output}`;
+  await saveHistory(name, `Compression vidéo · ${preset}`, blob).catch(() => undefined);
+  return url;
 }
 
 export function savings(before: number, after: number): number {

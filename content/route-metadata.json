@@ -36,6 +36,12 @@
     "index": true
   },
   {
+    "path": "/filigrane-pdf",
+    "title": "Ajouter un filigrane à un PDF gratuitement | Doxali",
+    "description": "Ajoutez un texte, un logo ou un cachet en filigrane sur les pages de votre PDF, avec réglage de l’opacité, de la rotation et de la répétition.",
+    "index": true
+  },
+  {
     "path": "/formulaires-pdf",
     "title": "Remplir et créer des formulaires PDF | Doxali",
     "description": "Remplissez les champs d’un formulaire PDF existant ou créez vos propres champs interactifs.",

@@ -15,6 +15,7 @@ import OptimizeTools from './pages/OptimizeTools';
 import PdfTools from './pages/PdfTools';
 import SupportedFormats from './pages/SupportedFormats';
 import TermsOfUsePage from './pages/TermsOfUsePage';
+import WatermarkPdfPage from './pages/WatermarkPdfPage';
 import WorkspaceDraftsPage from './pages/WorkspaceDraftsPage';
 
 export default function App() {
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/pivoter-pdf" element={<PdfTools />} />
           <Route path="/pdf-en-png" element={<PdfTools />} />
           <Route path="/images-en-pdf" element={<PdfTools />} />
+          <Route path="/filigrane-pdf" element={<WatermarkPdfPage />} />
           <Route path="/pdf" element={<PdfTools />} />
 
           <Route path="/compresser-pdf" element={<OptimizeTools />} />
