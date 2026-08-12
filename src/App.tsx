@@ -24,6 +24,7 @@ import { saveHistory } from './services/history';
 import HistoryPage from './pages/HistoryPage';
 import LandingPage from './pages/LandingPage';
 import AboutPage from './pages/AboutPage';
+import WorkspaceDraftsPage from './pages/WorkspaceDraftsPage';
 
 function App() {
   const navigate = useNavigate();
@@ -164,6 +165,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/a-propos" element={<AboutPage />} />
+          <Route path="/brouillons" element={<WorkspaceDraftsPage />} />
           <Route path="/convertir" element={
             <main className="flex-grow">
               <div className="relative overflow-hidden">
