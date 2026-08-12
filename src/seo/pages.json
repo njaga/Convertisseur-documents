@@ -1,0 +1,204 @@
+{
+  "siteName": "Doxali",
+  "siteUrl": "https://convertisseur-documents.vercel.app",
+  "locale": "fr_FR",
+  "language": "fr",
+  "author": "Ndiaga Ndiaye",
+  "twitterCreator": "@ndiagandiaye",
+  "ogImage": "/og-image.png",
+  "ogImageAlt": "Doxali — outils PDF et documents gratuits en ligne",
+  "pages": {
+    "/": {
+      "title": "Doxali — Outils PDF & documents gratuits en ligne",
+      "description": "Modifiez, fusionnez, compressez, signez et convertissez vos PDF et documents gratuitement, sans compte et avec traitement local en priorité.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 1,
+      "changefreq": "weekly"
+    },
+    "/modifier-pdf": {
+      "title": "Modifier un PDF en ligne gratuitement | Doxali",
+      "description": "Ajoutez du texte, des images, signatures, annotations et dessins directement sur vos pages PDF, puis réorganisez-les gratuitement.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.9,
+      "changefreq": "weekly"
+    },
+    "/fusionner-pdf": {
+      "title": "Fusionner des PDF gratuitement en ligne | Doxali",
+      "description": "Fusionnez plusieurs fichiers PDF dans l’ordre exact de votre choix grâce au glisser-déposer. Gratuit, sans inscription et simple à utiliser.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.9,
+      "changefreq": "weekly"
+    },
+    "/diviser-pdf": {
+      "title": "Diviser un PDF gratuitement en ligne | Doxali",
+      "description": "Séparez les pages d’un PDF et créez rapidement plusieurs documents. Outil gratuit, sans compte, avec aperçu avant traitement.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.85,
+      "changefreq": "weekly"
+    },
+    "/compresser-pdf": {
+      "title": "Compresser un PDF gratuitement en ligne | Doxali",
+      "description": "Réduisez gratuitement la taille de vos fichiers PDF avec plusieurs niveaux de compression et un aperçu du résultat avant téléchargement.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.9,
+      "changefreq": "weekly"
+    },
+    "/signer-pdf": {
+      "title": "Signer un PDF gratuitement en ligne | Doxali",
+      "description": "Ajoutez une signature ou un cachet sur un PDF, déplacez-le et redimensionnez-le directement sur la page avant de générer le document final.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.9,
+      "changefreq": "weekly"
+    },
+    "/formulaires-pdf": {
+      "title": "Remplir et créer un formulaire PDF | Doxali",
+      "description": "Remplissez les champs d’un formulaire PDF ou créez vos propres champs texte, cases, listes et boutons directement dans le navigateur.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.85,
+      "changefreq": "weekly"
+    },
+    "/organiser-pdf": {
+      "title": "Organiser les pages d’un PDF en ligne | Doxali",
+      "description": "Réorganisez visuellement les pages de votre PDF par glisser-déposer, supprimez ou sélectionnez les pages et générez le nouvel ordre.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.85,
+      "changefreq": "weekly"
+    },
+    "/pivoter-pdf": {
+      "title": "Pivoter les pages d’un PDF gratuitement | Doxali",
+      "description": "Tournez facilement les pages de votre PDF à 90°, 180° ou 270° directement dans votre navigateur et téléchargez le résultat.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.8,
+      "changefreq": "monthly"
+    },
+    "/pdf-en-png": {
+      "title": "Convertir un PDF en PNG gratuitement | Doxali",
+      "description": "Transformez chaque page de votre PDF en image PNG de qualité, directement dans votre navigateur et sans inscription.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.85,
+      "changefreq": "weekly"
+    },
+    "/images-en-pdf": {
+      "title": "Convertir des images en PDF gratuitement | Doxali",
+      "description": "Créez un PDF à partir de vos images JPG, PNG ou WebP, prévisualisez-les puis réorganisez les pages par glisser-déposer.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.9,
+      "changefreq": "weekly"
+    },
+    "/convertir": {
+      "title": "Convertisseur de fichiers gratuit en ligne | Doxali",
+      "description": "Convertissez gratuitement images, vidéos, audio et documents vers différents formats, directement dans votre navigateur et sans inscription.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.9,
+      "changefreq": "weekly"
+    },
+    "/optimiser-images": {
+      "title": "Compresser et optimiser des images en ligne | Doxali",
+      "description": "Compressez, redimensionnez, recadrez et convertissez vos images gratuitement avec aperçu avant téléchargement.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.8,
+      "changefreq": "weekly"
+    },
+    "/compresser-video": {
+      "title": "Compresser une vidéo gratuitement en ligne | Doxali",
+      "description": "Réduisez la taille de vos vidéos directement dans le navigateur avant partage ou stockage, avec suivi de la progression et aperçu du résultat.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.8,
+      "changefreq": "weekly"
+    },
+    "/ocr-pdf": {
+      "title": "OCR PDF & images gratuit en ligne | Doxali",
+      "description": "Extrayez le texte d’un PDF ou d’une image grâce à l’OCR, puis copiez, corrigez ou réutilisez le contenu gratuitement.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.85,
+      "changefreq": "weekly"
+    },
+    "/creer-pdf": {
+      "title": "Créer un PDF gratuitement en ligne | Doxali",
+      "description": "Créez rapidement un document PDF avec titre, contenu, logo et pied de page, puis prévisualisez-le avant téléchargement.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.8,
+      "changefreq": "weekly"
+    },
+    "/batch": {
+      "title": "Convertir plusieurs fichiers par lot | Doxali",
+      "description": "Traitez plusieurs fichiers à la suite, prévisualisez les résultats et récupérez vos conversions ensemble dans une archive ZIP.",
+      "index": true,
+      "schemaType": "WebApplication",
+      "priority": 0.75,
+      "changefreq": "monthly"
+    },
+    "/formats": {
+      "title": "Formats de fichiers pris en charge | Doxali",
+      "description": "Consultez les formats réellement pris en charge par Doxali pour les images, vidéos, fichiers audio, documents et outils PDF.",
+      "index": true,
+      "schemaType": "WebPage",
+      "priority": 0.6,
+      "changefreq": "monthly"
+    },
+    "/a-propos": {
+      "title": "À propos de Doxali — Suite documentaire gratuite",
+      "description": "Découvrez Doxali, une suite d’outils pour convertir, modifier, signer, compresser et organiser vos documents simplement dans le navigateur.",
+      "index": true,
+      "schemaType": "AboutPage",
+      "priority": 0.5,
+      "changefreq": "monthly"
+    },
+    "/conditions": {
+      "title": "Conditions d’utilisation | Doxali",
+      "description": "Consultez les conditions d’utilisation de Doxali et les informations relatives au fonctionnement des outils documentaires proposés.",
+      "index": true,
+      "schemaType": "WebPage",
+      "priority": 0.3,
+      "changefreq": "yearly"
+    },
+    "/brouillons": {
+      "title": "Brouillons locaux | Doxali",
+      "description": "Retrouvez les travaux PDF sauvegardés localement dans ce navigateur.",
+      "index": false,
+      "schemaType": "WebPage",
+      "canonical": "/brouillons"
+    },
+    "/historique": {
+      "title": "Historique local | Doxali",
+      "description": "Retrouvez les derniers fichiers traités localement sur cet appareil.",
+      "index": false,
+      "schemaType": "WebPage",
+      "canonical": "/historique"
+    },
+    "/pdf": {
+      "title": "Outils PDF | Doxali",
+      "description": "Accès de compatibilité aux outils PDF de Doxali.",
+      "index": false,
+      "schemaType": "WebPage"
+    },
+    "/optimiser": {
+      "title": "Outils d’optimisation | Doxali",
+      "description": "Accès de compatibilité aux outils d’optimisation de Doxali.",
+      "index": false,
+      "schemaType": "WebPage"
+    },
+    "/documents": {
+      "title": "Outils documentaires | Doxali",
+      "description": "Accès de compatibilité aux outils documentaires de Doxali.",
+      "index": false,
+      "schemaType": "WebPage"
+    }
+  }
+}
