@@ -1,12 +1,8 @@
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { saveHistory } from './history';
-import { createPdfPagePreviews, PdfOutput } from './pdfTools';
-
-declare global {
-  interface Window {
-    TextDetector?: new (options?: { languages?: string[] }) => { detect(source: ImageBitmapSource): Promise<Array<{ rawValue: string }>> };
-  }
-}
+import { createOcrSession, type OcrEngineProgress, type OcrSession } from './ocrEngine';
+import { PdfOutput } from './pdfTools';
 
 function pdfBlobFromBytes(bytes: Uint8Array): Blob {
   return new Blob([new Uint8Array(bytes)], { type: 'application/pdf' });
@@ -142,17 +138,6 @@ export async function annotatePdf(input: AnnotatePdfInput): Promise<PdfOutput> {
   return outputFromPdfBytes(name, input.signature ? 'Signature et annotation PDF' : 'Annotation PDF', bytes);
 }
 
-async function detectImage(file: Blob, languages: string[]): Promise<string> {
-  if (!window.TextDetector) throw new Error('L’OCR local natif n’est pas disponible dans ce navigateur. Utilisez Chrome/Edge récent ou l’extraction de texte PDF.');
-  const detector = new window.TextDetector({ languages });
-  const bitmap = await createImageBitmap(file);
-  try {
-    return (await detector.detect(bitmap)).map(item => item.rawValue).join('\n');
-  } finally {
-    bitmap.close();
-  }
-}
-
 async function saveOcrResult(file: File, text: string) {
   if (!text.trim()) return;
   const name = `${file.name.replace(/\.[^.]+$/, '')}-ocr.txt`;
@@ -160,21 +145,145 @@ async function saveOcrResult(file: File, text: string) {
   await saveHistory(name, 'OCR PDF & images', blob).catch(() => undefined);
 }
 
-export async function runLocalOcr(file: File, languages: string[]): Promise<string> {
-  let result: string;
+export type OcrRunProgress = {
+  progress: number;
+  message: string;
+  page?: number;
+  pageCount?: number;
+};
+
+function describeEngineProgress(progress: OcrEngineProgress): string {
+  const status = progress.status.toLowerCase();
+  if (status.includes('loading language')) return 'Chargement des modèles français et anglais…';
+  if (status.includes('loading tesseract core') || status.includes('loading engine')) return 'Chargement du moteur OCR…';
+  if (status.includes('initializing')) return 'Initialisation du moteur OCR…';
+  if (status.includes('recognizing text')) return 'Reconnaissance du texte…';
+  return 'Préparation de la reconnaissance…';
+}
+
+function textFromPdfItems(items: unknown[]): string {
+  let text = '';
+  for (const item of items) {
+    if (!item || typeof item !== 'object' || !('str' in item)) continue;
+    const value = String((item as { str?: unknown }).str ?? '');
+    if (!value) continue;
+    text += value;
+    text += (item as { hasEOL?: boolean }).hasEOL ? '\n' : ' ';
+  }
+  return text
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function hasUsefulEmbeddedText(text: string): boolean {
+  return text.replace(/\s/g, '').length >= 24;
+}
+
+export async function runLocalOcr(
+  file: File,
+  languages: string[],
+  onProgress: (progress: OcrRunProgress) => void = () => undefined,
+): Promise<string> {
+  let result = '';
+
   if (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')) {
-    const previews = await createPdfPagePreviews([file], 1.5);
+    const { getDocument, GlobalWorkerOptions } = await import('pdfjs-dist');
+    GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+    const loadingTask = getDocument({ data: new Uint8Array(await file.arrayBuffer()) });
+    const pdf = await loadingTask.promise;
+    const pageTexts: string[] = [];
+    let session: OcrSession | null = null;
+    let activePage = 1;
+
+    const getSession = async () => {
+      if (session) return session;
+      session = await createOcrSession(languages, engineProgress => {
+        const pageFraction = engineProgress.status.toLowerCase().includes('recognizing text')
+          ? Math.min(1, Math.max(0, engineProgress.progress))
+          : 0;
+        const overall = ((activePage - 1) + pageFraction) / Math.max(1, pdf.numPages) * 100;
+        onProgress({
+          progress: Math.min(99, Math.round(overall)),
+          message: describeEngineProgress(engineProgress),
+          page: activePage,
+          pageCount: pdf.numPages,
+        });
+      });
+      return session;
+    };
+
     try {
-      const pages = [];
-      for (const preview of previews) pages.push(await detectImage(await fetch(preview.url).then(response => response.blob()), languages));
-      result = pages.map((text, index) => `--- Page ${index + 1} ---\n${text}`).join('\n\n');
+      for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
+        activePage = pageNumber;
+        onProgress({
+          progress: Math.round((pageNumber - 1) / pdf.numPages * 100),
+          message: `Lecture de la page ${pageNumber}/${pdf.numPages}…`,
+          page: pageNumber,
+          pageCount: pdf.numPages,
+        });
+
+        const page = await pdf.getPage(pageNumber);
+        try {
+          const textContent = await page.getTextContent();
+          const embeddedText = textFromPdfItems(textContent.items);
+          if (hasUsefulEmbeddedText(embeddedText)) {
+            pageTexts.push(embeddedText);
+            onProgress({
+              progress: Math.round(pageNumber / pdf.numPages * 100),
+              message: `Texte intégré récupéré · page ${pageNumber}/${pdf.numPages}`,
+              page: pageNumber,
+              pageCount: pdf.numPages,
+            });
+            continue;
+          }
+
+          const viewport = page.getViewport({ scale: 2 });
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.ceil(viewport.width));
+          canvas.height = Math.max(1, Math.ceil(viewport.height));
+          const context = canvas.getContext('2d');
+          if (!context) throw new Error('Canvas indisponible pour analyser cette page.');
+
+          await page.render({ canvas, canvasContext: context, viewport, background: '#fff' }).promise;
+          const worker = await getSession();
+          pageTexts.push(await worker.recognize(canvas));
+          canvas.width = 0;
+          canvas.height = 0;
+
+          onProgress({
+            progress: Math.round(pageNumber / pdf.numPages * 100),
+            message: `Page ${pageNumber}/${pdf.numPages} analysée`,
+            page: pageNumber,
+            pageCount: pdf.numPages,
+          });
+        } finally {
+          page.cleanup();
+        }
+      }
     } finally {
-      previews.forEach(preview => URL.revokeObjectURL(preview.url));
+      if (session) await session.terminate().catch(() => undefined);
+      await loadingTask.destroy();
     }
+
+    result = pageTexts.map((text, index) => `--- Page ${index + 1} ---\n${text.trim()}`).join('\n\n').trim();
   } else {
-    result = await detectImage(file, languages);
+    const session = await createOcrSession(languages, engineProgress => {
+      const recognitionProgress = engineProgress.status.toLowerCase().includes('recognizing text')
+        ? Math.round(Math.min(1, Math.max(0, engineProgress.progress)) * 100)
+        : 0;
+      onProgress({ progress: recognitionProgress, message: describeEngineProgress(engineProgress), page: 1, pageCount: 1 });
+    });
+    try {
+      result = await session.recognize(file);
+    } finally {
+      await session.terminate().catch(() => undefined);
+    }
   }
 
+  if (!result.trim()) throw new Error('Aucun texte lisible n’a été détecté dans ce document. Essayez un scan plus net ou une image de meilleure résolution.');
+  onProgress({ progress: 100, message: 'Reconnaissance terminée.' });
   await saveOcrResult(file, result);
   return result;
 }
