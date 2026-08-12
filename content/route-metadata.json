@@ -1,0 +1,152 @@
+[
+  {
+    "path": "/",
+    "title": "Doxali — Outils PDF & documents gratuits, sans compte",
+    "description": "Modifiez, fusionnez, compressez, signez, convertissez et analysez vos PDF et documents avec Doxali, sans compte et sans quota quotidien.",
+    "index": true
+  },
+  {
+    "path": "/modifier-pdf",
+    "title": "Modifier un PDF en ligne gratuitement | Doxali",
+    "description": "Ajoutez du texte, des images, signatures, annotations et dessins sur vos PDF, puis réorganisez les pages directement dans Doxali.",
+    "index": true
+  },
+  {
+    "path": "/fusionner-pdf",
+    "title": "Fusionner des PDF en ligne gratuitement | Doxali",
+    "description": "Assemblez plusieurs fichiers PDF dans l’ordre exact de votre choix, simplement et sans inscription.",
+    "index": true
+  },
+  {
+    "path": "/diviser-pdf",
+    "title": "Diviser un PDF en ligne gratuitement | Doxali",
+    "description": "Séparez rapidement les pages d’un PDF et récupérez uniquement les parties dont vous avez besoin.",
+    "index": true
+  },
+  {
+    "path": "/compresser-pdf",
+    "title": "Compresser un PDF en ligne gratuitement | Doxali",
+    "description": "Réduisez le poids de vos fichiers PDF avec plusieurs niveaux de qualité, directement depuis Doxali.",
+    "index": true
+  },
+  {
+    "path": "/signer-pdf",
+    "title": "Signer un PDF en ligne gratuitement | Doxali",
+    "description": "Ajoutez une signature ou un cachet, déplacez-le et redimensionnez-le visuellement avant de télécharger votre PDF.",
+    "index": true
+  },
+  {
+    "path": "/formulaires-pdf",
+    "title": "Remplir et créer des formulaires PDF | Doxali",
+    "description": "Remplissez les champs d’un formulaire PDF existant ou créez vos propres champs interactifs.",
+    "index": true
+  },
+  {
+    "path": "/organiser-pdf",
+    "title": "Organiser les pages d’un PDF gratuitement | Doxali",
+    "description": "Réordonnez vos pages PDF par glisser-déposer et choisissez précisément l’ordre du document final.",
+    "index": true
+  },
+  {
+    "path": "/pivoter-pdf",
+    "title": "Pivoter les pages d’un PDF gratuitement | Doxali",
+    "description": "Tournez rapidement les pages de votre PDF à 90°, 180° ou 270°.",
+    "index": true
+  },
+  {
+    "path": "/pdf-en-png",
+    "title": "Convertir un PDF en PNG gratuitement | Doxali",
+    "description": "Transformez les pages de votre PDF en images PNG de qualité, directement dans votre navigateur.",
+    "index": true
+  },
+  {
+    "path": "/images-en-pdf",
+    "title": "Convertir des images en PDF gratuitement | Doxali",
+    "description": "Créez un PDF à partir de vos images JPG, PNG ou WebP, avec aperçu et réorganisation visuelle.",
+    "index": true
+  },
+  {
+    "path": "/convertir",
+    "title": "Convertir des fichiers en ligne gratuitement | Doxali",
+    "description": "Convertissez images, vidéos, audio, texte et formats compatibles simplement, sans inscription.",
+    "index": true
+  },
+  {
+    "path": "/optimiser-images",
+    "title": "Compresser et optimiser des images | Doxali",
+    "description": "Compressez, redimensionnez, recadrez et convertissez vos images directement dans votre navigateur.",
+    "index": true
+  },
+  {
+    "path": "/compresser-video",
+    "title": "Compresser une vidéo en ligne | Doxali",
+    "description": "Réduisez le poids d’une vidéo avant partage ou stockage grâce aux outils d’optimisation Doxali.",
+    "index": true
+  },
+  {
+    "path": "/ocr-pdf",
+    "title": "OCR PDF et images en ligne gratuitement | Doxali",
+    "description": "Extrayez le texte de vos PDF et images pour le copier, le corriger ou le réutiliser.",
+    "index": true
+  },
+  {
+    "path": "/creer-pdf",
+    "title": "Créer un PDF en ligne gratuitement | Doxali",
+    "description": "Créez rapidement un document PDF propre avec texte, logo et pied de page.",
+    "index": true
+  },
+  {
+    "path": "/batch",
+    "title": "Convertir plusieurs fichiers par lot | Doxali",
+    "description": "Traitez plusieurs fichiers à la suite puis récupérez facilement tous vos résultats.",
+    "index": true
+  },
+  {
+    "path": "/formats",
+    "title": "Formats de fichiers pris en charge | Doxali",
+    "description": "Consultez les formats réellement pris en charge par Doxali pour les images, vidéos, audio, texte, documents Office et outils PDF.",
+    "index": true
+  },
+  {
+    "path": "/conditions",
+    "title": "Conditions d’utilisation | Doxali",
+    "description": "Consultez les conditions d’utilisation de Doxali, son approche local-first, le traitement des fichiers et les limites du service.",
+    "index": true
+  },
+  {
+    "path": "/a-propos",
+    "title": "À propos de Doxali",
+    "description": "Découvrez Doxali, une suite simple d’outils PDF et documentaires pensée pour travailler sans parcours compliqué.",
+    "index": true
+  },
+  {
+    "path": "/brouillons",
+    "title": "Brouillons locaux | Doxali",
+    "description": "Retrouvez les brouillons enregistrés localement dans ce navigateur.",
+    "index": false
+  },
+  {
+    "path": "/historique",
+    "title": "Historique local | Doxali",
+    "description": "Retrouvez les derniers fichiers traités localement dans ce navigateur.",
+    "index": false
+  },
+  {
+    "path": "/documents",
+    "title": "Outils documents | Doxali",
+    "description": "Accédez aux outils documentaires Doxali.",
+    "index": false
+  },
+  {
+    "path": "/pdf",
+    "title": "Outils PDF | Doxali",
+    "description": "Accédez aux outils PDF Doxali.",
+    "index": false
+  },
+  {
+    "path": "/optimiser",
+    "title": "Outils d’optimisation | Doxali",
+    "description": "Accédez aux outils d’optimisation Doxali.",
+    "index": false
+  }
+]
