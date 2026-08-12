@@ -57,9 +57,13 @@ Browser
 ├── FFmpeg.wasm        audio and video processing
 └── IndexedDB          local drafts and history
 
-Optional services
-├── api/og-image.js                generated social preview image
-└── server/office-converter        LibreOffice Headless → PDF
+Build / deployment assets
+├── content                       SEO and editorial source data
+├── scripts/prerender-seo.mjs     route HTML and sitemap generation
+└── public/og-image.png           social preview image
+
+Optional service
+└── server/office-converter       LibreOffice Headless → PDF
 ```
 
 Route metadata and FAQ content are stored as data files in `content/`. The production build generates route-specific HTML documents so crawlers receive the correct title, description, canonical URL, Open Graph data and structured data before React starts.
