@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, Cloud, Copy, Download, FilePlus2, GripVertical, Keyboard, Loader2, PencilLine, Redo2, RotateCcw, RotateCw, Scissors, Trash2, Undo2 } from 'lucide-react';
+import { CheckCircle2, Cloud, Copy, Download, FilePlus2, Keyboard, Loader2, PencilLine, Redo2, RotateCcw, RotateCw, Scissors, Trash2, Undo2 } from 'lucide-react';
 import PdfPageContentEditor from './PdfPageContentEditor';
+import SortableHandle from './SortableHandle';
 import { createPdfPagePreviews, PdfOutput } from '../services/pdfTools';
 import { buildRichCompositePdf, clonePdfOverlays, getImageDimensions, getPdfPageDimensions, PdfOverlay } from '../services/pdfContentEditor';
 import { hydratePdfEditorDraft, serializePdfEditorDraft, type PdfEditorDraftState, type PdfEditorWorkspacePage } from '../services/pdfEditorWorkspace';
@@ -27,7 +28,6 @@ export default function PdfVisualEditor({ file }: { file: File }) {
   const [redoStack, setRedoStack] = useState<PageState[][]>([]);
   const [draftStatus, setDraftStatus] = useState<DraftStatus>('idle');
   const [restoredDraft, setRestoredDraft] = useState(false);
-  const draggedIndex = useRef<number | null>(null);
   const lastSelected = useRef<number | null>(null);
   const objectUrls = useRef<string[]>([]);
   const outputUrls = useRef<string[]>([]);
@@ -201,13 +201,11 @@ export default function PdfVisualEditor({ file }: { file: File }) {
     ? { ...page, rotation: ((page.rotation + direction + 360) % 360) as PageState['rotation'] }
     : page));
 
-  const dropAt = (targetIndex: number) => {
-    const sourceIndex = draggedIndex.current;
-    draggedIndex.current = null;
-    if (sourceIndex === null || sourceIndex === targetIndex) return;
+  const reorderPages = (fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex || fromIndex < 0 || toIndex < 0 || fromIndex >= pages.length || toIndex >= pages.length) return;
     const next = [...pages];
-    const [moved] = next.splice(sourceIndex, 1);
-    next.splice(targetIndex, 0, moved);
+    const [moved] = next.splice(fromIndex, 1);
+    next.splice(toIndex, 0, moved);
     commit(next);
   };
 
@@ -333,7 +331,7 @@ export default function PdfVisualEditor({ file }: { file: File }) {
       <div className="mb-4 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <h2 className="font-semibold text-gray-900">Éditeur PDF visuel</h2>
-          <p className="mt-1 text-xs text-gray-500">Réorganisez les pages puis ouvrez-en une pour ajouter texte, signature, image, surlignage, caviardage ou dessin.</p>
+          <p className="mt-1 text-xs text-gray-500">Réorganisez les pages par glisser-déposer, puis ouvrez-en une pour ajouter texte, signature, image, surlignage, caviardage ou dessin.</p>
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-gray-500">
             <span className="inline-flex items-center gap-1.5">
               {draftStatus === 'saving' ? <Cloud size={13} className="animate-pulse text-blue-600" /> : <CheckCircle2 size={13} className={draftStatus === 'error' ? 'text-red-500' : 'text-emerald-600'} />}
@@ -356,7 +354,7 @@ export default function PdfVisualEditor({ file }: { file: File }) {
         {pages.map((page, index) => {
           const isSelected = selected.has(page.id);
           return (
-            <article key={page.id} draggable onDragStart={() => { draggedIndex.current = index; }} onDragOver={event => event.preventDefault()} onDrop={() => dropAt(index)} className={`group relative overflow-hidden rounded-xl border-2 bg-white shadow-sm transition ${isSelected ? 'border-gray-900 ring-2 ring-gray-900/10' : 'border-transparent hover:border-gray-400'}`}>
+            <article key={page.id} data-sortable-index={index} className={`group relative overflow-hidden rounded-xl border-2 bg-white shadow-sm transition ${isSelected ? 'border-gray-900 ring-2 ring-gray-900/10' : 'border-transparent hover:border-gray-400'}`}>
               <button type="button" onClick={event => togglePage(index, event.shiftKey)} onDoubleClick={() => setEditingId(page.id)} className="block w-full text-left">
                 <div className="relative aspect-[3/4] overflow-hidden bg-white">
                   <img src={page.url} alt={page.label} style={{ transform: `rotate(${page.rotation}deg)` }} className="h-full w-full object-contain transition-transform duration-200" />
@@ -367,7 +365,10 @@ export default function PdfVisualEditor({ file }: { file: File }) {
               </button>
               <div className="border-t border-gray-100 px-2 py-1.5">
                 <div className="flex items-center justify-between gap-1">
-                  <span className="inline-flex min-w-0 cursor-grab items-center gap-1 truncate text-[11px] text-gray-500"><GripVertical size={13} /> {page.label}</span>
+                  <div className="flex min-w-0 items-center gap-1.5">
+                    <SortableHandle index={index} itemCount={pages.length} onMove={reorderPages} label={`Déplacer ${page.label}`} className="flex h-7 w-7 shrink-0 items-center justify-center border-0 bg-gray-50 shadow-none" />
+                    <span className="min-w-0 truncate text-[11px] text-gray-500">{page.label}</span>
+                  </div>
                   <div className="flex shrink-0">
                     <button type="button" onClick={() => setEditingId(page.id)} aria-label="Modifier le contenu" title="Modifier le contenu" className="rounded p-1.5 text-blue-600 hover:bg-blue-50"><PencilLine size={14} /></button>
                     <button type="button" onClick={() => rotate(page.id, -90)} aria-label="Tourner à gauche" className="rounded p-1.5 hover:bg-gray-100"><RotateCcw size={14} /></button>
