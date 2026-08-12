@@ -33,8 +33,24 @@ export default function HistoryPage() {
   }, []);
 
   useEffect(() => {
-    void reload();
-    return subscribeHistory(() => void reload());
+    let active = true;
+
+    void listHistory()
+      .then(values => {
+        if (active) setEntries(values);
+      })
+      .catch(caught => {
+        if (active) setError(caught instanceof Error ? caught.message : 'Impossible de lire l’historique local.');
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+
+    const unsubscribe = subscribeHistory(() => void reload());
+    return () => {
+      active = false;
+      unsubscribe();
+    };
   }, [reload]);
 
   const download = (entry: HistoryEntry) => {
