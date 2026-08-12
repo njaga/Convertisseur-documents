@@ -20,6 +20,7 @@ Production: https://convertisseur-documents.vercel.app
 - Reorder pages with drag and drop.
 - Rotate, duplicate, remove and extract pages.
 - Add text, images, signatures, shapes, highlights, redaction areas and freehand annotations.
+- Add text or image watermarks with opacity, rotation, repetition and page selection.
 - Fill existing AcroForm fields and create new form fields.
 - Convert PDF pages to PNG.
 - Convert images to PDF with visual ordering.
@@ -40,7 +41,7 @@ Production: https://convertisseur-documents.vercel.app
 - Local OCR when the browser exposes the required text-detection API.
 - Simple PDF document generation.
 - Batch conversion with sequential processing to limit memory pressure.
-- Local history for recent outputs.
+- Local history for recent outputs from conversion, PDF, optimization and document workflows.
 
 ## Architecture
 
@@ -118,6 +119,7 @@ See [server/office-converter/README.md](server/office-converter/README.md) for d
 | Operation | Processing location |
 | --- | --- |
 | PDF editing and page tools | Browser |
+| PDF watermarking | Browser |
 | Image conversion and optimization | Browser |
 | Audio and video conversion | Browser via FFmpeg.wasm |
 | TXT / Markdown / HTML conversion | Browser |
@@ -130,6 +132,7 @@ The Office service is stateless by design and removes temporary files after conv
 ## Known limitations
 
 - PDF compression currently rebuilds pages from their rendered appearance. Interactive elements such as links or form behavior may therefore be flattened.
+- A watermark is a visual mark, not encryption, DRM or a certified electronic signature.
 - OCR depends on a browser capability that is not available everywhere.
 - Office conversion is available only when the optional LibreOffice service is deployed and configured.
 - Large media files and long PDFs may be constrained by browser memory, especially on mobile devices.
@@ -141,6 +144,12 @@ These limitations are documented intentionally so the interface does not promise
 Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) before proposing changes, especially when adding a new conversion pair or document engine.
 
 For security-sensitive reports, see [SECURITY.md](SECURITY.md).
+
+## License
+
+Doxali is licensed under the [Apache License 2.0](LICENSE). The license permits commercial and private use, modification and redistribution while preserving the license and required notices. It also includes an explicit patent grant from contributors.
+
+See [NOTICE](NOTICE) for project attribution information.
 
 ## Maintainer
 
