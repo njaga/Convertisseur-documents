@@ -1,15 +1,22 @@
 import { degrees, PDFDocument } from 'pdf-lib';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import { saveHistory } from './history';
 
 export interface PdfOutput {
   name: string;
   url: string;
 }
 
-function bytesToPdfUrl(bytes: Uint8Array): string {
+function bytesToPdfBlob(bytes: Uint8Array): Blob {
   const copy = new Uint8Array(bytes.byteLength);
   copy.set(bytes);
-  return URL.createObjectURL(new Blob([copy.buffer], { type: 'application/pdf' }));
+  return new Blob([copy.buffer], { type: 'application/pdf' });
+}
+
+async function pdfOutputFromBytes(name: string, operation: string, bytes: Uint8Array): Promise<PdfOutput> {
+  const blob = bytesToPdfBlob(bytes);
+  await saveHistory(name, operation, blob).catch(() => undefined);
+  return { name, url: URL.createObjectURL(blob) };
 }
 
 function canvasToPngBlob(canvas: HTMLCanvasElement): Promise<Blob> {
@@ -72,7 +79,7 @@ export async function imagesToPdf(files: File[]): Promise<PdfOutput> {
   }
 
   const bytes = await pdf.save();
-  return { name: 'images-converties.pdf', url: bytesToPdfUrl(bytes) };
+  return pdfOutputFromBytes('images-converties.pdf', 'Images → PDF', bytes);
 }
 
 export async function mergePdfs(files: File[]): Promise<PdfOutput> {
@@ -86,7 +93,7 @@ export async function mergePdfs(files: File[]): Promise<PdfOutput> {
   }
 
   const bytes = await output.save();
-  return { name: 'pdf-fusionne.pdf', url: bytesToPdfUrl(bytes) };
+  return pdfOutputFromBytes('pdf-fusionne.pdf', 'Fusion PDF', bytes);
 }
 
 export async function splitPdf(file: File): Promise<PdfOutput[]> {
@@ -99,10 +106,8 @@ export async function splitPdf(file: File): Promise<PdfOutput[]> {
     const [page] = await pagePdf.copyPages(source, [index]);
     pagePdf.addPage(page);
     const bytes = await pagePdf.save();
-    outputs.push({
-      name: `${file.name.replace(/\.pdf$/i, '')}-page-${index + 1}.pdf`,
-      url: bytesToPdfUrl(bytes),
-    });
+    const name = `${file.name.replace(/\.pdf$/i, '')}-page-${index + 1}.pdf`;
+    outputs.push(await pdfOutputFromBytes(name, `Division PDF · page ${index + 1}`, bytes));
   }
 
   return outputs;
@@ -116,10 +121,8 @@ export async function rotatePdf(file: File, angle: 90 | 180 | 270): Promise<PdfO
   });
 
   const bytes = await pdf.save();
-  return {
-    name: `${file.name.replace(/\.pdf$/i, '')}-rotation-${angle}.pdf`,
-    url: bytesToPdfUrl(bytes),
-  };
+  const name = `${file.name.replace(/\.pdf$/i, '')}-rotation-${angle}.pdf`;
+  return pdfOutputFromBytes(name, `Rotation PDF · ${angle}°`, bytes);
 }
 
 export async function pdfToPngs(file: File, scale = 2): Promise<PdfOutput[]> {
@@ -144,10 +147,9 @@ export async function pdfToPngs(file: File, scale = 2): Promise<PdfOutput[]> {
 
       await page.render({ canvas, canvasContext: context, viewport }).promise;
       const blob = await canvasToPngBlob(canvas);
-      outputs.push({
-        name: `${baseName}-page-${pageNumber}.png`,
-        url: URL.createObjectURL(blob),
-      });
+      const name = `${baseName}-page-${pageNumber}.png`;
+      await saveHistory(name, `PDF → PNG · page ${pageNumber}`, blob).catch(() => undefined);
+      outputs.push({ name, url: URL.createObjectURL(blob) });
       page.cleanup();
     }
   } finally {
@@ -199,13 +201,10 @@ export async function organizePdf(file: File, selection: string): Promise<PdfOut
   const pages = await output.copyPages(source, indices);
   pages.forEach(page => output.addPage(page));
   const bytes = await output.save();
+  const name = `${file.name.replace(/\.pdf$/i, '')}-organise.pdf`;
 
-  return {
-    name: `${file.name.replace(/\.pdf$/i, '')}-organise.pdf`,
-    url: bytesToPdfUrl(bytes),
-  };
+  return pdfOutputFromBytes(name, 'Organisation PDF', bytes);
 }
-
 
 export interface PdfPagePreview {
   fileIndex: number;
@@ -242,7 +241,6 @@ export async function createPdfPagePreviews(files: File[], scale = 0.45): Promis
   return previews;
 }
 
-
 export interface PdfPageEdit {
   sourceIndex: number;
   rotation: 0 | 90 | 180 | 270;
@@ -265,12 +263,9 @@ export async function buildEditedPdf(file: File, pages: PdfPageEdit[], suffix = 
   }
 
   const bytes = await output.save();
-  return {
-    name: `${file.name.replace(/\.pdf$/i, '')}-${suffix}.pdf`,
-    url: bytesToPdfUrl(bytes),
-  };
+  const name = `${file.name.replace(/\.pdf$/i, '')}-${suffix}.pdf`;
+  return pdfOutputFromBytes(name, 'Modification PDF', bytes);
 }
-
 
 export interface CompositePdfPage {
   kind: 'pdf' | 'image';
@@ -316,5 +311,5 @@ export async function buildCompositePdf(pages: CompositePdfPage[], name = 'docum
   }
 
   const bytes = await output.save();
-  return { name, url: bytesToPdfUrl(bytes) };
+  return pdfOutputFromBytes(name, 'Modification PDF', bytes);
 }
