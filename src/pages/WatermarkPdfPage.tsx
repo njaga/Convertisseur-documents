@@ -39,6 +39,7 @@ export default function WatermarkPdfPage() {
   const [output, setOutput] = useState<PdfOutput | null>(null);
   const previewUrls = useRef<string[]>([]);
   const outputUrl = useRef('');
+  const imagePreviewUrl = useRef('');
 
   const clearOutput = () => {
     if (outputUrl.current) URL.revokeObjectURL(outputUrl.current);
@@ -53,19 +54,18 @@ export default function WatermarkPdfPage() {
   };
 
   useEffect(() => () => {
-    clearPreviews();
+    previewUrls.current.forEach(URL.revokeObjectURL);
     if (outputUrl.current) URL.revokeObjectURL(outputUrl.current);
+    if (imagePreviewUrl.current) URL.revokeObjectURL(imagePreviewUrl.current);
   }, []);
 
-  useEffect(() => {
-    if (!image) {
-      setImageUrl('');
-      return;
-    }
-    const url = URL.createObjectURL(image);
-    setImageUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [image]);
+  const selectWatermarkImage = (selected?: File) => {
+    if (imagePreviewUrl.current) URL.revokeObjectURL(imagePreviewUrl.current);
+    imagePreviewUrl.current = selected ? URL.createObjectURL(selected) : '';
+    setImage(selected);
+    setImageUrl(imagePreviewUrl.current);
+    clearOutput();
+  };
 
   const selectPdf = (files: File[]) => {
     clearOutput();
@@ -177,7 +177,7 @@ export default function WatermarkPdfPage() {
                   <ImageIcon className="mx-auto text-gray-400" size={24} />
                   <span className="mt-2 block text-sm font-semibold text-gray-800">{image ? image.name : 'Choisir un logo, cachet ou image'}</span>
                   <span className="mt-1 block text-xs text-gray-500">PNG, JPG, WebP… La transparence PNG est conservée.</span>
-                  <input type="file" accept="image/*,.png,.jpg,.jpeg,.webp" className="hidden" onChange={event => { setImage(event.target.files?.[0]); clearOutput(); event.target.value = ''; }} />
+                  <input type="file" accept="image/*,.png,.jpg,.jpeg,.webp" className="hidden" onChange={event => { selectWatermarkImage(event.target.files?.[0]); event.target.value = ''; }} />
                 </label>
               )}
 
