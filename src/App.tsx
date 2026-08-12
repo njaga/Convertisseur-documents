@@ -296,6 +296,7 @@ function App() {
           <Route path="/fusionner-pdf" element={<PdfTools />} />
           <Route path="/diviser-pdf" element={<PdfTools />} />
           <Route path="/modifier-pdf" element={<PdfTools />} />
+          <Route path="/formulaires-pdf" element={<PdfTools />} />
           <Route path="/organiser-pdf" element={<PdfTools />} />
           <Route path="/pivoter-pdf" element={<PdfTools />} />
           <Route path="/pdf-en-png" element={<PdfTools />} />
