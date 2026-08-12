@@ -6,12 +6,13 @@ import { getAllAcceptedExtensions } from '../utils/formats';
 interface FileUploaderProps {
   onFilesSelect: (files: File[]) => void;
   onPdfSelect?: (file: File) => void;
+  compact?: boolean;
 }
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024;
 const acceptedExtensions = new Set([...getAllAcceptedExtensions(), 'pdf']);
 
-const FileUploader: React.FC<FileUploaderProps> = ({ onFilesSelect, onPdfSelect }) => {
+const FileUploader: React.FC<FileUploaderProps> = ({ onFilesSelect, onPdfSelect, compact = false }) => {
   const [error, setError] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: FileRejection[]) => {
@@ -46,6 +47,26 @@ const FileUploader: React.FC<FileUploaderProps> = ({ onFilesSelect, onPdfSelect 
     maxSize: MAX_FILE_SIZE,
     multiple: true,
   });
+
+  if (compact) {
+    return (
+      <>
+        <div
+          {...getRootProps()}
+          className={`cursor-pointer rounded-xl border border-dashed px-4 py-3 transition-colors ${
+            isDragActive ? 'border-[#2457E6] bg-blue-50/60' : 'border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-white'
+          }`}
+        >
+          <input {...getInputProps()} />
+          <div className="flex items-center justify-center gap-2 text-sm font-medium text-gray-700">
+            <UploadCloud size={17} className="text-[#2457E6]" />
+            {isDragActive ? 'Déposez les fichiers ici' : 'Ajouter d’autres fichiers'}
+          </div>
+        </div>
+        {error && <p role="alert" className="mt-3 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-600">{error}</p>}
+      </>
+    );
+  }
 
   return (
     <>
