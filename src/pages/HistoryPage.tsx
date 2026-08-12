@@ -1,33 +1,41 @@
-import { useEffect, useState } from 'react';
-import { Download, History, Share2, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { AlertCircle, Download, FileClock, History, RefreshCw, Share2, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import {
   clearHistory,
   deleteHistory,
   type HistoryEntry,
   listHistory,
+  subscribeHistory,
 } from '../services/history';
 
-const formatSize = (bytes: number) => `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+const formatSize = (bytes: number) => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / 1024 / 1024).toFixed(2)} MB`;
+};
 
 export default function HistoryPage() {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  const reload = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      setEntries(await listHistory());
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Impossible de lire l’historique local.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    let active = true;
-
-    listHistory()
-      .then(values => {
-        if (active) setEntries(values);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
+    void reload();
+    return subscribeHistory(() => void reload());
+  }, [reload]);
 
   const download = (entry: HistoryEntry) => {
     const url = URL.createObjectURL(entry.blob);
@@ -46,13 +54,21 @@ export default function HistoryPage() {
   };
 
   const remove = async (id: string) => {
-    await deleteHistory(id);
-    setEntries(current => current.filter(entry => entry.id !== id));
+    try {
+      await deleteHistory(id);
+      setEntries(current => current.filter(entry => entry.id !== id));
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Impossible de supprimer ce fichier.');
+    }
   };
 
   const clear = async () => {
-    await clearHistory();
-    setEntries([]);
+    try {
+      await clearHistory();
+      setEntries([]);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : 'Impossible de vider l’historique.');
+    }
   };
 
   return (
@@ -63,33 +79,64 @@ export default function HistoryPage() {
             <History size={20} />
           </div>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-gray-950 md:text-4xl">Historique local</h1>
-          <p className="mt-3 text-sm leading-6 text-gray-500">
-            Les résultats conservés ici restent sur cet appareil et sont automatiquement supprimés après 7 jours.
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-gray-500">
+            Les résultats enregistrés par Doxali restent sur cet appareil. Ils sont supprimés automatiquement après 7 jours et ne nécessitent aucun compte.
           </p>
         </header>
 
         <section className="rounded-2xl border border-gray-200 bg-white p-6">
           <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="font-semibold text-gray-900">
-              {entries.length} fichier{entries.length > 1 ? 's' : ''}
-            </h2>
-            {entries.length > 0 && (
-              <button type="button" onClick={() => void clear()} className="text-left text-sm font-medium text-red-600 hover:text-red-700">
-                Supprimer tout l’historique
+            <div>
+              <h2 className="font-semibold text-gray-900">
+                {entries.length} fichier{entries.length > 1 ? 's' : ''}
+              </h2>
+              <p className="mt-1 text-xs text-gray-500">Conversions et résultats PDF récents sur ce navigateur.</p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button type="button" onClick={() => void reload()} className="inline-flex items-center gap-1.5 text-sm font-medium text-[#2457E6] hover:text-[#1e49c4]">
+                <RefreshCw size={14} /> Actualiser
               </button>
-            )}
+              {entries.length > 0 && (
+                <button type="button" onClick={() => void clear()} className="text-left text-sm font-medium text-red-600 hover:text-red-700">
+                  Supprimer tout l’historique
+                </button>
+              )}
+            </div>
           </div>
 
-          {loading && <p className="text-sm text-gray-500">Chargement…</p>}
+          {error && (
+            <div role="alert" className="mb-4 flex items-start gap-3 rounded-xl border border-red-100 bg-red-50 p-4 text-sm text-red-700">
+              <AlertCircle size={18} className="mt-0.5 shrink-0" />
+              <div>
+                <p className="font-semibold">Historique indisponible</p>
+                <p className="mt-1 leading-6">{error}</p>
+              </div>
+            </div>
+          )}
 
-          {!loading && entries.length === 0 && (
-            <p className="rounded-xl bg-gray-50 p-8 text-center text-sm text-gray-500">Aucun fichier dans l’historique.</p>
+          {loading && <p className="rounded-xl bg-gray-50 p-8 text-center text-sm text-gray-500">Chargement de l’historique…</p>}
+
+          {!loading && !error && entries.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
+              <FileClock className="mx-auto text-gray-400" size={28} />
+              <h3 className="mt-3 font-semibold text-gray-900">Aucun résultat enregistré pour le moment</h3>
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-gray-500">
+                Les prochains fichiers générés par le convertisseur, les outils PDF, la compression, la signature et les autres outils compatibles apparaîtront ici automatiquement.
+              </p>
+              <div className="mt-5 flex flex-wrap justify-center gap-2">
+                <Link to="/modifier-pdf" className="rounded-lg bg-gray-950 px-4 py-2.5 text-sm font-semibold text-white">Modifier un PDF</Link>
+                <Link to="/convertir" className="rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-800">Convertir un fichier</Link>
+              </div>
+            </div>
           )}
 
           {!loading && entries.length > 0 && (
             <div className="space-y-3">
               {entries.map(entry => (
                 <article key={entry.id} className="flex flex-col gap-4 rounded-xl border border-gray-200 p-4 sm:flex-row sm:items-center">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600">
+                    <FileClock size={18} />
+                  </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-gray-900">{entry.name}</p>
                     <p className="mt-1 text-xs leading-5 text-gray-500">
