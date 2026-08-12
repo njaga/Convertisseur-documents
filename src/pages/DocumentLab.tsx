@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import type { Accept } from 'react-dropzone';
-import { CalendarDays, Download, FileSignature, FileText, ImagePlus, Loader2, ScanText } from 'lucide-react';
+import { CalendarDays, Download, ImagePlus, Loader2 } from 'lucide-react';
 import FileDropZone from '../components/FileDropZone';
 import FilePreview from '../components/FilePreview';
 import PdfAnnotationEditor from '../components/PdfAnnotationEditor';
@@ -10,15 +10,15 @@ import { annotatePdf, generateDocument, runLocalOcr, type OcrRunProgress } from 
 import { PdfOutput } from '../services/pdfTools';
 import { PdfAnnotationState } from '../types/documentLab';
 
-type Tab = 'ocr' | 'annotate' | 'generate';
+type DocumentTool = 'ocr' | 'annotate' | 'generate';
 
-const tabs = [
-  { id: 'ocr', path: '/ocr-pdf', label: 'OCR local', title: 'OCR PDF et images', description: 'Extrayez du texte depuis un PDF ou une image directement dans votre navigateur.', icon: ScanText },
-  { id: 'annotate', path: '/signer-pdf', label: 'Signer & annoter', title: 'Signer et annoter un PDF', description: 'Ajoutez une signature, une date, du texte ou masquez une zone avec un placement visuel précis.', icon: FileSignature },
-  { id: 'generate', path: '/creer-pdf', label: 'Créer un PDF', title: 'Créer un document PDF', description: 'Rédigez un document simple, ajoutez un logo et exportez-le immédiatement en PDF.', icon: FileText },
+const documentTools = [
+  { id: 'ocr', path: '/ocr-pdf', title: 'OCR PDF et images', description: 'Extrayez du texte depuis un PDF ou une image directement dans votre navigateur.' },
+  { id: 'annotate', path: '/signer-pdf', title: 'Signer et annoter un PDF', description: 'Ajoutez une signature, une date, du texte ou masquez une zone avec un placement visuel précis.' },
+  { id: 'generate', path: '/creer-pdf', title: 'Créer un document PDF', description: 'Rédigez un document simple, ajoutez un logo et exportez-le immédiatement en PDF.' },
 ] as const;
 
-const pathToTab = new Map<string, Tab>(tabs.map(item => [item.path, item.id]));
+const pathToTool = new Map<string, DocumentTool>(documentTools.map(item => [item.path, item.id]));
 const ocrAccept: Accept = { 'application/pdf': ['.pdf'], 'image/*': ['.png', '.jpg', '.jpeg', '.webp', '.gif'] };
 const pdfAccept: Accept = { 'application/pdf': ['.pdf'] };
 
@@ -36,9 +36,8 @@ const initialAnnotation: PdfAnnotationState = {
 
 export default function DocumentLab() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const tab: Tab = pathToTab.get(location.pathname) ?? 'ocr';
-  const tabInfo = tabs.find(item => item.id === tab) ?? tabs[0];
+  const tool: DocumentTool = pathToTool.get(location.pathname) ?? 'ocr';
+  const toolInfo = documentTools.find(item => item.id === tool) ?? documentTools[0];
 
   const [file, setFile] = useState<File | null>(null);
   const [signature, setSignature] = useState<File | null>(null);
@@ -71,9 +70,9 @@ export default function DocumentLab() {
     const previousCanonical = canonical.getAttribute('href');
     if (!existingCanonical) canonical.rel = 'canonical';
 
-    document.title = `${tabInfo.title} gratuitement | Doxali`;
-    meta.setAttribute('content', `${tabInfo.description} Sans compte et sans quota quotidien.`);
-    canonical.setAttribute('href', `${window.location.origin}${tabInfo.path}`);
+    document.title = `${toolInfo.title} gratuitement | Doxali`;
+    meta.setAttribute('content', `${toolInfo.description} Sans compte et sans quota quotidien.`);
+    canonical.setAttribute('href', `${window.location.origin}${toolInfo.path}`);
 
     return () => {
       document.title = previousTitle;
@@ -86,7 +85,7 @@ export default function DocumentLab() {
         else canonical.setAttribute('href', previousCanonical);
       } else canonical.remove();
     };
-  }, [tabInfo]);
+  }, [toolInfo]);
 
   const clearOutput = () => {
     urls.current.forEach(URL.revokeObjectURL);
@@ -98,17 +97,6 @@ export default function DocumentLab() {
     clearOutput();
     urls.current.push(next.url);
     setOutput(next);
-  };
-
-  const changeTab = (next: Tab) => {
-    clearOutput();
-    setFile(null);
-    setSignature(null);
-    setError('');
-    setOcrText('');
-    setOcrProgress(null);
-    setAnnotation(initialAnnotation);
-    navigate(tabs.find(item => item.id === next)?.path ?? '/ocr-pdf');
   };
 
   const selectFile = (files: File[]) => {
@@ -125,12 +113,12 @@ export default function DocumentLab() {
     setError('');
     clearOutput();
     try {
-      if (tab === 'ocr') {
+      if (tool === 'ocr') {
         if (!file) throw new Error('Ajoutez une image ou un PDF.');
         setOcrText('');
         setOcrProgress({ progress: 0, message: 'Préparation de la reconnaissance…' });
         setOcrText(await runLocalOcr(file, ['fra', 'eng'], setOcrProgress));
-      } else if (tab === 'annotate') {
+      } else if (tool === 'annotate') {
         if (!file) throw new Error('Ajoutez un PDF.');
         publish(await annotatePdf({ pdf: file, signature: signature ?? undefined, ...annotation }));
       } else {
@@ -156,34 +144,21 @@ export default function DocumentLab() {
     <main className="flex-grow bg-[#f7f8fb] px-6 pb-20 pt-28">
       <div className="mx-auto max-w-6xl">
         <header className="mx-auto mb-8 max-w-3xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">{tabInfo.title}</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-gray-600 md:text-lg">{tabInfo.description}</p>
+          <h1 className="text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">{toolInfo.title}</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-gray-600 md:text-lg">{toolInfo.description}</p>
         </header>
 
-        <nav className="mb-8 grid gap-3 sm:grid-cols-3" aria-label="Outils documentaires">
-          {tabs.map(item => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => changeTab(item.id)}
-              className={`flex items-center justify-center gap-2 rounded-xl border p-4 font-medium transition ${tab === item.id ? 'border-gray-950 bg-gray-950 text-white shadow-sm' : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'}`}
-            >
-              <item.icon size={18} /> {item.label}
-            </button>
-          ))}
-        </nav>
-
         <section className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm md:p-7">
-          {tab !== 'generate' && !file && (
+          {tool !== 'generate' && !file && (
             <FileDropZone
               onFiles={selectFile}
-              accept={tab === 'ocr' ? ocrAccept : pdfAccept}
-              title={tab === 'ocr' ? 'Sélectionner une image ou un PDF' : 'Sélectionner le PDF à signer'}
-              hint={tab === 'ocr' ? 'ou glissez-déposez votre fichier ici' : 'ou glissez-déposez votre PDF ici · 150 MB max.'}
+              accept={tool === 'ocr' ? ocrAccept : pdfAccept}
+              title={tool === 'ocr' ? 'Sélectionner une image ou un PDF' : 'Sélectionner le PDF à signer'}
+              hint={tool === 'ocr' ? 'ou glissez-déposez votre fichier ici' : 'ou glissez-déposez votre PDF ici · 150 MB max.'}
             />
           )}
 
-          {file && tab !== 'generate' && (
+          {file && tool !== 'generate' && (
             <div className="mb-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-gray-50 px-4 py-3">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-gray-900">{file.name}</p>
@@ -193,7 +168,7 @@ export default function DocumentLab() {
             </div>
           )}
 
-          {tab === 'ocr' && file && (
+          {tool === 'ocr' && file && (
             <div>
               <div className="mx-auto max-w-3xl"><FilePreview file={file} /></div>
               <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50/50 p-4 text-sm leading-6 text-gray-700">
@@ -225,7 +200,7 @@ export default function DocumentLab() {
             </div>
           )}
 
-          {tab === 'annotate' && file && (
+          {tool === 'annotate' && file && (
             <div>
               <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-end">
                 <label className="text-sm font-medium text-gray-700">
@@ -270,7 +245,7 @@ export default function DocumentLab() {
             </div>
           )}
 
-          {tab === 'generate' && (
+          {tool === 'generate' && (
             <div className="grid gap-4">
               <label className="text-sm font-medium text-gray-700">Titre<input value={title} onChange={event => setTitle(event.target.value)} className="mt-1.5 w-full rounded-xl border border-gray-200 p-3 font-normal" /></label>
               <label className="text-sm font-medium text-gray-700">Contenu<textarea value={body} onChange={event => setBody(event.target.value)} className="mt-1.5 h-72 w-full rounded-xl border border-gray-200 p-3 font-normal leading-6" placeholder="Lettre, reçu, attestation, note…" /></label>
@@ -281,9 +256,9 @@ export default function DocumentLab() {
 
           {error && <p role="alert" className="mt-5 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-600">{error}</p>}
 
-          {(tab === 'generate' || file) && (
+          {(tool === 'generate' || file) && (
             <button onClick={() => void run()} disabled={busy} className="mt-6 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-gray-950 px-5 py-3 font-semibold text-white hover:bg-gray-800 disabled:bg-gray-300">
-              {busy ? <><Loader2 size={17} className="animate-spin" /> {tab === 'ocr' && ocrProgress ? `${ocrProgress.progress}% · ${ocrProgress.message}` : 'Traitement…'}</> : tab === 'ocr' ? 'Extraire le texte' : tab === 'annotate' ? 'Appliquer et générer le PDF' : 'Créer le PDF'}
+              {busy ? <><Loader2 size={17} className="animate-spin" /> {tool === 'ocr' && ocrProgress ? `${ocrProgress.progress}% · ${ocrProgress.message}` : 'Traitement…'}</> : tool === 'ocr' ? 'Extraire le texte' : tool === 'annotate' ? 'Appliquer et générer le PDF' : 'Créer le PDF'}
             </button>
           )}
 
