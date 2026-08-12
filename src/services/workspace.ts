@@ -144,7 +144,7 @@ export async function findWorkspaceDraft<State = unknown>(kind: WorkspaceDraftKi
     name: draft.fileName,
     size: draft.file.size,
     lastModified: draft.fileLastModified,
-  } as File) === expected);
+  }) === expected);
   return (match as WorkspaceDraft<State> | undefined) ?? null;
 }
 
