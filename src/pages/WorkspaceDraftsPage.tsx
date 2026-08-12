@@ -47,8 +47,31 @@ export default function WorkspaceDraftsPage() {
   };
 
   useEffect(() => {
+    const previousTitle = document.title;
     document.title = 'Brouillons locaux | Doxali';
-    void reload();
+    let cancelled = false;
+
+    void Promise.all([
+      listWorkspaceDrafts(),
+      getWorkspaceStorageEstimate().catch(() => null),
+    ])
+      .then(([nextDrafts, nextEstimate]) => {
+        if (cancelled) return;
+        setDrafts(nextDrafts);
+        setEstimate(nextEstimate);
+        setError(null);
+      })
+      .catch(caught => {
+        if (!cancelled) setError(caught instanceof Error ? caught.message : 'Impossible de charger les brouillons locaux.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+      document.title = previousTitle;
+    };
   }, []);
 
   const resume = (draft: WorkspaceDraft) => {
