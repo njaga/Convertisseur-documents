@@ -11,6 +11,7 @@ import {
   StandardFonts,
   rgb,
 } from 'pdf-lib';
+import { saveHistory } from './history';
 import type { PdfOutput } from './pdfTools';
 
 export type PdfFormFieldType = 'text' | 'checkbox' | 'radio' | 'dropdown' | 'list' | 'button' | 'signature' | 'unknown';
@@ -265,8 +266,10 @@ export async function applyPdfFormEdits(file: File, edits: PdfFormEdits): Promis
 
   const bytes = await document.save();
   const blob = new Blob([new Uint8Array(bytes)], { type: 'application/pdf' });
+  const name = `${file.name.replace(/\.pdf$/i, '')}-formulaire.pdf`;
+  await saveHistory(name, 'Formulaire PDF', blob).catch(() => undefined);
   return {
-    name: `${file.name.replace(/\.pdf$/i, '')}-formulaire.pdf`,
+    name,
     url: URL.createObjectURL(blob),
   };
 }
