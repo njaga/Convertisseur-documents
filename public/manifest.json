@@ -1,12 +1,12 @@
 {
-  "name": "Doxali — Vos documents, sans limites",
+  "name": "Doxali — Outils PDF & documents",
   "short_name": "Doxali",
-  "description": "Suite documentaire locale pour convertir, éditer, compresser, signer et analyser vos fichiers sans quota quotidien.",
+  "description": "Suite documentaire local-first pour modifier, fusionner, compresser, signer, convertir et analyser vos fichiers sans compte.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f9fafb",
-  "theme_color": "#111827",
+  "background_color": "#ffffff",
+  "theme_color": "#2457E6",
   "icons": [
     {
       "src": "/favicon.svg",
