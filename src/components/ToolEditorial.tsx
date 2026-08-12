@@ -1,6 +1,7 @@
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import editorialData from '../../content/tool-editorial.json';
+import editorialAdditions from '../../content/tool-editorial-additions.json';
 
 type EditorialEntry = {
   heading: string;
@@ -10,7 +11,10 @@ type EditorialEntry = {
   related: Array<{ href: string; label: string; description: string }>;
 };
 
-const editorialByPath = editorialData as Record<string, EditorialEntry>;
+const editorialByPath = {
+  ...(editorialData as Record<string, EditorialEntry>),
+  ...(editorialAdditions as Record<string, EditorialEntry>),
+};
 
 const normalizePath = (pathname: string) => pathname.replace(/\/$/, '') || '/';
 
