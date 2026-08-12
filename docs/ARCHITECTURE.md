@@ -41,8 +41,11 @@ Browser-side engines include:
 - FFmpeg WebAssembly;
 - `pdf-lib`;
 - PDF.js;
+- Tesseract.js/WebAssembly for OCR;
 - Marked, DOMPurify and Turndown;
 - IndexedDB-backed draft/history helpers.
+
+The OCR engine is loaded on demand rather than bundled into the main application. `src/services/ocrEngine.ts` pins the Tesseract.js runtime, Web Worker/core and language-data endpoints explicitly. The user document stays in the browser; only OCR runtime assets are downloaded. Deployments that require fully self-hosted runtime assets can replace those URLs without changing the OCR orchestration.
 
 The Office integration is deliberately separate under `server/office-converter`.
 
@@ -64,6 +67,17 @@ This provides two useful properties:
 2. infrastructure does not become a hidden requirement for basic workflows.
 
 The trade-off is memory pressure. Large PDF files and media conversions can exceed the practical limits of a mobile browser.
+
+### OCR
+
+OCR follows a two-stage browser pipeline:
+
+1. for PDF files, PDF.js first inspects the embedded text layer and returns it directly when useful text is already present;
+2. scanned PDF pages and image files are recognized with Tesseract.js running in a Web Worker/WebAssembly runtime.
+
+PDF pages that need OCR are rendered sequentially before recognition to avoid unnecessary parallel memory use. The OCR worker is created lazily only if a page actually requires image recognition, so text-native PDFs do not pay the Tesseract startup cost.
+
+The first OCR use may require network access to fetch the pinned runtime and French/English trained data. Recognition itself runs in the browser and the source document is not uploaded to the runtime asset hosts.
 
 ### Office → PDF
 
@@ -134,8 +148,9 @@ Changes should preserve these constraints:
 
 - no unsupported conversion pair should be advertised;
 - server-side processing must not be introduced silently;
+- external runtime assets must be pinned and documented when a browser-side engine downloads them on demand;
 - file-object URLs must be revoked when results are replaced or discarded;
-- expensive media operations should avoid unnecessary parallelism;
+- expensive media and OCR operations should avoid unnecessary parallelism;
 - visual editor coordinates must remain independent from display scale;
 - route metadata and editorial content should have a single source of truth;
 - build, lint, type-check and test failures block merge.
