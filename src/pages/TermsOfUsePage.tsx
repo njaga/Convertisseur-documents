@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import {
   AlertTriangle,
   ArrowUpRight,
@@ -55,6 +56,49 @@ const sections = [
 ];
 
 const TermsOfUsePage = () => {
+  useEffect(() => {
+    const title = 'Conditions d’utilisation | Doxali';
+    const description = 'Consultez les conditions d’utilisation de Doxali, son approche local-first, le traitement des fichiers et les limites du service.';
+    const canonicalUrl = 'https://convertisseur-documents.vercel.app/conditions';
+
+    const setNamedMeta = (name: string, content: string) => {
+      let node = document.head.querySelector<HTMLMetaElement>(`meta[name="${name}"]`);
+      if (!node) {
+        node = document.createElement('meta');
+        node.name = name;
+        document.head.appendChild(node);
+      }
+      node.content = content;
+    };
+
+    const setPropertyMeta = (property: string, content: string) => {
+      let node = document.head.querySelector<HTMLMetaElement>(`meta[property="${property}"]`);
+      if (!node) {
+        node = document.createElement('meta');
+        node.setAttribute('property', property);
+        document.head.appendChild(node);
+      }
+      node.content = content;
+    };
+
+    document.title = title;
+    setNamedMeta('description', description);
+    setNamedMeta('robots', 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1');
+    setNamedMeta('twitter:title', title);
+    setNamedMeta('twitter:description', description);
+    setPropertyMeta('og:title', 'Conditions d’utilisation — Doxali');
+    setPropertyMeta('og:description', description);
+    setPropertyMeta('og:url', canonicalUrl);
+
+    let canonical = document.head.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+    if (!canonical) {
+      canonical = document.createElement('link');
+      canonical.rel = 'canonical';
+      document.head.appendChild(canonical);
+    }
+    canonical.href = canonicalUrl;
+  }, []);
+
   return (
     <main className="min-h-screen bg-white px-6 pb-20 pt-28 text-slate-950">
       <div className="mx-auto max-w-5xl">
