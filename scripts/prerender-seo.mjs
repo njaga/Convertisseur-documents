@@ -100,14 +100,18 @@ function renderSitemap(routes) {
 }
 
 const main = async () => {
-  const [template, routeSource, editorialSource] = await Promise.all([
+  const [template, routeSource, editorialSource, editorialAdditionsSource] = await Promise.all([
     readFile(join('dist', 'index.html'), 'utf8'),
     readFile(join('content', 'route-metadata.json'), 'utf8'),
     readFile(join('content', 'tool-editorial.json'), 'utf8'),
+    readFile(join('content', 'tool-editorial-additions.json'), 'utf8'),
   ]);
 
   const routes = JSON.parse(routeSource);
-  const editorial = JSON.parse(editorialSource);
+  const editorial = {
+    ...JSON.parse(editorialSource),
+    ...JSON.parse(editorialAdditionsSource),
+  };
   const outputDir = join('dist', '__prerender');
   await mkdir(outputDir, { recursive: true });
 
