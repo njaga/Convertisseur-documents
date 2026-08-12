@@ -53,7 +53,8 @@ const localDocumentFormats = ['txt', 'md', 'html'];
 
 const SupportedFormats = () => {
   const [query, setQuery] = useState('');
-  const officeEnabled = isOfficeConverterConfigured();
+  const officeConfigured = isOfficeConverterConfigured();
+  const officeEnabled = officeConfigured && officeInputFormats.every(format => isConversionSupported(format, 'pdf'));
   const normalizedQuery = query.trim().toLowerCase();
 
   const localPairsCount = useMemo(
