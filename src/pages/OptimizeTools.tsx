@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import type { Accept } from 'react-dropzone';
-import { Download, FileArchive, Image as ImageIcon, Loader2, RotateCw, Video, X } from 'lucide-react';
+import { Download, Loader2, RotateCw, X } from 'lucide-react';
 import FileDropZone from '../components/FileDropZone';
 import FilePreview from '../components/FilePreview';
 import ResultPreview from '../components/ResultPreview';
@@ -11,9 +11,9 @@ import { createZip } from '../services/zip';
 type Mode = 'image' | 'pdf' | 'video';
 const defaults: ImageEditOptions = { rotation: 0, flipX: false, flipY: false, quality: 'balanced', background: 'transparent', crop: { x: 0, y: 0, width: 100, height: 100 }, format: 'webp' };
 const modes = [
-  { id: 'pdf', path: '/compresser-pdf', label: 'PDF', title: 'Compresser PDF', description: 'Réduisez la taille de vos fichiers PDF tout en choisissant le niveau de qualité adapté.', icon: FileArchive },
-  { id: 'image', path: '/optimiser-images', label: 'Images', title: 'Optimiser des images', description: 'Redimensionnez, convertissez et compressez vos images directement dans le navigateur.', icon: ImageIcon },
-  { id: 'video', path: '/compresser-video', label: 'Vidéos', title: 'Compresser une vidéo', description: 'Réduisez le poids de vos vidéos avec un profil adapté au partage ou au stockage.', icon: Video },
+  { id: 'pdf', path: '/compresser-pdf', title: 'Compresser PDF', description: 'Réduisez la taille de vos fichiers PDF tout en choisissant le niveau de qualité adapté.' },
+  { id: 'image', path: '/optimiser-images', title: 'Optimiser des images', description: 'Redimensionnez, convertissez et compressez vos images directement dans le navigateur.' },
+  { id: 'video', path: '/compresser-video', title: 'Compresser une vidéo', description: 'Réduisez le poids de vos vidéos avec un profil adapté au partage ou au stockage.' },
 ] as const;
 
 const accepts: Record<Mode, Accept> = {
@@ -33,7 +33,6 @@ const isMode = (value: string | null): value is Mode => value === 'image' || val
 
 export default function OptimizeTools() {
   const location = useLocation();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const requestedMode = pathToMode.get(location.pathname) ?? searchParams.get('type');
   const mode: Mode = isMode(requestedMode) ? requestedMode : 'pdf';
@@ -87,14 +86,6 @@ export default function OptimizeTools() {
     urls.current.forEach(URL.revokeObjectURL);
     urls.current.length = 0;
     setResults([]);
-  };
-
-  const changeMode = (next: Mode) => {
-    clearResults();
-    setFiles([]);
-    setProgress(0);
-    const destination = modes.find(item => item.id === next)?.path ?? '/compresser-pdf';
-    navigate(destination);
   };
 
   const addFiles = (selected: File[]) => {
@@ -169,14 +160,6 @@ export default function OptimizeTools() {
           <h1 className="text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">{modeInfo.title}</h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-gray-600 md:text-lg">{modeInfo.description}</p>
         </header>
-
-        <div className="mb-8 flex flex-wrap justify-center gap-2">
-          {modes.map(item => (
-            <button key={item.id} type="button" onClick={() => changeMode(item.id)} className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${mode === item.id ? 'border-gray-950 bg-gray-950 text-white' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-950'}`}>
-              <item.icon size={15} /> {item.label}
-            </button>
-          ))}
-        </div>
 
         <div className="mx-auto max-w-3xl">
           {files.length === 0 && <FileDropZone onFiles={addFiles} accept={accept} multiple title={uploadTitle} hint={uploadHint} />}
