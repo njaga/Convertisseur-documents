@@ -1,9 +1,16 @@
 export const siteMetadata = {
-  title: "Convertisseur de Documents en Ligne Gratuit",
-  description: "Convertissez gratuitement vos fichiers en ligne : PDF, DOCX, images, vidéos et audio. Conversion rapide, sécurisée et sans inscription.",
-  keywords: "convertisseur fichiers, conversion pdf, convertir images, convertir vidéos, convertir audio, conversion gratuite, convertisseur en ligne",
-  author: "Ndiaga Ndiaye",
-  siteUrl: "https://convertisseur-documents.vercel.app",
-  ogImage: "/og-image.jpg",
-  twitterHandle: "@ndiagandiaye",
+  name: 'Doxali',
+  title: 'Doxali — Outils PDF & documents gratuits, sans compte',
+  description: 'Modifiez, fusionnez, compressez, signez, convertissez et analysez vos PDF et documents avec Doxali, sans compte et sans quota quotidien.',
+  keywords: 'outils PDF, modifier PDF, fusionner PDF, compresser PDF, signer PDF, convertir fichiers, OCR PDF, images en PDF, formulaire PDF',
+  author: 'Doxali',
+  siteUrl: 'https://convertisseur-documents.vercel.app',
+  ogImage: '/api/og-image',
+  locale: 'fr_FR',
+  themeColor: '#2457E6',
+} as const;
+
+export const absoluteUrl = (path = '/') => {
+  const normalized = path.startsWith('/') ? path : `/${path}`;
+  return `${siteMetadata.siteUrl}${normalized}`;
 };
