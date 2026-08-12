@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, FileArchive, FileImage, FileSignature, FileText, Files, History, Image, Layers3, Menu, PencilLine, RotateCw, ScanText, Scissors, Split, X, Zap } from 'lucide-react';
+import { ChevronDown, FileArchive, FileImage, FileSignature, FileText, Files, FormInput, History, Image, Layers3, Menu, PencilLine, RotateCw, ScanText, Scissors, Split, X, Zap } from 'lucide-react';
 import Logo from './Logo';
 
 const mainLinks = [
@@ -17,6 +17,7 @@ const toolGroups = [
       { to: '/fusionner-pdf', label: 'Fusionner PDF', icon: Layers3 },
       { to: '/diviser-pdf', label: 'Diviser PDF', icon: Scissors },
       { to: '/modifier-pdf', label: 'Modifier le contenu', icon: PencilLine },
+      { to: '/pdf?tool=forms', label: 'Formulaires PDF', icon: FormInput },
       { to: '/organiser-pdf', label: 'Organiser PDF', icon: Split },
       { to: '/pivoter-pdf', label: 'Faire pivoter', icon: RotateCw },
       { to: '/signer-pdf', label: 'Signer & annoter', icon: FileSignature },
