@@ -1,78 +1,36 @@
-import React from 'react';
+import { ArrowRight, FileText, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { AlertCircle, Home, FileText, Mail } from 'lucide-react';
 
-const NotFound: React.FC = () => {
+export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white py-20">
-      <div className="max-w-3xl mx-auto px-4 text-center">
-        {/* En-tête avec icône */}
-        <div className="mb-8 mt-12">
-          <div className="inline-block p-3 bg-red-500/10 rounded-2xl mb-6">
-            <AlertCircle className="w-16 h-16 text-red-500" />
-          </div>
-          <h1 className="text-6xl font-bold text-gray-900 mb-4">404</h1>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-            Page Non Trouvée
-          </h2>
-          <p className="text-gray-600 text-lg">
-            Désolé, la page que vous recherchez n'existe pas ou a été déplacée.
-          </p>
-        </div>
+    <main className="flex-grow bg-white px-6 pb-20 pt-32">
+      <div className="mx-auto max-w-2xl text-center">
+        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-[#2457E6]">Erreur 404</p>
+        <h1 className="mt-4 text-4xl font-semibold tracking-tight text-gray-950 md:text-5xl">
+          Cette page n’existe pas.
+        </h1>
+        <p className="mx-auto mt-4 max-w-xl text-base leading-7 text-gray-600">
+          Le lien est peut-être incorrect ou la page a été déplacée. Vous pouvez revenir à l’accueil ou consulter les formats pris en charge.
+        </p>
 
-        {/* Séparateur */}
-        <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-blue-600 mx-auto rounded-full mb-8"></div>
-
-        {/* Liens de navigation */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-2xl mx-auto mb-12">
-          <Link 
-            to="/" 
-            className="flex items-center justify-center gap-2 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-100 group"
+        <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+          <Link
+            to="/"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2457E6] px-5 py-3 text-sm font-semibold text-white hover:bg-[#1e49c4]"
           >
-            <Home className="w-5 h-5 text-blue-500 group-hover:text-blue-600" />
-            <span className="font-medium text-gray-800 group-hover:text-gray-900">Accueil</span>
+            <Home size={17} />
+            Retour à l’accueil
           </Link>
-          
-          <Link 
-            to="/formats" 
-            className="flex items-center justify-center gap-2 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-100 group"
+          <Link
+            to="/formats"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-sm font-semibold text-gray-800 hover:border-gray-300"
           >
-            <FileText className="w-5 h-5 text-blue-500 group-hover:text-blue-600" />
-            <span className="font-medium text-gray-800 group-hover:text-gray-900">Formats</span>
+            <FileText size={17} />
+            Voir les formats
+            <ArrowRight size={15} />
           </Link>
-          
-          <Link 
-            to="/contact" 
-            className="flex items-center justify-center gap-2 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all border border-gray-100 group"
-          >
-            <Mail className="w-5 h-5 text-blue-500 group-hover:text-blue-600" />
-            <span className="font-medium text-gray-800 group-hover:text-gray-900">Contact</span>
-          </Link>
-        </div>
-
-        {/* Message d'aide */}
-        <div className="bg-blue-50 p-6 rounded-2xl max-w-2xl mx-auto">
-          <p className="text-gray-600">
-            Besoin d'aide ? N'hésitez pas à{' '}
-            <Link 
-              to="/contact" 
-              className="text-blue-500 hover:text-blue-600 font-medium"
-            >
-              nous contacter
-            </Link>
-            {' '}ou retourner à la{' '}
-            <Link 
-              to="/" 
-              className="text-blue-500 hover:text-blue-600 font-medium"
-            >
-              page d'accueil
-            </Link>
-            .
-          </p>
         </div>
       </div>
-    </div>
+    </main>
   );
-};
-
-export default NotFound;
+}

@@ -1,0 +1,354 @@
+{
+  "/fusionner-pdf": {
+    "heading": "Fusionner plusieurs PDF dans le bon ordre",
+    "intro": [
+      "L’outil de fusion Doxali regroupe plusieurs fichiers PDF dans un seul document. Avant de lancer la fusion, vous pouvez contrôler les fichiers ajoutés et les réordonner par glisser-déposer pour obtenir exactement la séquence souhaitée.",
+      "La fusion est utile pour rassembler un dossier administratif, un rapport composé de plusieurs pièces ou des documents reçus séparément, sans devoir les imprimer puis les rescanner."
+    ],
+    "steps": [
+      { "title": "Ajoutez vos PDF", "description": "Déposez les documents à regrouper dans la zone prévue." },
+      { "title": "Réglez l’ordre", "description": "Glissez les fichiers pour choisir la position de chacun dans le document final." },
+      { "title": "Fusionnez et vérifiez", "description": "Générez le PDF unique, prévisualisez le résultat puis téléchargez-le." }
+    ],
+    "faqs": [
+      { "question": "Puis-je choisir l’ordre des PDF avant la fusion ?", "answer": "Oui. Les fichiers peuvent être réordonnés visuellement par glisser-déposer avant de créer le PDF final." },
+      { "question": "La fusion modifie-t-elle le contenu des pages ?", "answer": "Doxali assemble les pages des documents dans l’ordre choisi. L’objectif est de conserver leur contenu et leur format tout en produisant un fichier unique." },
+      { "question": "Faut-il créer un compte pour fusionner des PDF ?", "answer": "Non. L’outil est accessible sans création de compte." }
+    ],
+    "related": [
+      { "href": "/organiser-pdf", "label": "Organiser un PDF", "description": "Réordonner les pages d’un seul document." },
+      { "href": "/diviser-pdf", "label": "Diviser un PDF", "description": "Séparer un document en plusieurs fichiers." },
+      { "href": "/compresser-pdf", "label": "Compresser un PDF", "description": "Réduire le poids du document final." }
+    ]
+  },
+  "/diviser-pdf": {
+    "heading": "Séparer un PDF pour ne garder que les pages utiles",
+    "intro": [
+      "Diviser un PDF permet de transformer un document volumineux en plusieurs fichiers plus faciles à partager ou à archiver. Doxali vous aide à extraire les pages nécessaires sans reconstruire le document manuellement.",
+      "Cette opération est pratique pour isoler une facture, une annexe, une attestation ou une partie précise d’un rapport avant de l’envoyer."
+    ],
+    "steps": [
+      { "title": "Importez le PDF", "description": "Sélectionnez le document que vous souhaitez séparer." },
+      { "title": "Choisissez les pages", "description": "Repérez les pages à conserver ou à extraire à partir de l’aperçu." },
+      { "title": "Générez les fichiers", "description": "Lancez la séparation puis récupérez les documents produits." }
+    ],
+    "faqs": [
+      { "question": "Puis-je extraire seulement quelques pages d’un PDF ?", "answer": "Oui. Utilisez la sélection de pages pour ne récupérer que les parties qui vous intéressent." },
+      { "question": "Est-ce utile pour envoyer une seule pièce d’un dossier ?", "answer": "Oui. Vous pouvez isoler une ou plusieurs pages au lieu d’envoyer le document complet." },
+      { "question": "Puis-je réorganiser les pages avant de les exporter ?", "answer": "Pour un réordonnancement visuel complet, utilisez l’outil Organiser PDF, puis divisez le document si nécessaire." }
+    ],
+    "related": [
+      { "href": "/organiser-pdf", "label": "Organiser un PDF", "description": "Changer l’ordre des pages avant l’export." },
+      { "href": "/fusionner-pdf", "label": "Fusionner des PDF", "description": "Regrouper plusieurs documents en un seul." },
+      { "href": "/pdf-en-png", "label": "PDF en PNG", "description": "Transformer chaque page en image." }
+    ]
+  },
+  "/modifier-pdf": {
+    "heading": "Ajouter du contenu et des annotations sur un PDF",
+    "intro": [
+      "L’éditeur PDF de Doxali permet d’ajouter du texte, des images, des signatures, des formes, du surlignage, du dessin libre ou des zones de masquage directement sur les pages. Les éléments ajoutés peuvent être déplacés et redimensionnés visuellement.",
+      "L’outil convient pour compléter un document, corriger visuellement une information, ajouter une mention ou préparer un PDF avant validation, sans passer par un logiciel de bureau lourd."
+    ],
+    "steps": [
+      { "title": "Ouvrez le document", "description": "Importez le PDF et sélectionnez la page à modifier." },
+      { "title": "Ajoutez vos éléments", "description": "Placez texte, image, signature, forme ou annotation sur la page." },
+      { "title": "Ajustez puis exportez", "description": "Déplacez, redimensionnez et vérifiez le résultat avant de générer le PDF." }
+    ],
+    "faqs": [
+      { "question": "Puis-je déplacer les éléments ajoutés directement sur la page ?", "answer": "Oui. Les objets ajoutés sont manipulables visuellement et peuvent être repositionnés ou redimensionnés avant l’export." },
+      { "question": "Doxali remplace-t-il directement le texte déjà présent dans le PDF ?", "answer": "L’éditeur est surtout conçu pour ajouter, annoter, masquer ou superposer du contenu. Modifier la structure interne d’un texte existant comme dans un traitement de texte dépend fortement de la manière dont le PDF a été créé." },
+      { "question": "Puis-je annuler une modification ?", "answer": "Oui. L’éditeur propose un historique d’annulation et de rétablissement pour les opérations prises en charge." }
+    ],
+    "related": [
+      { "href": "/signer-pdf", "label": "Signer un PDF", "description": "Placer rapidement une signature ou un cachet." },
+      { "href": "/formulaires-pdf", "label": "Formulaires PDF", "description": "Remplir ou créer des champs interactifs." },
+      { "href": "/organiser-pdf", "label": "Organiser un PDF", "description": "Réordonner ou supprimer des pages." }
+    ]
+  },
+  "/formulaires-pdf": {
+    "heading": "Remplir ou créer des champs dans un formulaire PDF",
+    "intro": [
+      "Doxali peut lire les champs AcroForm présents dans de nombreux PDF et vous permettre de renseigner des zones de texte, cases à cocher, boutons radio ou listes. Vous pouvez également ajouter vos propres champs sur une page lorsque le document n’en contient pas encore.",
+      "Cette fonction est pensée pour les formulaires administratifs, fiches internes, questionnaires et documents à compléter régulièrement."
+    ],
+    "steps": [
+      { "title": "Chargez le formulaire", "description": "Doxali analyse le PDF et détecte les champs compatibles déjà présents." },
+      { "title": "Remplissez ou ajoutez", "description": "Saisissez les valeurs ou placez de nouveaux champs à l’endroit voulu." },
+      { "title": "Exportez le document", "description": "Conservez les champs interactifs ou aplatissez le formulaire selon votre besoin." }
+    ],
+    "faqs": [
+      { "question": "Quels types de champs sont pris en charge ?", "answer": "Les formulaires AcroForm classiques peuvent contenir notamment des champs texte, cases à cocher, boutons radio, listes déroulantes et listes." },
+      { "question": "Puis-je créer de nouveaux champs ?", "answer": "Oui. Doxali permet d’ajouter plusieurs types de champs et de les positionner visuellement sur la page." },
+      { "question": "Qu’en est-il des formulaires XFA ?", "answer": "Les formulaires XFA ont un fonctionnement différent des AcroForm standards et leur édition complète n’est pas prise en charge. Doxali signale ce cas lorsque le document en contient." }
+    ],
+    "related": [
+      { "href": "/modifier-pdf", "label": "Modifier un PDF", "description": "Ajouter du contenu libre sur les pages." },
+      { "href": "/signer-pdf", "label": "Signer un PDF", "description": "Ajouter une signature au document rempli." },
+      { "href": "/creer-pdf", "label": "Créer un PDF", "description": "Générer un document simple à partir de zéro." }
+    ]
+  },
+  "/organiser-pdf": {
+    "heading": "Réorganiser les pages d’un PDF visuellement",
+    "intro": [
+      "L’outil Organiser PDF affiche les pages sous forme de miniatures afin de rendre l’ordre du document immédiatement compréhensible. Vous pouvez déplacer une page par glisser-déposer, supprimer les pages inutiles et contrôler la structure avant de générer le nouveau fichier.",
+      "C’est particulièrement utile pour remettre dans l’ordre un scan, préparer un dossier ou corriger rapidement un document assemblé dans le mauvais sens."
+    ],
+    "steps": [
+      { "title": "Importez le PDF", "description": "Les pages sont chargées sous forme de miniatures." },
+      { "title": "Réorganisez", "description": "Glissez chaque page jusqu’à sa position finale ou supprimez les pages inutiles." },
+      { "title": "Contrôlez le résultat", "description": "Générez le PDF réorganisé et vérifiez l’ordre avant téléchargement." }
+    ],
+    "faqs": [
+      { "question": "Puis-je déplacer une page directement à une position précise ?", "answer": "Oui. Le glisser-déposer permet d’envoyer une page directement à la position souhaitée, sans devoir la faire monter ou descendre étape par étape." },
+      { "question": "Puis-je supprimer plusieurs pages ?", "answer": "Oui. L’éditeur propose des mécanismes de sélection et de suppression pour gérer plus rapidement les documents de plusieurs pages." },
+      { "question": "Le clavier peut-il être utilisé ?", "answer": "Oui. Les fonctions de réorganisation et de sélection disposent de raccourcis ou de contrôles accessibles au clavier lorsque cela est pertinent." }
+    ],
+    "related": [
+      { "href": "/fusionner-pdf", "label": "Fusionner des PDF", "description": "Assembler plusieurs documents avant de les organiser." },
+      { "href": "/pivoter-pdf", "label": "Pivoter un PDF", "description": "Corriger l’orientation de certaines pages." },
+      { "href": "/diviser-pdf", "label": "Diviser un PDF", "description": "Extraire une partie du document organisé." }
+    ]
+  },
+  "/pivoter-pdf": {
+    "heading": "Corriger l’orientation des pages d’un PDF",
+    "intro": [
+      "Une page scannée à l’envers ou en mode paysage peut rendre un dossier pénible à lire. L’outil de rotation Doxali permet de faire pivoter les pages d’un PDF à 90°, 180° ou 270° avant de produire une version corrigée.",
+      "Vous pouvez ainsi remettre rapidement dans le bon sens des scans, factures, pièces d’identité numérisées ou annexes reçues avec une orientation incorrecte."
+    ],
+    "steps": [
+      { "title": "Ajoutez le PDF", "description": "Chargez le document dont certaines pages sont mal orientées." },
+      { "title": "Choisissez la rotation", "description": "Appliquez l’angle adapté aux pages concernées." },
+      { "title": "Enregistrez", "description": "Générez une nouvelle version du PDF avec l’orientation corrigée." }
+    ],
+    "faqs": [
+      { "question": "Quels angles de rotation sont disponibles ?", "answer": "Les rotations courantes de 90°, 180° et 270° sont prises en charge." },
+      { "question": "Puis-je corriger seulement certaines pages ?", "answer": "Oui, lorsque l’outil permet une sélection de pages, vous pouvez cibler les pages concernées au lieu de modifier tout le document." },
+      { "question": "Puis-je réorganiser les pages en même temps ?", "answer": "Pour modifier l’ordre du document, utilisez l’outil Organiser PDF, conçu pour le glisser-déposer des pages." }
+    ],
+    "related": [
+      { "href": "/organiser-pdf", "label": "Organiser un PDF", "description": "Réordonner les pages après correction." },
+      { "href": "/modifier-pdf", "label": "Modifier un PDF", "description": "Ajouter du contenu et des annotations." },
+      { "href": "/pdf-en-png", "label": "PDF en PNG", "description": "Exporter les pages corrigées en images." }
+    ]
+  },
+  "/pdf-en-png": {
+    "heading": "Transformer chaque page PDF en image PNG",
+    "intro": [
+      "La conversion PDF vers PNG crée une image à partir de chaque page du document. C’est pratique pour intégrer une page dans une présentation, publier un visuel, partager un extrait dans une messagerie ou travailler avec un logiciel qui accepte mieux les images que les PDF.",
+      "Doxali rend les pages dans le navigateur puis fournit les fichiers images correspondants."
+    ],
+    "steps": [
+      { "title": "Sélectionnez le PDF", "description": "Ajoutez le document à convertir." },
+      { "title": "Lancez le rendu", "description": "Chaque page est convertie en une image PNG distincte." },
+      { "title": "Récupérez les images", "description": "Téléchargez les résultats et utilisez uniquement les pages dont vous avez besoin." }
+    ],
+    "faqs": [
+      { "question": "Est-ce qu’une image est créée pour chaque page ?", "answer": "Oui. Le principe de l’outil est de produire un fichier PNG distinct pour chaque page du PDF." },
+      { "question": "Le texte reste-t-il sélectionnable dans le PNG ?", "answer": "Non. Un PNG est une image : le contenu visuel est conservé, mais le texte n’est plus un texte sélectionnable comme dans un PDF." },
+      { "question": "Comment récupérer du texte à partir d’une page scannée ?", "answer": "Utilisez plutôt l’outil OCR PDF & images, qui est conçu pour reconnaître et extraire du texte." }
+    ],
+    "related": [
+      { "href": "/ocr-pdf", "label": "OCR PDF & images", "description": "Extraire le texte d’une image ou d’un scan." },
+      { "href": "/images-en-pdf", "label": "Images en PDF", "description": "Faire l’opération inverse et créer un PDF." },
+      { "href": "/optimiser-images", "label": "Optimiser des images", "description": "Réduire ensuite le poids des PNG exportés." }
+    ]
+  },
+  "/images-en-pdf": {
+    "heading": "Créer un PDF à partir de plusieurs images",
+    "intro": [
+      "Images en PDF permet de regrouper plusieurs fichiers JPG, JPEG, PNG, WebP ou formats compatibles dans un document unique. Les miniatures affichées avant la génération vous permettent de contrôler le contenu et l’ordre des futures pages.",
+      "L’outil est adapté pour constituer rapidement un dossier à partir de photos, de scans, de captures d’écran ou de justificatifs reçus sous forme d’images."
+    ],
+    "steps": [
+      { "title": "Ajoutez vos images", "description": "Déposez toutes les images à intégrer au document." },
+      { "title": "Organisez les pages", "description": "Glissez les miniatures pour définir précisément l’ordre du futur PDF." },
+      { "title": "Créez le PDF", "description": "Générez le document puis vérifiez son aperçu avant de le télécharger." }
+    ],
+    "faqs": [
+      { "question": "Puis-je changer l’ordre des images ?", "answer": "Oui. Les vignettes peuvent être réordonnées par glisser-déposer et leur numéro de page est mis à jour en conséquence." },
+      { "question": "Puis-je supprimer une image avant de créer le PDF ?", "answer": "Oui. Une image peut être retirée de la sélection avant la génération du document final." },
+      { "question": "Quels fichiers image sont les plus adaptés ?", "answer": "JPG/JPEG, PNG et WebP sont les formats les plus courants. La page Formats indique les formats effectivement disponibles dans le déploiement actuel." }
+    ],
+    "related": [
+      { "href": "/pdf-en-png", "label": "PDF en PNG", "description": "Transformer un PDF en images." },
+      { "href": "/optimiser-images", "label": "Optimiser des images", "description": "Réduire le poids des images avant création." },
+      { "href": "/fusionner-pdf", "label": "Fusionner des PDF", "description": "Assembler ensuite plusieurs documents PDF." }
+    ]
+  },
+  "/compresser-pdf": {
+    "heading": "Réduire le poids d’un PDF avant envoi ou archivage",
+    "intro": [
+      "Un PDF trop lourd peut être refusé par un formulaire, ralentir un envoi par e-mail ou consommer inutilement de l’espace de stockage. Doxali propose plusieurs niveaux de compression afin de trouver un compromis entre taille du fichier et qualité visuelle.",
+      "Le mode de compression actuel reconstruit les pages à partir de leur rendu visuel. Il convient donc surtout aux documents que vous souhaitez consulter ou partager, plutôt qu’aux PDF dont les fonctions interactives doivent absolument être conservées."
+    ],
+    "steps": [
+      { "title": "Ajoutez le PDF", "description": "Chargez le document dont vous souhaitez réduire la taille." },
+      { "title": "Choisissez la qualité", "description": "Sélectionnez le niveau de compression adapté à votre usage." },
+      { "title": "Comparez le résultat", "description": "Vérifiez le poids obtenu et l’aperçu avant téléchargement." }
+    ],
+    "faqs": [
+      { "question": "La compression réduit-elle toujours la taille du fichier ?", "answer": "Doxali compare le résultat à l’original et évite de vous proposer inutilement une version plus lourde lorsque la compression n’apporte pas de gain." },
+      { "question": "La qualité peut-elle diminuer ?", "answer": "Oui. Une compression plus forte réduit davantage le poids mais peut aussi réduire la finesse des images et du rendu des pages." },
+      { "question": "Les liens ou formulaires interactifs sont-ils toujours conservés ?", "answer": "Le mode actuel privilégie la réduction visuelle et peut aplatir des éléments interactifs. Pour un PDF contenant des formulaires ou des fonctions avancées, conservez l’original comme copie de référence." }
+    ],
+    "related": [
+      { "href": "/fusionner-pdf", "label": "Fusionner des PDF", "description": "Regrouper les documents avant compression." },
+      { "href": "/optimiser-images", "label": "Optimiser des images", "description": "Réduire le poids des images séparément." },
+      { "href": "/compresser-video", "label": "Compresser une vidéo", "description": "Alléger également vos fichiers vidéo." }
+    ]
+  },
+  "/signer-pdf": {
+    "heading": "Placer une signature ou un cachet directement sur un PDF",
+    "intro": [
+      "Signer PDF permet d’ajouter une image de signature ou de cachet sur la page de votre choix. La signature peut être déplacée, redimensionnée et repositionnée visuellement avant la création du fichier final.",
+      "Cet outil est adapté à l’ajout d’une signature visuelle sur un document. Il ne remplace pas une signature électronique qualifiée reposant sur un certificat cryptographique lorsqu’un cadre juridique spécifique l’exige."
+    ],
+    "steps": [
+      { "title": "Importez le PDF", "description": "Choisissez le document et la page qui doit recevoir la signature." },
+      { "title": "Ajoutez la signature", "description": "Importez l’image de signature ou de cachet puis placez-la directement sur la page." },
+      { "title": "Ajustez et exportez", "description": "Déplacez ou redimensionnez la signature puis générez le PDF signé visuellement." }
+    ],
+    "faqs": [
+      { "question": "Puis-je déplacer la signature à la souris ou au tactile ?", "answer": "Oui. La signature est manipulable directement sur l’aperçu et peut être repositionnée avec la souris, le tactile ou le clavier." },
+      { "question": "Puis-je redimensionner la signature ?", "answer": "Oui. Une poignée de redimensionnement permet d’ajuster sa taille tout en conservant ses proportions." },
+      { "question": "S’agit-il d’une signature électronique certifiée ?", "answer": "Non. Doxali ajoute une représentation visuelle de votre signature ou de votre cachet. Une signature numérique certifiée nécessite une infrastructure de certificats et un cadre de validation distinct." }
+    ],
+    "related": [
+      { "href": "/modifier-pdf", "label": "Modifier un PDF", "description": "Ajouter aussi du texte ou des annotations." },
+      { "href": "/formulaires-pdf", "label": "Formulaires PDF", "description": "Remplir le document avant de le signer." },
+      { "href": "/compresser-pdf", "label": "Compresser un PDF", "description": "Réduire le poids après signature si nécessaire." }
+    ]
+  },
+  "/ocr-pdf": {
+    "heading": "Extraire du texte à partir d’un PDF ou d’une image",
+    "intro": [
+      "L’OCR transforme du texte visible dans une image ou une page scannée en texte exploitable. Doxali peut analyser des images et des pages PDF lorsque le navigateur fournit le moteur de reconnaissance nécessaire.",
+      "Le résultat peut ensuite être copié, corrigé ou réutilisé. La qualité dépend notamment de la netteté du document, de la taille des caractères et des capacités OCR disponibles dans le navigateur."
+    ],
+    "steps": [
+      { "title": "Ajoutez le document", "description": "Importez une image ou un PDF contenant du texte à reconnaître." },
+      { "title": "Lancez la reconnaissance", "description": "Doxali analyse localement les pages lorsque le navigateur prend en charge la détection de texte." },
+      { "title": "Relisez le texte", "description": "Corrigez si nécessaire puis copiez ou téléchargez le résultat." }
+    ],
+    "faqs": [
+      { "question": "Pourquoi l’OCR n’est-il pas disponible dans tous les navigateurs ?", "answer": "L’outil s’appuie actuellement sur une capacité native de détection de texte qui n’est pas exposée de la même manière par tous les navigateurs. Un navigateur Chromium récent offre généralement la meilleure compatibilité." },
+      { "question": "L’OCR est-il toujours exact ?", "answer": "Non. Comme tout système de reconnaissance optique, il peut faire des erreurs sur les scans flous, les polices inhabituelles, les tableaux ou les documents de faible résolution." },
+      { "question": "Puis-je utiliser l’OCR sur un PDF de plusieurs pages ?", "answer": "Oui lorsque le moteur OCR local est disponible : les pages sont rendues puis analysées successivement." }
+    ],
+    "related": [
+      { "href": "/pdf-en-png", "label": "PDF en PNG", "description": "Exporter d’abord les pages sous forme d’images." },
+      { "href": "/creer-pdf", "label": "Créer un PDF", "description": "Réutiliser le texte extrait dans un nouveau document." },
+      { "href": "/modifier-pdf", "label": "Modifier un PDF", "description": "Ajouter des corrections ou des annotations." }
+    ]
+  },
+  "/creer-pdf": {
+    "heading": "Créer rapidement un document PDF simple",
+    "intro": [
+      "Créer PDF permet de produire un document propre à partir d’un titre, d’un corps de texte, d’un logo facultatif et d’un pied de page. Le résultat est adapté aux notes, courriers simples, comptes rendus courts ou documents internes qui n’exigent pas une mise en page complexe.",
+      "L’objectif est volontairement simple : générer rapidement un PDF lisible sans ouvrir un traitement de texte complet."
+    ],
+    "steps": [
+      { "title": "Saisissez le contenu", "description": "Ajoutez le titre et le texte principal du document." },
+      { "title": "Personnalisez", "description": "Ajoutez si nécessaire un logo, un pied de page et une couleur d’accent." },
+      { "title": "Prévisualisez", "description": "Générez le PDF, vérifiez son rendu puis téléchargez-le." }
+    ],
+    "faqs": [
+      { "question": "Puis-je ajouter un logo ?", "answer": "Oui. Une image peut être intégrée comme logo en haut du document." },
+      { "question": "L’outil remplace-t-il Word ou Google Docs ?", "answer": "Non. Il est conçu pour produire rapidement des PDF simples. Pour des mises en page complexes, tableaux avancés ou styles très détaillés, un traitement de texte reste plus adapté." },
+      { "question": "Le document peut-il comporter plusieurs pages ?", "answer": "Oui. Le contenu est réparti sur plusieurs pages lorsque le texte dépasse l’espace disponible." }
+    ],
+    "related": [
+      { "href": "/modifier-pdf", "label": "Modifier un PDF", "description": "Ajouter ensuite des annotations ou images." },
+      { "href": "/signer-pdf", "label": "Signer un PDF", "description": "Ajouter une signature au document créé." },
+      { "href": "/fusionner-pdf", "label": "Fusionner des PDF", "description": "Assembler le document avec d’autres pièces." }
+    ]
+  },
+  "/optimiser-images": {
+    "heading": "Réduire et adapter des images pour le web ou le partage",
+    "intro": [
+      "L’optimisation d’images aide à réduire le poids d’un fichier avant son envoi, sa publication sur un site ou son stockage. Selon le format et les options disponibles, Doxali peut compresser, redimensionner ou convertir l’image tout en affichant un aperçu du résultat.",
+      "Une image plus légère accélère généralement les téléchargements et limite la consommation de données, à condition de conserver une qualité adaptée à l’usage prévu."
+    ],
+    "steps": [
+      { "title": "Ajoutez l’image", "description": "Sélectionnez le fichier à optimiser." },
+      { "title": "Réglez les paramètres", "description": "Choisissez qualité, dimensions ou format selon les options proposées." },
+      { "title": "Comparez", "description": "Vérifiez l’aperçu et le poids final avant de télécharger l’image." }
+    ],
+    "faqs": [
+      { "question": "Vaut-il mieux réduire les dimensions ou la qualité ?", "answer": "Cela dépend de l’usage. Pour une image affichée en petit, réduire ses dimensions est souvent très efficace. Pour conserver la taille en pixels, ajuster la qualité peut être préférable." },
+      { "question": "Puis-je changer le format de l’image ?", "answer": "Oui pour les conversions proposées par le moteur de Doxali. Consultez la page Formats pour voir les couples source et destination disponibles." },
+      { "question": "L’image originale est-elle remplacée ?", "answer": "Non. Le résultat est généré comme un nouveau fichier ; conservez toujours l’original si vous avez besoin de la qualité maximale." }
+    ],
+    "related": [
+      { "href": "/images-en-pdf", "label": "Images en PDF", "description": "Regrouper les images optimisées dans un PDF." },
+      { "href": "/convertir", "label": "Convertir un fichier", "description": "Changer le format d’une image." },
+      { "href": "/compresser-video", "label": "Compresser une vidéo", "description": "Optimiser aussi les contenus vidéo." }
+    ]
+  },
+  "/compresser-video": {
+    "heading": "Alléger une vidéo avant de la partager",
+    "intro": [
+      "La compression vidéo réduit le poids d’un fichier pour faciliter son envoi, son stockage ou sa publication. Doxali s’appuie sur FFmpeg WebAssembly pour effectuer le traitement directement dans le navigateur sur les formats pris en charge.",
+      "La vidéo est une opération exigeante : la durée du traitement dépend de la taille du fichier, de la résolution, du codec et de la puissance de votre appareil."
+    ],
+    "steps": [
+      { "title": "Ajoutez la vidéo", "description": "Sélectionnez un fichier dans un format pris en charge." },
+      { "title": "Choisissez le niveau", "description": "Réglez les options proposées en fonction du compromis taille/qualité recherché." },
+      { "title": "Laissez le traitement finir", "description": "Prévisualisez le résultat puis téléchargez la version compressée." }
+    ],
+    "faqs": [
+      { "question": "Pourquoi la compression vidéo peut-elle être longue ?", "answer": "Le traitement est effectué dans le navigateur avec WebAssembly et sollicite fortement le processeur et la mémoire, surtout pour les vidéos longues ou en haute résolution." },
+      { "question": "La qualité baisse-t-elle forcément ?", "answer": "Une réduction importante du poids implique généralement un compromis sur la qualité, le débit ou la résolution. Choisissez un niveau adapté à la destination de la vidéo." },
+      { "question": "Mes vidéos sont-elles envoyées vers un serveur pour être compressées ?", "answer": "La compression vidéo courante est réalisée localement avec FFmpeg WebAssembly dans le navigateur." }
+    ],
+    "related": [
+      { "href": "/convertir", "label": "Convertir une vidéo", "description": "Changer de conteneur ou de format compatible." },
+      { "href": "/optimiser-images", "label": "Optimiser des images", "description": "Alléger également les contenus visuels fixes." },
+      { "href": "/formats", "label": "Formats pris en charge", "description": "Vérifier les formats vidéo disponibles." }
+    ]
+  },
+  "/convertir": {
+    "heading": "Convertir un fichier sans multiplier les outils",
+    "intro": [
+      "Le convertisseur général de Doxali couvre les transformations réellement implémentées pour les images, l’audio, la vidéo et les documents texte. Les formats de sortie proposés dépendent directement du format source afin d’éviter les options qui ne produiraient pas de fichier valide.",
+      "Les conversions pouvant être exécutées dans le navigateur sont traitées localement. La conversion Office vers PDF constitue un cas distinct et dépend de la présence d’un service LibreOffice configuré par le déploiement."
+    ],
+    "steps": [
+      { "title": "Ajoutez vos fichiers", "description": "Pour une conversion groupée, sélectionnez des fichiers du même format source." },
+      { "title": "Choisissez la sortie", "description": "Doxali affiche uniquement les formats de destination réellement disponibles." },
+      { "title": "Téléchargez", "description": "Suivez la progression, prévisualisez les résultats compatibles et récupérez vos fichiers." }
+    ],
+    "faqs": [
+      { "question": "Pourquoi certains formats de sortie ne sont-ils pas proposés ?", "answer": "Doxali préfère afficher uniquement les conversions réellement prises en charge par un moteur disponible plutôt que de présenter des options qui échoueraient au moment de l’export." },
+      { "question": "Puis-je convertir plusieurs fichiers à la fois ?", "answer": "Oui, lorsque les fichiers sélectionnés partagent le même format source. Pour des traitements plus variés, utilisez le gestionnaire de conversion par lot." },
+      { "question": "Les fichiers Office sont-ils traités localement ?", "answer": "Non lorsqu’une conversion Office → PDF est activée : elle passe par le service LibreOffice configuré pour le déploiement. Les autres conversions courantes sont exécutées localement lorsque le moteur navigateur le permet." }
+    ],
+    "related": [
+      { "href": "/formats", "label": "Formats pris en charge", "description": "Consulter toute la matrice de conversion." },
+      { "href": "/batch", "label": "Traitement par lot", "description": "Gérer plusieurs conversions dans une file de travail." },
+      { "href": "/fusionner-pdf", "label": "Outils PDF", "description": "Accéder aux opérations dédiées aux PDF." }
+    ]
+  },
+  "/batch": {
+    "heading": "Traiter plusieurs fichiers dans une même file de travail",
+    "intro": [
+      "Le mode par lot permet d’ajouter plusieurs fichiers et de lancer des conversions successives sans recommencer le parcours pour chaque document. Il est conçu pour les séries de fichiers et limite volontairement le parallélisme afin de préserver la mémoire du navigateur.",
+      "Les résultats peuvent être prévisualisés lorsque leur format le permet, puis téléchargés individuellement ou regroupés selon les options disponibles."
+    ],
+    "steps": [
+      { "title": "Ajoutez la série", "description": "Glissez plusieurs fichiers dans le gestionnaire de lot." },
+      { "title": "Choisissez les conversions", "description": "Sélectionnez les sorties compatibles avec chaque fichier." },
+      { "title": "Lancez la file", "description": "Doxali traite les éléments successivement et affiche l’état de chaque opération." }
+    ],
+    "faqs": [
+      { "question": "Pourquoi les fichiers ne sont-ils pas tous convertis en parallèle ?", "answer": "Les conversions lourdes peuvent consommer beaucoup de mémoire. Un traitement séquentiel est plus fiable, surtout sur les ordinateurs modestes et les appareils mobiles." },
+      { "question": "Puis-je supprimer un fichier de la file ?", "answer": "Oui. Les éléments peuvent être retirés de la liste, et les URLs temporaires associées aux résultats sont nettoyées lorsque cela est nécessaire." },
+      { "question": "Tous les formats peuvent-ils être mélangés ?", "answer": "Le gestionnaire accepte plusieurs types de fichiers, mais chaque conversion reste soumise aux formats réellement pris en charge par Doxali." }
+    ],
+    "related": [
+      { "href": "/convertir", "label": "Convertisseur", "description": "Effectuer une conversion simple ou groupée." },
+      { "href": "/formats", "label": "Formats pris en charge", "description": "Vérifier les conversions disponibles." },
+      { "href": "/historique", "label": "Historique local", "description": "Retrouver les derniers résultats sauvegardés sur l’appareil." }
+    ]
+  }
+}

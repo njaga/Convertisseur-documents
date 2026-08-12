@@ -2,6 +2,13 @@
   "name": "convertisseur-documents",
   "private": true,
   "version": "0.0.0",
+  "description": "Doxali, an open-source browser-first toolkit for PDF and document workflows.",
+  "homepage": "https://convertisseur-documents.vercel.app",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/njaga/Convertisseur-documents.git"
+  },
+  "author": "Ndiaga Ndiaye",
   "type": "module",
   "scripts": {
     "dev": "vite",

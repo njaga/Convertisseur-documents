@@ -5,7 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <title>Doxali — Outils PDF & documents gratuits, sans compte</title>
-    <meta name="description" content="Modifiez, fusionnez, compressez, signez, convertissez et analysez vos PDF et documents avec Doxali, sans compte et sans quota quotidien." />
+    <meta
+      name="description"
+      content="Modifiez, fusionnez, compressez, signez, convertissez et analysez vos PDF et documents avec Doxali, sans compte et sans quota quotidien."
+    />
     <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
     <meta name="application-name" content="Doxali" />
     <meta name="theme-color" content="#2457E6" />
@@ -19,10 +22,13 @@
     <meta property="og:locale" content="fr_FR" />
     <meta property="og:site_name" content="Doxali" />
     <meta property="og:title" content="Doxali — Vos outils PDF et documents, sans compte" />
-    <meta property="og:description" content="Modifiez, fusionnez, compressez, signez, convertissez et analysez vos documents simplement, sans compte ni quota quotidien." />
+    <meta
+      property="og:description"
+      content="Modifiez, fusionnez, compressez, signez, convertissez et analysez vos documents simplement, sans compte ni quota quotidien."
+    />
     <meta property="og:url" content="https://convertisseur-documents.vercel.app/" />
-    <meta property="og:image" content="https://convertisseur-documents.vercel.app/api/og-image" />
-    <meta property="og:image:secure_url" content="https://convertisseur-documents.vercel.app/api/og-image" />
+    <meta property="og:image" content="https://convertisseur-documents.vercel.app/og-image.png" />
+    <meta property="og:image:secure_url" content="https://convertisseur-documents.vercel.app/og-image.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -30,8 +36,11 @@
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Doxali — Vos outils PDF et documents, sans compte" />
-    <meta name="twitter:description" content="Modifiez, fusionnez, compressez, signez, convertissez et analysez vos documents simplement, sans compte ni quota quotidien." />
-    <meta name="twitter:image" content="https://convertisseur-documents.vercel.app/api/og-image" />
+    <meta
+      name="twitter:description"
+      content="Modifiez, fusionnez, compressez, signez, convertissez et analysez vos documents simplement, sans compte ni quota quotidien."
+    />
+    <meta name="twitter:image" content="https://convertisseur-documents.vercel.app/og-image.png" />
     <meta name="twitter:image:alt" content="Doxali — outils PDF et documents gratuits, sans compte" />
 
     <script type="application/ld+json">
@@ -56,87 +65,6 @@
           "Créer et remplir des formulaires PDF"
         ]
       }
-    </script>
-
-    <script>
-      (() => {
-        const siteUrl = 'https://convertisseur-documents.vercel.app';
-        const image = `${siteUrl}/api/og-image`;
-        const defaults = {
-          title: 'Doxali — Outils PDF & documents gratuits, sans compte',
-          description: 'Modifiez, fusionnez, compressez, signez, convertissez et analysez vos PDF et documents avec Doxali, sans compte et sans quota quotidien.'
-        };
-        const routes = {
-          '/': defaults,
-          '/modifier-pdf': { title: 'Modifier un PDF en ligne gratuitement | Doxali', description: 'Ajoutez du texte, des images, signatures, annotations et dessins sur vos PDF, puis réorganisez les pages directement dans Doxali.' },
-          '/fusionner-pdf': { title: 'Fusionner des PDF en ligne gratuitement | Doxali', description: 'Assemblez plusieurs fichiers PDF dans l’ordre exact de votre choix, simplement et sans inscription.' },
-          '/diviser-pdf': { title: 'Diviser un PDF en ligne gratuitement | Doxali', description: 'Séparez rapidement les pages d’un PDF et récupérez uniquement les parties dont vous avez besoin.' },
-          '/compresser-pdf': { title: 'Compresser un PDF en ligne gratuitement | Doxali', description: 'Réduisez le poids de vos fichiers PDF avec plusieurs niveaux de qualité, directement depuis Doxali.' },
-          '/signer-pdf': { title: 'Signer un PDF en ligne gratuitement | Doxali', description: 'Ajoutez une signature ou un cachet, déplacez-le et redimensionnez-le visuellement avant de télécharger votre PDF.' },
-          '/formulaires-pdf': { title: 'Remplir et créer des formulaires PDF | Doxali', description: 'Remplissez les champs d’un formulaire PDF existant ou créez vos propres champs interactifs.' },
-          '/organiser-pdf': { title: 'Organiser les pages d’un PDF gratuitement | Doxali', description: 'Réordonnez vos pages PDF par glisser-déposer et choisissez précisément l’ordre du document final.' },
-          '/pivoter-pdf': { title: 'Pivoter les pages d’un PDF gratuitement | Doxali', description: 'Tournez rapidement les pages de votre PDF à 90°, 180° ou 270°.' },
-          '/pdf-en-png': { title: 'Convertir un PDF en PNG gratuitement | Doxali', description: 'Transformez les pages de votre PDF en images PNG de qualité, directement dans votre navigateur.' },
-          '/images-en-pdf': { title: 'Convertir des images en PDF gratuitement | Doxali', description: 'Créez un PDF à partir de vos images JPG, PNG ou WebP, avec aperçu et réorganisation visuelle.' },
-          '/convertir': { title: 'Convertir des fichiers en ligne gratuitement | Doxali', description: 'Convertissez images, vidéos, audio, texte et formats compatibles simplement, sans inscription.' },
-          '/optimiser-images': { title: 'Compresser et optimiser des images | Doxali', description: 'Compressez, redimensionnez, recadrez et convertissez vos images directement dans votre navigateur.' },
-          '/compresser-video': { title: 'Compresser une vidéo en ligne | Doxali', description: 'Réduisez le poids d’une vidéo avant partage ou stockage grâce aux outils d’optimisation Doxali.' },
-          '/ocr-pdf': { title: 'OCR PDF et images en ligne gratuitement | Doxali', description: 'Extrayez le texte de vos PDF et images pour le copier, le corriger ou le réutiliser.' },
-          '/creer-pdf': { title: 'Créer un PDF en ligne gratuitement | Doxali', description: 'Créez rapidement un document PDF propre avec texte, logo et pied de page.' },
-          '/batch': { title: 'Convertir plusieurs fichiers par lot | Doxali', description: 'Traitez plusieurs fichiers à la suite puis récupérez facilement tous vos résultats.' },
-          '/formats': { title: 'Formats de fichiers pris en charge | Doxali', description: 'Consultez les formats de fichiers réellement pris en charge par les outils de conversion Doxali.' },
-          '/a-propos': { title: 'À propos de Doxali', description: 'Découvrez Doxali, une suite simple d’outils PDF et documentaires pensée pour travailler sans parcours compliqué.' }
-        };
-        const noIndexPaths = new Set(['/brouillons', '/historique', '/documents', '/pdf', '/optimiser']);
-
-        const setNamedMeta = (name, content) => {
-          let node = document.head.querySelector(`meta[name="${name}"]`);
-          if (!node) {
-            node = document.createElement('meta');
-            node.setAttribute('name', name);
-            document.head.appendChild(node);
-          }
-          node.setAttribute('content', content);
-        };
-        const setPropertyMeta = (property, content) => {
-          let node = document.head.querySelector(`meta[property="${property}"]`);
-          if (!node) {
-            node = document.createElement('meta');
-            node.setAttribute('property', property);
-            document.head.appendChild(node);
-          }
-          node.setAttribute('content', content);
-        };
-        const applyMetadata = () => {
-          const path = window.location.pathname.replace(/\/$/, '') || '/';
-          const meta = routes[path] || defaults;
-          const canonicalUrl = `${siteUrl}${path === '/' ? '/' : path}`;
-          document.title = meta.title;
-          setNamedMeta('description', meta.description);
-          setNamedMeta('robots', noIndexPaths.has(path) ? 'noindex,follow' : 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1');
-          let canonical = document.head.querySelector('link[rel="canonical"]');
-          if (!canonical) {
-            canonical = document.createElement('link');
-            canonical.setAttribute('rel', 'canonical');
-            document.head.appendChild(canonical);
-          }
-          canonical.setAttribute('href', canonicalUrl);
-          setPropertyMeta('og:title', meta.title.replace(' | Doxali', ' — Doxali'));
-          setPropertyMeta('og:description', meta.description);
-          setPropertyMeta('og:url', canonicalUrl);
-          setPropertyMeta('og:image', image);
-          setNamedMeta('twitter:title', meta.title);
-          setNamedMeta('twitter:description', meta.description);
-          setNamedMeta('twitter:image', image);
-        };
-
-        applyMetadata();
-        const pushState = history.pushState.bind(history);
-        const replaceState = history.replaceState.bind(history);
-        history.pushState = (...args) => { pushState(...args); queueMicrotask(applyMetadata); };
-        history.replaceState = (...args) => { replaceState(...args); queueMicrotask(applyMetadata); };
-        window.addEventListener('popstate', applyMetadata);
-      })();
     </script>
   </head>
   <body>
