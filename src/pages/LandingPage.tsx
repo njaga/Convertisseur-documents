@@ -19,6 +19,7 @@ import {
   Scissors,
   Search,
   ShieldCheck,
+  Stamp,
   UserRoundX,
   Video,
 } from 'lucide-react';
@@ -40,6 +41,7 @@ const tools: ToolItem[] = [
   { to: '/fusionner-pdf', title: 'Fusionner PDF', description: 'Assemblez plusieurs PDF dans l’ordre exact de votre choix.', category: 'PDF', icon: Merge, featured: true },
   { to: '/compresser-pdf', title: 'Compresser PDF', description: 'Réduisez le poids d’un PDF en choisissant le niveau de qualité.', category: 'Optimiser', icon: FileArchive, featured: true },
   { to: '/signer-pdf', title: 'Signer PDF', description: 'Placez, déplacez et redimensionnez votre signature ou votre cachet.', category: 'PDF', icon: FileSignature, featured: true },
+  { to: '/filigrane-pdf', title: 'Ajouter un filigrane', description: 'Ajoutez un texte, un logo ou un cachet avec opacité, rotation et répétition.', category: 'PDF', icon: Stamp },
   { to: '/diviser-pdf', title: 'Diviser PDF', description: 'Séparez les pages d’un document en plusieurs fichiers PDF.', category: 'PDF', icon: Scissors },
   { to: '/formulaires-pdf', title: 'Formulaires PDF', description: 'Remplissez des champs existants ou créez vos propres champs interactifs.', category: 'PDF', icon: FormInput },
   { to: '/organiser-pdf', title: 'Organiser PDF', description: 'Réordonnez visuellement les pages par glisser-déposer.', category: 'PDF', icon: Layers3 },
@@ -110,7 +112,7 @@ export default function LandingPage() {
                 id="home-tool-search"
                 value={search}
                 onChange={event => setSearch(event.target.value)}
-                placeholder="Rechercher un outil : signer, compresser, OCR…"
+                placeholder="Rechercher un outil : filigrane, signer, compresser, OCR…"
                 className="min-h-14 w-full border-0 bg-transparent px-3 text-sm text-slate-900 outline-none placeholder:text-slate-400"
               />
               {search && <a href="#outils" className="shrink-0 text-xs font-semibold text-[#2457E6]">Voir les résultats</a>}
