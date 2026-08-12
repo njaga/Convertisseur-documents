@@ -108,17 +108,16 @@ export default function Navbar() {
     };
   }, []);
 
-  useEffect(() => {
+  const closeMenus = () => {
     setMoreOpen(false);
     setMobile(false);
-  }, [pathname]);
-
+  };
   const isActive = (to: string) => pathname === to;
 
   return (
     <header className={`fixed inset-x-0 top-0 z-50 border-b bg-white/95 backdrop-blur transition ${isScrolled ? 'border-slate-200 shadow-[0_6px_24px_rgba(15,23,42,0.06)]' : 'border-slate-200/80'}`}>
       <nav className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-5 lg:px-6" aria-label="Navigation principale">
-        <Link to="/" className="flex shrink-0 items-center gap-2.5" aria-label="Doxali - Accueil">
+        <Link to="/" onClick={closeMenus} className="flex shrink-0 items-center gap-2.5" aria-label="Doxali - Accueil">
           <Logo size={31} />
           <span className="text-lg font-bold tracking-[-0.025em] text-slate-950">Doxali</span>
           <span className="hidden h-1.5 w-1.5 rounded-full bg-[#F26B4A] sm:block" aria-hidden="true" />
@@ -130,6 +129,7 @@ export default function Navbar() {
               <Link
                 key={link.to}
                 to={link.to}
+                onClick={() => setMoreOpen(false)}
                 className={`relative px-3 py-2 text-sm font-medium transition-colors ${isActive(link.to) ? 'text-[#2457E6]' : 'text-slate-600 hover:text-slate-950'}`}
               >
                 {link.label}
@@ -165,6 +165,7 @@ export default function Navbar() {
                             key={link.to}
                             to={link.to}
                             role="menuitem"
+                            onClick={() => setMoreOpen(false)}
                             className={`group flex items-center gap-2.5 px-2.5 py-2.5 text-sm transition-colors ${isActive(link.to) ? 'bg-[#EEF3FF] font-semibold text-[#2457E6]' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'}`}
                           >
                             <link.icon size={15} className={isActive(link.to) ? 'text-[#2457E6]' : 'text-slate-400 group-hover:text-[#2457E6]'} />
@@ -177,7 +178,7 @@ export default function Navbar() {
                 </div>
                 <div className="flex items-center justify-between border-t border-slate-100 bg-[#F7F8FA] px-5 py-3">
                   <p className="text-xs text-slate-500">Traitement local en priorité · Sans compte · Open source</p>
-                  <Link to="/formats" className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2457E6]">Voir les formats <ArrowRight size={13} /></Link>
+                  <Link to="/formats" onClick={() => setMoreOpen(false)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2457E6]">Voir les formats <ArrowRight size={13} /></Link>
                 </div>
               </div>
             )}
@@ -199,7 +200,7 @@ export default function Navbar() {
         <div className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-slate-200 bg-white px-5 py-5 lg:hidden">
           <div className="grid grid-cols-2 gap-2">
             {mainLinks.map(link => (
-              <Link key={link.to} to={link.to} className={`border px-3 py-3 text-sm font-semibold ${isActive(link.to) ? 'border-[#2457E6] bg-[#EEF3FF] text-[#2457E6]' : 'border-slate-200 text-slate-800'}`}>
+              <Link key={link.to} to={link.to} onClick={closeMenus} className={`border px-3 py-3 text-sm font-semibold ${isActive(link.to) ? 'border-[#2457E6] bg-[#EEF3FF] text-[#2457E6]' : 'border-slate-200 text-slate-800'}`}>
                 {link.label}
               </Link>
             ))}
@@ -214,7 +215,7 @@ export default function Navbar() {
                 </div>
                 <div className="mt-2">
                   {group.links.map(link => (
-                    <Link key={link.to} to={link.to} className={`flex items-center gap-2.5 px-2 py-2.5 text-sm ${isActive(link.to) ? 'font-semibold text-[#2457E6]' : 'text-slate-600'}`}>
+                    <Link key={link.to} to={link.to} onClick={closeMenus} className={`flex items-center gap-2.5 px-2 py-2.5 text-sm ${isActive(link.to) ? 'font-semibold text-[#2457E6]' : 'text-slate-600'}`}>
                       <link.icon size={15} className="text-slate-400" /> {link.label}
                     </Link>
                   ))}
@@ -224,7 +225,7 @@ export default function Navbar() {
           </div>
 
           <div className="mt-6 border-t border-slate-100 pt-4">
-            <Link to="/a-propos" className="inline-flex items-center gap-2 text-sm font-semibold text-[#2457E6]">À propos de Doxali <ArrowRight size={14} /></Link>
+            <Link to="/a-propos" onClick={closeMenus} className="inline-flex items-center gap-2 text-sm font-semibold text-[#2457E6]">À propos de Doxali <ArrowRight size={14} /></Link>
           </div>
         </div>
       )}
