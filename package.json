@@ -9,6 +9,7 @@
     "url": "https://github.com/njaga/Convertisseur-documents.git"
   },
   "author": "Ndiaga Ndiaye",
+  "license": "Apache-2.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
