@@ -86,36 +86,41 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={`fixed z-50 w-full border-b border-slate-200/80 transition ${isScrolled ? 'bg-white/95 shadow-sm backdrop-blur-xl' : 'bg-white/90 backdrop-blur-xl'}`}>
+    <nav className={`fixed z-50 w-full border-b border-slate-200 bg-white transition-shadow ${isScrolled ? 'shadow-sm' : ''}`}>
       <div className="mx-auto max-w-7xl px-5 lg:px-6">
         <div className="flex h-16 items-center justify-between gap-6">
-          <Link to="/" onClick={closeMenus} className="group flex shrink-0 items-center gap-2.5">
-            <Logo size={32} className="transition-transform duration-200 group-hover:scale-105" />
-            <span className="text-lg font-black tracking-[-0.03em] text-slate-950">Doxali</span>
+          <Link to="/" onClick={closeMenus} className="flex shrink-0 items-center gap-2.5">
+            <Logo size={32} />
+            <span className="text-lg font-bold tracking-[-0.02em] text-slate-950">Doxali</span>
           </Link>
 
           <div className="hidden flex-1 items-center justify-end gap-6 lg:flex">
             {mainLinks.map(link => (
-              <Link key={link.to} to={link.to} onClick={() => setMoreOpen(false)} className="whitespace-nowrap text-sm font-semibold text-slate-700 transition-colors hover:text-indigo-600">{link.label}</Link>
+              <Link key={link.to} to={link.to} onClick={() => setMoreOpen(false)} className="whitespace-nowrap text-sm font-medium text-slate-700 transition-colors hover:text-[#2457E6]">{link.label}</Link>
             ))}
 
             <div ref={moreMenuRef} className="relative">
-              <button type="button" aria-haspopup="menu" aria-expanded={moreOpen} onClick={() => setMoreOpen(open => !open)} className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-2 text-sm font-bold transition-all ${moreOpen ? 'border-indigo-200 bg-indigo-100 text-indigo-700' : 'border-indigo-100 bg-indigo-50 text-indigo-700 hover:border-indigo-200 hover:bg-indigo-100'}`}>
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={moreOpen}
+                onClick={() => setMoreOpen(open => !open)}
+                className={`inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold transition-colors ${moreOpen ? 'text-[#2457E6]' : 'text-slate-800 hover:text-[#2457E6]'}`}
+              >
                 Tous les outils
                 <ChevronDown size={14} className={`transition-transform ${moreOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {moreOpen && (
-                <div role="menu" className="absolute right-0 top-full z-50 mt-4 w-[780px] overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/15">
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-400" />
-                  <div className="grid grid-cols-4 gap-5 pt-1">
+                <div role="menu" className="absolute right-0 top-full z-50 mt-4 w-[780px] border border-slate-200 bg-white p-5 shadow-xl">
+                  <div className="grid grid-cols-4 gap-5">
                     {toolGroups.map(group => (
                       <section key={group.title}>
-                        <p className="mb-2 px-2 text-[11px] font-black uppercase tracking-[0.12em] text-slate-400">{group.title}</p>
+                        <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">{group.title}</p>
                         <div className="space-y-1">
                           {group.links.map(link => (
-                            <Link key={link.to} to={link.to} role="menuitem" onClick={() => setMoreOpen(false)} className="group flex items-center gap-2.5 rounded-xl px-2 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-indigo-50 hover:text-indigo-700">
-                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 transition group-hover:bg-white group-hover:text-indigo-600"><link.icon size={15} /></span>
+                            <Link key={link.to} to={link.to} role="menuitem" onClick={() => setMoreOpen(false)} className="group flex items-center gap-2.5 px-2 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-[#F5F7FF] hover:text-[#2457E6]">
+                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600 group-hover:text-[#2457E6]"><link.icon size={15} /></span>
                               <span>{link.label}</span>
                             </Link>
                           ))}
@@ -128,7 +133,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          <button onClick={() => setMobile(open => !open)} className="rounded-xl border border-slate-200 bg-white p-2 text-slate-600 shadow-sm lg:hidden" aria-label="Menu" aria-expanded={mobile}>
+          <button onClick={() => setMobile(open => !open)} className="border border-slate-200 bg-white p-2 text-slate-600 lg:hidden" aria-label="Menu" aria-expanded={mobile}>
             {mobile ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
@@ -136,13 +141,13 @@ export default function Navbar() {
         {mobile && (
           <div className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-slate-100 py-4 lg:hidden">
             <div className="grid gap-1 sm:grid-cols-2">
-              {mainLinks.map(link => <Link key={link.to} to={link.to} onClick={closeMenus} className="rounded-xl px-3 py-3 text-sm font-bold text-slate-800 hover:bg-indigo-50 hover:text-indigo-700">{link.label}</Link>)}
+              {mainLinks.map(link => <Link key={link.to} to={link.to} onClick={closeMenus} className="px-3 py-3 text-sm font-semibold text-slate-800 hover:bg-[#F5F7FF] hover:text-[#2457E6]">{link.label}</Link>)}
             </div>
             <div className="mt-4 grid gap-5 border-t border-slate-100 pt-4 sm:grid-cols-2">
               {toolGroups.map(group => (
                 <section key={group.title}>
-                  <p className="mb-1 px-3 text-[11px] font-black uppercase tracking-wider text-slate-400">{group.title}</p>
-                  {group.links.map(link => <Link key={link.to} to={link.to} onClick={closeMenus} className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm text-slate-700 hover:bg-indigo-50 hover:text-indigo-700"><link.icon size={15} /> {link.label}</Link>)}
+                  <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">{group.title}</p>
+                  {group.links.map(link => <Link key={link.to} to={link.to} onClick={closeMenus} className="flex items-center gap-2 px-3 py-2.5 text-sm text-slate-700 hover:bg-[#F5F7FF] hover:text-[#2457E6]"><link.icon size={15} /> {link.label}</Link>)}
                 </section>
               ))}
             </div>
