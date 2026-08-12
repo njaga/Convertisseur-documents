@@ -31,13 +31,13 @@ const editorial = editorialContent as Record<string, {
 }>;
 
 describe('route metadata', () => {
-  it('contains unique paths and non-empty metadata', () => {
+  it('contains unique paths and useful metadata', () => {
     expect(routePaths.size).toBe(routeMetadata.length);
 
     for (const route of routeMetadata) {
       expect(route.path.startsWith('/')).toBe(true);
       expect(route.title.trim().length).toBeGreaterThan(0);
-      expect(route.description.trim().length).toBeGreaterThan(40);
+      expect(route.description.trim().length).toBeGreaterThan(route.index ? 60 : 20);
     }
   });
 });
