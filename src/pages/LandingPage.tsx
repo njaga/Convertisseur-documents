@@ -21,9 +21,9 @@ import {
   Search,
   ShieldCheck,
   Sparkles,
+  Sparkles as WandSparkles,
   UserRoundX,
   Video,
-  WandSparkles,
 } from 'lucide-react';
 
 type Category = 'Tous' | 'PDF' | 'Convertir' | 'Optimiser' | 'Documents';
