@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams } from 'react-router-dom';
 import type { Accept } from 'react-dropzone';
-import { Download, FileImage, FormInput, Images, ListOrdered, Loader2, Merge, RotateCw, Scissors, ShieldCheck, X } from 'lucide-react';
+import { Download, Loader2, ShieldCheck, X } from 'lucide-react';
 import FileDropZone from '../components/FileDropZone';
 import FilePreview from '../components/FilePreview';
 import PdfFormEditor from '../components/PdfFormEditor';
@@ -15,22 +15,20 @@ type LocationState = { initialFile?: File } | null;
 type ToolDefinition = {
   id: Tool;
   path: string;
-  label: string;
   title: string;
   description: string;
   action: string;
-  icon: typeof FileImage;
 };
 
 const tools: ToolDefinition[] = [
-  { id: 'merge', path: '/fusionner-pdf', label: 'Fusionner', title: 'Fusionner des fichiers PDF', description: 'Combinez plusieurs PDF et choisissez leur ordre avant de créer un seul document.', action: 'Fusionner les PDF', icon: Merge },
-  { id: 'split', path: '/diviser-pdf', label: 'Diviser', title: 'Diviser un fichier PDF', description: 'Séparez votre document pour obtenir un fichier PDF indépendant pour chaque page.', action: 'Diviser le PDF', icon: Scissors },
-  { id: 'editor', path: '/modifier-pdf', label: 'Modifier', title: 'Modifier un PDF', description: 'Ajoutez du texte, des images, des annotations et des dessins, puis réorganisez les pages visuellement.', action: 'Modifier le PDF', icon: ListOrdered },
-  { id: 'forms', path: '/formulaires-pdf', label: 'Formulaires', title: 'Remplir et créer des formulaires PDF', description: 'Détectez les champs existants, remplissez-les et ajoutez visuellement vos propres champs interactifs.', action: 'Modifier le formulaire', icon: FormInput },
-  { id: 'organize', path: '/organiser-pdf', label: 'Organiser', title: 'Organiser les pages d’un PDF', description: 'Choisissez précisément les pages à conserver et l’ordre dans lequel elles doivent apparaître.', action: 'Organiser le PDF', icon: ListOrdered },
-  { id: 'rotate', path: '/pivoter-pdf', label: 'Pivoter', title: 'Faire pivoter un PDF', description: 'Tournez toutes les pages de votre PDF à 90°, 180° ou 270°.', action: 'Faire pivoter le PDF', icon: RotateCw },
-  { id: 'render', path: '/pdf-en-png', label: 'PDF → PNG', title: 'Convertir un PDF en PNG', description: 'Transformez chaque page de votre document en image PNG haute résolution.', action: 'Convertir en PNG', icon: Images },
-  { id: 'images', path: '/images-en-pdf', label: 'Images → PDF', title: 'Convertir des images en PDF', description: 'Regroupez vos images PNG, JPG, WebP ou ICO dans un document PDF.', action: 'Créer le PDF', icon: FileImage },
+  { id: 'merge', path: '/fusionner-pdf', title: 'Fusionner des fichiers PDF', description: 'Combinez plusieurs PDF et choisissez leur ordre avant de créer un seul document.', action: 'Fusionner les PDF' },
+  { id: 'split', path: '/diviser-pdf', title: 'Diviser un fichier PDF', description: 'Séparez votre document pour obtenir un fichier PDF indépendant pour chaque page.', action: 'Diviser le PDF' },
+  { id: 'editor', path: '/modifier-pdf', title: 'Modifier un PDF', description: 'Ajoutez du texte, des images, des annotations et des dessins, puis réorganisez les pages visuellement.', action: 'Modifier le PDF' },
+  { id: 'forms', path: '/formulaires-pdf', title: 'Remplir et créer des formulaires PDF', description: 'Détectez les champs existants, remplissez-les et ajoutez visuellement vos propres champs interactifs.', action: 'Modifier le formulaire' },
+  { id: 'organize', path: '/organiser-pdf', title: 'Organiser les pages d’un PDF', description: 'Choisissez précisément les pages à conserver et l’ordre dans lequel elles doivent apparaître.', action: 'Organiser le PDF' },
+  { id: 'rotate', path: '/pivoter-pdf', title: 'Faire pivoter un PDF', description: 'Tournez toutes les pages de votre PDF à 90°, 180° ou 270°.', action: 'Faire pivoter le PDF' },
+  { id: 'render', path: '/pdf-en-png', title: 'Convertir un PDF en PNG', description: 'Transformez chaque page de votre document en image PNG haute résolution.', action: 'Convertir en PNG' },
+  { id: 'images', path: '/images-en-pdf', title: 'Convertir des images en PDF', description: 'Regroupez vos images PNG, JPG, WebP ou ICO dans un document PDF.', action: 'Créer le PDF' },
 ];
 
 const validTools = new Set<Tool>(tools.map(item => item.id));
@@ -48,7 +46,6 @@ function moveItem<T>(items: T[], fromIndex: number, toIndex: number): T[] {
 
 const PdfTools = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const initialFile = (location.state as LocationState)?.initialFile;
   const [fallbackTool] = useState<Tool>(initialFile ? 'editor' : 'merge');
@@ -163,17 +160,6 @@ const PdfTools = () => {
     previewUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
     previewUrlsRef.current.clear();
     setPreviews([]);
-  };
-
-  const changeTool = (next: Tool) => {
-    resetResults();
-    clearPreviews();
-    setFiles([]);
-    setPageSelection('');
-    setPageCount(null);
-    setLoadingPreviews(false);
-    const destination = tools.find(item => item.id === next)?.path ?? '/fusionner-pdf';
-    navigate(destination);
   };
 
   const handleFiles = (selected: File[]) => {
@@ -299,19 +285,6 @@ const PdfTools = () => {
             <FileDropZone onFiles={handleFiles} accept={accept} multiple={multiple} title={uploadTitle} hint={uploadHint} />
           )}
         </div>
-
-        <nav className="my-8 flex flex-wrap justify-center gap-2" aria-label="Autres outils PDF">
-          {tools.map(item => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => changeTool(item.id)}
-              className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-medium transition ${tool === item.id ? 'border-gray-950 bg-gray-950 text-white' : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300 hover:text-gray-950'}`}
-            >
-              <item.icon size={15} /> {item.label}
-            </button>
-          ))}
-        </nav>
 
         {files.length > 0 && (
           <section className="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
