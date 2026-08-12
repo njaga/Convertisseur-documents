@@ -15,10 +15,17 @@ const Logo: React.FC<LogoProps> = ({ className = "", size = 32 }) => {
             xmlns="http://www.w3.org/2000/svg"
             className={className}
         >
-            <rect width="32" height="32" rx="10" fill="#3B82F6" />
-            <path d="M10 10H17V15H22V22H10V10Z" fill="white" fillOpacity="0.9" />
-            <path d="M22 15L17 10V15H22Z" fill="white" fillOpacity="0.5" />
-            <path d="M17 18L21 21M21 21L17 24M21 21H14" stroke="#111827" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <defs>
+                <linearGradient id="doxali-brand-gradient" x1="3" y1="2" x2="29" y2="30" gradientUnits="userSpaceOnUse">
+                    <stop stopColor="#4F46E5" />
+                    <stop offset="0.55" stopColor="#7C3AED" />
+                    <stop offset="1" stopColor="#06B6D4" />
+                </linearGradient>
+            </defs>
+            <rect width="32" height="32" rx="10" fill="url(#doxali-brand-gradient)" />
+            <path d="M10 9.5H17.2V14.8H22.5V22.5H10V9.5Z" fill="white" fillOpacity="0.96" />
+            <path d="M22.5 14.8L17.2 9.5V14.8H22.5Z" fill="white" fillOpacity="0.52" />
+            <path d="M17 18.2L21 21M21 21L17 23.8M21 21H14" stroke="#111827" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
     );
 };
