@@ -181,6 +181,10 @@ function hasUsefulEmbeddedText(text: string): boolean {
   return text.replace(/\s/g, '').length >= 24;
 }
 
+type OcrSessionState = {
+  promise: Promise<OcrSession> | null;
+};
+
 export async function runLocalOcr(
   file: File,
   languages: string[],
@@ -194,12 +198,12 @@ export async function runLocalOcr(
     const loadingTask = getDocument({ data: new Uint8Array(await file.arrayBuffer()) });
     const pdf = await loadingTask.promise;
     const pageTexts: string[] = [];
-    let sessionPromise: Promise<OcrSession> | null = null;
+    const sessionState: OcrSessionState = { promise: null };
     let activePage = 1;
 
     const getSession = () => {
-      if (!sessionPromise) {
-        sessionPromise = createOcrSession(languages, engineProgress => {
+      if (!sessionState.promise) {
+        sessionState.promise = createOcrSession(languages, engineProgress => {
           const pageFraction = engineProgress.status.toLowerCase().includes('recognizing text')
             ? Math.min(1, Math.max(0, engineProgress.progress))
             : 0;
@@ -212,7 +216,7 @@ export async function runLocalOcr(
           });
         });
       }
-      return sessionPromise;
+      return sessionState.promise;
     };
 
     try {
@@ -264,8 +268,9 @@ export async function runLocalOcr(
         }
       }
     } finally {
-      if (sessionPromise) {
-        const activeSession = await sessionPromise.catch(() => null);
+      const currentSessionPromise = sessionState.promise;
+      if (currentSessionPromise) {
+        const activeSession = await currentSessionPromise.catch(() => null);
         if (activeSession) await activeSession.terminate().catch(() => undefined);
       }
       await loadingTask.destroy();
