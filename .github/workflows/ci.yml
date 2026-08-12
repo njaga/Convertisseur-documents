@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
-      - fix/conversion-engine-hardening
-      - feat/v2-pdf-ico
   pull_request:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   verify:
