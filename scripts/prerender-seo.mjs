@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const SITE_URL = 'https://convertisseur-documents.vercel.app';
-const OG_IMAGE_URL = `${SITE_URL}/api/og-image`;
+const OG_IMAGE_URL = `${SITE_URL}/og-image.png`;
 const INDEX_ROBOTS = 'index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1';
 
 const escapeHtml = value => String(value)
