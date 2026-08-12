@@ -3,6 +3,7 @@ import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import type { Accept } from 'react-dropzone';
 import { ArrowDown, ArrowUp, Download, FileImage, FormInput, Images, ListOrdered, Loader2, Merge, RotateCw, Scissors, ShieldCheck, X } from 'lucide-react';
 import FileDropZone from '../components/FileDropZone';
+import FilePreview from '../components/FilePreview';
 import PdfFormEditor from '../components/PdfFormEditor';
 import PdfVisualEditor from '../components/PdfVisualEditor';
 import { createPdfPagePreviews, getPdfPageCount, imagesToPdf, mergePdfs, organizePdf, pdfToPngs, PdfOutput, PdfPagePreview, rotatePdf, splitPdf } from '../services/pdfTools';
@@ -192,7 +193,7 @@ const PdfTools = () => {
 
   const moveFile = (index: number, direction: -1 | 1) => {
     clearPreviews();
-    setLoadingPreviews(true);
+    setLoadingPreviews(tool !== 'images');
     setFiles(current => {
       const target = index + direction;
       if (target < 0 || target >= current.length) return current;
@@ -303,25 +304,63 @@ const PdfTools = () => {
               <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="font-semibold text-gray-950">{files.length} fichier{files.length > 1 ? 's' : ''} prêt{files.length > 1 ? 's' : ''}</p>
-                  <p className="mt-1 text-xs text-gray-500">{tool === 'merge' ? 'L’ordre ci-dessous sera utilisé dans le PDF final.' : 'Vous pouvez remplacer le fichier en recommençant la sélection.'}</p>
+                  <p className="mt-1 text-xs text-gray-500">
+                    {tool === 'merge'
+                      ? 'L’ordre ci-dessous sera utilisé dans le PDF final.'
+                      : tool === 'images'
+                        ? 'Chaque image deviendra une page du PDF, dans l’ordre affiché ci-dessous.'
+                        : 'Vous pouvez remplacer le fichier en recommençant la sélection.'}
+                  </p>
                 </div>
                 <button type="button" onClick={() => handleFiles([])} className="text-sm font-medium text-red-600 hover:text-red-700">Tout retirer</button>
               </div>
 
-              <div className="space-y-2 rounded-2xl bg-gray-50 p-3">
-                {files.map((file, index) => (
-                  <div key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-3">
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-xs font-semibold text-gray-600">{index + 1}</span>
-                    <span className="min-w-0 flex-1 truncate text-sm text-gray-700">{file.name}</span>
-                    <span className="hidden text-xs text-gray-400 sm:block">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
-                    {multiple && <>
-                      <button type="button" onClick={() => moveFile(index, -1)} disabled={index === 0} aria-label="Monter" className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-25"><ArrowUp size={15} /></button>
-                      <button type="button" onClick={() => moveFile(index, 1)} disabled={index === files.length - 1} aria-label="Descendre" className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-25"><ArrowDown size={15} /></button>
-                    </>}
-                    <button type="button" onClick={() => removeFile(index)} aria-label={`Retirer ${file.name}`} className="rounded-lg p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600"><X size={15} /></button>
+              {tool === 'images' ? (
+                <section aria-label="Aperçu et ordre des images">
+                  <div className="mb-3 flex flex-wrap items-end justify-between gap-2">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-800">Aperçu & ordre des pages</p>
+                      <p className="mt-1 text-xs text-gray-500">Vérifiez vos images avant création du PDF. Utilisez les flèches pour changer l’ordre des pages.</p>
+                    </div>
+                    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600">{files.length} page{files.length > 1 ? 's' : ''}</span>
                   </div>
-                ))}
-              </div>
+
+                  <div className="grid max-h-[46rem] gap-3 overflow-auto rounded-2xl border border-gray-200 bg-gray-100 p-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {files.map((file, index) => (
+                      <article key={`${file.name}-${file.size}-${file.lastModified}`} className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+                        <div className="relative bg-gray-50 p-2">
+                          <FilePreview file={file} className="!h-56 !rounded-xl !border-0 bg-white" />
+                          <span className="absolute left-4 top-4 flex h-8 min-w-8 items-center justify-center rounded-full bg-gray-950 px-2 text-xs font-bold text-white shadow">{index + 1}</span>
+                          <button type="button" onClick={() => removeFile(index)} aria-label={`Retirer ${file.name}`} title="Retirer cette image" className="absolute right-4 top-4 rounded-full bg-white/95 p-2 text-gray-600 shadow hover:bg-red-50 hover:text-red-600"><X size={15} /></button>
+                        </div>
+                        <div className="border-t border-gray-100 p-3">
+                          <p className="truncate text-sm font-medium text-gray-800" title={file.name}>{file.name}</p>
+                          <p className="mt-1 text-xs text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB · Page {index + 1}</p>
+                          <div className="mt-3 grid grid-cols-2 gap-2">
+                            <button type="button" onClick={() => moveFile(index, -1)} disabled={index === 0} className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"><ArrowUp size={14} /> Monter</button>
+                            <button type="button" onClick={() => moveFile(index, 1)} disabled={index === files.length - 1} className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-30"><ArrowDown size={14} /> Descendre</button>
+                          </div>
+                        </div>
+                      </article>
+                    ))}
+                  </div>
+                </section>
+              ) : (
+                <div className="space-y-2 rounded-2xl bg-gray-50 p-3">
+                  {files.map((file, index) => (
+                    <div key={`${file.name}-${file.size}-${file.lastModified}`} className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-3">
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-xs font-semibold text-gray-600">{index + 1}</span>
+                      <span className="min-w-0 flex-1 truncate text-sm text-gray-700">{file.name}</span>
+                      <span className="hidden text-xs text-gray-400 sm:block">{(file.size / 1024 / 1024).toFixed(2)} MB</span>
+                      {multiple && <>
+                        <button type="button" onClick={() => moveFile(index, -1)} disabled={index === 0} aria-label="Monter" className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-25"><ArrowUp size={15} /></button>
+                        <button type="button" onClick={() => moveFile(index, 1)} disabled={index === files.length - 1} aria-label="Descendre" className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 disabled:opacity-25"><ArrowDown size={15} /></button>
+                      </>}
+                      <button type="button" onClick={() => removeFile(index)} aria-label={`Retirer ${file.name}`} className="rounded-lg p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600"><X size={15} /></button>
+                    </div>
+                  ))}
+                </div>
+              )}
 
               {pageCount !== null && <p className="mt-2 text-xs text-gray-500">{pageCount} page{pageCount > 1 ? 's' : ''}</p>}
 
