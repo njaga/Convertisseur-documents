@@ -1,129 +1,158 @@
-import { Shield, Zap, Lock, Clock, Code, ArrowUpRight } from 'lucide-react';
+import {
+  AlertTriangle,
+  ArrowUpRight,
+  CheckCircle2,
+  HardDrive,
+  Mail,
+  Scale,
+  Server,
+  ShieldCheck,
+} from 'lucide-react';
+
+const sections = [
+  {
+    number: '01',
+    title: 'Accès au service',
+    paragraphs: [
+      'Doxali est une suite d’outils documentaires accessible sans création de compte. Le service peut évoluer, être interrompu temporairement ou voir certaines fonctions modifiées pour des raisons techniques, de sécurité ou de maintenance.',
+      'L’utilisation personnelle et professionnelle est autorisée, sous réserve de respecter la loi et les présentes conditions.',
+    ],
+  },
+  {
+    number: '02',
+    title: 'Confidentialité et traitement des fichiers',
+    paragraphs: [
+      'Doxali suit une approche local-first : les conversions d’images, d’audio, de vidéo, de texte ainsi que les principaux outils PDF sont exécutés dans votre navigateur lorsque cela est techniquement possible.',
+      'La conversion Office vers PDF est différente : lorsqu’un moteur Office est activé sur le déploiement, le document est transmis au service de conversion pour être traité. Le service est conçu pour supprimer ses fichiers temporaires après la requête. Si ce moteur n’est pas configuré, les formats Office ne sont pas proposés.',
+      'Les brouillons et l’historique disponibles dans l’application sont stockés localement dans votre navigateur. Ils ne constituent pas une sauvegarde cloud et peuvent disparaître si vous effacez les données du site ou changez d’appareil.',
+    ],
+  },
+  {
+    number: '03',
+    title: 'Utilisation responsable',
+    paragraphs: [
+      'Vous restez responsable des fichiers que vous importez ou traitez avec Doxali. Vous devez disposer des droits nécessaires sur leur contenu et ne pas utiliser le service pour traiter, créer ou diffuser des contenus illicites.',
+      'Il est interdit de tenter de contourner les mécanismes de sécurité, de perturber volontairement le service, de surcharger les éventuels services serveur ou d’utiliser Doxali pour une activité frauduleuse.',
+    ],
+  },
+  {
+    number: '04',
+    title: 'Résultats, sauvegardes et responsabilité',
+    paragraphs: [
+      'Doxali est fourni en l’état. Même si les traitements sont testés, aucune compatibilité absolue ne peut être garantie pour tous les fichiers, navigateurs, appareils ou documents endommagés.',
+      'Conservez toujours une copie de vos documents d’origine et vérifiez le fichier généré avant de supprimer une source, de signer un document important ou de l’utiliser dans un contexte professionnel, administratif ou juridique.',
+      'Les performances dépendent notamment de la mémoire disponible, de la puissance de l’appareil, du navigateur et de la taille du fichier. Les gros PDF et les traitements FFmpeg peuvent être particulièrement exigeants sur mobile.',
+    ],
+  },
+  {
+    number: '05',
+    title: 'Évolution de Doxali',
+    paragraphs: [
+      'Les formats pris en charge, les limites techniques, l’interface et les présentes conditions peuvent évoluer à mesure que Doxali s’améliore. La date de mise à jour affichée sur cette page permet d’identifier la version applicable.',
+      'Une fonctionnalité indiquée comme locale peut être remplacée ou complétée par un traitement serveur uniquement si cela devient nécessaire au fonctionnement du produit ; la documentation et l’interface devront alors l’indiquer clairement.',
+    ],
+  },
+];
 
 const TermsOfUsePage = () => {
-  const features = [
-    { icon: Shield, title: 'Confidentialite', description: 'Vos fichiers restent sur votre appareil' },
-    { icon: Zap, title: 'Performance', description: 'Conversion locale sans upload' },
-    { icon: Lock, title: 'Securite', description: 'Aucun fichier stocke sur nos serveurs' },
-    { icon: Clock, title: 'Disponibilite', description: 'Application accessible sans inscription' },
-  ];
-
-  const terms = [
-    {
-      title: 'Utilisation',
-      items: [
-        'Service gratuit et open source',
-        'Usage personnel et professionnel autorise',
-        'Aucune inscription requise',
-      ],
-    },
-    {
-      title: 'Limites',
-      items: [
-        '100 MB par fichier maximum dans la version actuelle',
-        'Les performances dependent de la puissance et de la memoire de votre appareil',
-        'Les conversions PDF et Office ne sont pas encore disponibles',
-      ],
-    },
-    {
-      title: 'Responsabilite',
-      items: [
-        'Service fourni "tel quel"',
-        'Aucune garantie de disponibilite ou de compatibilite absolue',
-        'Utilisateur responsable du contenu des fichiers traites',
-      ],
-    },
-  ];
-
   return (
-    <div className="min-h-screen bg-gray-50 pt-24 pb-16">
-      <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f0f0f0_1px,transparent_1px),linear-gradient(to_bottom,#f0f0f0_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_110%)]" />
-        <div className="relative max-w-3xl mx-auto px-6 py-16 text-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white rounded-full border border-gray-200 text-sm text-gray-600 mb-6">
-            <Code size={14} />
-            <span>Open Source Project</span>
+    <main className="min-h-screen bg-white px-6 pb-20 pt-28 text-slate-950">
+      <div className="mx-auto max-w-5xl">
+        <header className="max-w-3xl">
+          <div className="flex flex-wrap items-center gap-3 text-sm">
+            <span className="font-semibold text-[#2457E6]">Conditions d’utilisation</span>
+            <span className="text-slate-300">•</span>
+            <span className="text-slate-500">Mise à jour : 12 août 2026</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-4">Conditions d'utilisation</h1>
-          <p className="text-lg text-gray-500 max-w-xl mx-auto">Un outil simple, transparent et respectueux de votre vie privee.</p>
-        </div>
-      </div>
+          <h1 className="mt-3 text-4xl font-bold tracking-[-0.035em] sm:text-5xl">Des règles simples pour un outil simple.</h1>
+          <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg">
+            Cette page explique comment Doxali fonctionne, ce qui reste sur votre appareil et les responsabilités à garder en tête lorsque vous traitez vos documents.
+          </p>
+        </header>
 
-      <div className="max-w-3xl mx-auto px-6 -mt-4">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {features.map(feature => (
-            <div key={feature.title} className="group relative bg-white rounded-2xl border border-gray-200 p-5 hover:border-gray-300 hover:shadow-lg transition-all duration-300">
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-white rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative">
-                <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center mb-3 group-hover:bg-gray-900 transition-colors">
-                  <feature.icon size={18} className="text-gray-600 group-hover:text-white transition-colors" />
+        <div className="mt-9 grid gap-px overflow-hidden rounded-xl border border-slate-200 bg-slate-200 sm:grid-cols-3">
+          <div className="bg-white p-5">
+            <CheckCircle2 size={20} className="text-[#2457E6]" />
+            <p className="mt-3 text-sm font-semibold">Sans compte</p>
+            <p className="mt-1 text-sm leading-6 text-slate-500">Les outils principaux sont accessibles sans créer de profil utilisateur.</p>
+          </div>
+          <div className="bg-white p-5">
+            <ShieldCheck size={20} className="text-[#2457E6]" />
+            <p className="mt-3 text-sm font-semibold">Local-first</p>
+            <p className="mt-1 text-sm leading-6 text-slate-500">Les traitements restent dans le navigateur chaque fois qu’un moteur local fiable est disponible.</p>
+          </div>
+          <div className="bg-white p-5">
+            <HardDrive size={20} className="text-[#2457E6]" />
+            <p className="mt-3 text-sm font-semibold">Stockage local</p>
+            <p className="mt-1 text-sm leading-6 text-slate-500">Brouillons et historique sont liés à ce navigateur, pas à un compte cloud.</p>
+          </div>
+        </div>
+
+        <div className="mt-12 grid gap-10 lg:grid-cols-[minmax(0,1fr)_280px] lg:items-start">
+          <div className="space-y-10">
+            {sections.map(section => (
+              <section key={section.number} className="border-t border-slate-200 pt-6">
+                <div className="grid gap-4 sm:grid-cols-[54px_1fr]">
+                  <span className="text-xs font-bold tracking-[0.12em] text-slate-400">{section.number}</span>
+                  <div>
+                    <h2 className="text-xl font-bold tracking-tight">{section.title}</h2>
+                    <div className="mt-3 space-y-3 text-sm leading-7 text-slate-600">
+                      {section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
+                    </div>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-gray-900 text-sm">{feature.title}</h3>
-                <p className="text-xs text-gray-500 mt-1">{feature.description}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+              </section>
+            ))}
+          </div>
 
-      <div className="max-w-3xl mx-auto px-6 mt-12">
-        <div className="grid md:grid-cols-3 gap-4">
-          {terms.map((section, index) => (
-            <div key={section.title} className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <h2 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <span className="w-6 h-6 bg-gray-900 text-white rounded-lg text-xs flex items-center justify-center">{index + 1}</span>
-                {section.title}
-              </h2>
-              <ul className="space-y-2.5">
-                {section.items.map(item => (
-                  <li key={item} className="flex items-start gap-2 text-sm text-gray-600">
-                    <div className="w-1 h-1 bg-gray-400 rounded-full mt-2 flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
+          <aside className="space-y-4 lg:sticky lg:top-24">
+            <div className="rounded-lg border border-slate-200 p-5">
+              <Server size={19} className="text-[#2457E6]" />
+              <h2 className="mt-3 text-sm font-semibold">Cas particulier : Office</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                DOC, DOCX, XLS, XLSX, PPT, PPTX et formats OpenDocument peuvent nécessiter un moteur serveur. L’interface ne les propose que lorsqu’il est configuré.
+              </p>
             </div>
-          ))}
-        </div>
-      </div>
 
-      <div className="max-w-3xl mx-auto px-6 mt-12">
-        <div className="relative overflow-hidden bg-gray-900 rounded-2xl p-8">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-gray-800 to-transparent rounded-full blur-3xl opacity-50" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-gray-800 to-transparent rounded-full blur-2xl opacity-30" />
-          <div className="relative">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-              <div>
-                <p className="text-gray-400 text-sm mb-1">Developpe par</p>
-                <h3 className="text-xl font-semibold text-white">Ndiaga Ndiaye</h3>
-                <p className="text-gray-400 mt-1">Full Stack Developer</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <a href="https://ndiagandiaye.com" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2 bg-white text-gray-900 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors">
-                  Portfolio <ArrowUpRight size={14} />
-                </a>
-                <a href="https://github.com/njaga" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 py-2 bg-gray-800 text-white rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors">
-                  GitHub <ArrowUpRight size={14} />
-                </a>
-              </div>
+            <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-5">
+              <AlertTriangle size={19} className="text-amber-700" />
+              <h2 className="mt-3 text-sm font-semibold text-slate-900">Documents sensibles</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Pour un document confidentiel ou critique, vérifiez toujours le type de traitement indiqué dans l’outil avant de continuer.
+              </p>
             </div>
-            <div className="mt-6 pt-6 border-t border-gray-800">
-              <div className="flex flex-wrap gap-2">
-                {['React', 'TypeScript', 'Vite', 'FFmpeg.wasm', 'Tailwind CSS'].map(skill => (
-                  <span key={skill} className="px-3 py-1 bg-gray-800 text-gray-300 rounded-full text-xs">{skill}</span>
-                ))}
-              </div>
+
+            <div className="rounded-lg border border-slate-200 p-5">
+              <Scale size={19} className="text-slate-600" />
+              <h2 className="mt-3 text-sm font-semibold">Portée de cette page</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Ces conditions décrivent l’usage de Doxali et son fonctionnement actuel. Elles ne constituent pas un conseil juridique adapté à une situation particulière.
+              </p>
+            </div>
+          </aside>
+        </div>
+
+        <section className="mt-12 border-t border-slate-200 pt-8">
+          <div className="grid gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
+            <div className="max-w-2xl">
+              <Mail size={20} className="text-[#2457E6]" />
+              <h2 className="mt-3 text-xl font-bold">Une question sur Doxali ?</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Pour signaler un problème, demander une précision ou discuter du traitement des fichiers, vous pouvez contacter le développeur du projet.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <a href="mailto:contact@ndiagandiaye.com" className="inline-flex items-center gap-2 rounded-md bg-[#2457E6] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1d48c7]">
+                Contact <ArrowUpRight size={14} />
+              </a>
+              <a href="https://github.com/njaga/Convertisseur-documents" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-md border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:border-slate-400 hover:bg-slate-50">
+                Code source <ArrowUpRight size={14} />
+              </a>
             </div>
           </div>
-        </div>
+        </section>
       </div>
-
-      <div className="max-w-3xl mx-auto px-6 mt-8 text-center">
-        <p className="text-sm text-gray-400">
-          Questions ? <a href="mailto:contact@ndiagandiaye.com" className="text-gray-600 hover:text-gray-900 transition-colors">contact@ndiagandiaye.com</a>
-        </p>
-      </div>
-    </div>
+    </main>
   );
 };
 
