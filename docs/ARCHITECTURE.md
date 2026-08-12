@@ -124,7 +124,7 @@ This avoids maintaining separate route metadata in React, `index.html`, the site
 
 The reference deployment uses Vercel.
 
-`vercel.json` maps known routes to the HTML files generated in `dist/__prerender`. Static assets are served normally, and the optional social-image endpoint is implemented as a Vercel Function under `api/`.
+`vercel.json` maps known routes to the HTML files generated in `dist/__prerender`. The social preview is the static 1200 × 630 asset in `public/og-image.png`, so link previews do not require server compute.
 
 The client application itself remains a Vite/React application and does not require a Node.js web server for normal browser-side document operations.
 
