@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
-import { ChevronDown, FileArchive, FileImage, FileSignature, FileText, Files, FormInput, History, Image, Layers3, Menu, PencilLine, RotateCw, ScanText, Scissors, Split, X, Zap } from 'lucide-react';
+import { ChevronDown, FileArchive, FileImage, FileSignature, FileText, Files, FormInput, History, Image, Layers3, Menu, PencilLine, RotateCw, Save, ScanText, Scissors, Split, X, Zap } from 'lucide-react';
 import Logo from './Logo';
 
 const mainLinks = [
@@ -45,6 +45,7 @@ const toolGroups = [
     links: [
       { to: '/ocr-pdf', label: 'OCR PDF & images', icon: ScanText },
       { to: '/creer-pdf', label: 'Créer un PDF', icon: FileText },
+      { to: '/brouillons', label: 'Brouillons locaux', icon: Save },
       { to: '/historique', label: 'Historique local', icon: History },
       { to: '/a-propos', label: 'À propos de Doxali', icon: FileArchive },
     ],
