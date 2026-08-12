@@ -1,0 +1,54 @@
+{
+  "/filigrane-pdf": {
+    "heading": "Marquer un PDF avec un filigrane sans modifier son contenu principal",
+    "intro": [
+      "Un filigrane permet d’identifier visuellement un document, d’indiquer son statut ou de rappeler son origine sans remplacer le contenu des pages. Doxali peut appliquer un texte, un logo ou un cachet avec une opacité et une rotation réglables.",
+      "Le filigrane peut être centré ou répété sur la page, puis appliqué à toutes les pages, uniquement à la première ou à une sélection personnalisée. Le traitement est réalisé dans le navigateur."
+    ],
+    "steps": [
+      {
+        "title": "Ajoutez votre PDF",
+        "description": "Sélectionnez le document à marquer. Doxali génère un aperçu de la première page pour préparer le rendu."
+      },
+      {
+        "title": "Réglez le filigrane",
+        "description": "Choisissez un texte ou une image, puis ajustez la taille, l’opacité, la rotation, la répétition et les pages concernées."
+      },
+      {
+        "title": "Générez le PDF",
+        "description": "Doxali ajoute le filigrane aux pages sélectionnées et produit un nouveau PDF sans remplacer votre fichier original."
+      }
+    ],
+    "faqs": [
+      {
+        "question": "Puis-je utiliser un logo ou un cachet comme filigrane ?",
+        "answer": "Oui. Vous pouvez importer une image et régler sa taille, son opacité et sa rotation avant de l’appliquer au PDF. Les images PNG avec transparence sont particulièrement adaptées aux logos et cachets."
+      },
+      {
+        "question": "Le filigrane peut-il être ajouté seulement à certaines pages ?",
+        "answer": "Oui. Vous pouvez l’appliquer à toutes les pages, uniquement à la première page ou saisir une sélection comme 1,3,5-8."
+      },
+      {
+        "question": "Le filigrane protège-t-il juridiquement ou techniquement le PDF ?",
+        "answer": "Non. Un filigrane est un marquage visuel. Il peut décourager certaines réutilisations ou indiquer la provenance d’un document, mais il ne remplace ni un chiffrement, ni une protection par mot de passe, ni une signature électronique certifiée."
+      }
+    ],
+    "related": [
+      {
+        "href": "/signer-pdf",
+        "label": "Signer un PDF",
+        "description": "Ajoutez une signature ou un cachet avec un placement visuel précis."
+      },
+      {
+        "href": "/modifier-pdf",
+        "label": "Modifier un PDF",
+        "description": "Ajoutez du texte, des images et des annotations directement sur les pages."
+      },
+      {
+        "href": "/compresser-pdf",
+        "label": "Compresser un PDF",
+        "description": "Réduisez le poids du document après vos modifications lorsque c’est nécessaire."
+      }
+    ]
+  }
+}
