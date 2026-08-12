@@ -1,8 +1,29 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
+    { "source": "/modifier-pdf", "destination": "/__prerender/modifier-pdf.html" },
+    { "source": "/fusionner-pdf", "destination": "/__prerender/fusionner-pdf.html" },
+    { "source": "/diviser-pdf", "destination": "/__prerender/diviser-pdf.html" },
+    { "source": "/compresser-pdf", "destination": "/__prerender/compresser-pdf.html" },
+    { "source": "/signer-pdf", "destination": "/__prerender/signer-pdf.html" },
+    { "source": "/formulaires-pdf", "destination": "/__prerender/formulaires-pdf.html" },
+    { "source": "/organiser-pdf", "destination": "/__prerender/organiser-pdf.html" },
+    { "source": "/pivoter-pdf", "destination": "/__prerender/pivoter-pdf.html" },
+    { "source": "/pdf-en-png", "destination": "/__prerender/pdf-en-png.html" },
+    { "source": "/images-en-pdf", "destination": "/__prerender/images-en-pdf.html" },
+    { "source": "/convertir", "destination": "/__prerender/convertir.html" },
+    { "source": "/optimiser-images", "destination": "/__prerender/optimiser-images.html" },
+    { "source": "/compresser-video", "destination": "/__prerender/compresser-video.html" },
+    { "source": "/ocr-pdf", "destination": "/__prerender/ocr-pdf.html" },
+    { "source": "/creer-pdf", "destination": "/__prerender/creer-pdf.html" },
+    { "source": "/batch", "destination": "/__prerender/batch.html" },
+    { "source": "/formats", "destination": "/__prerender/formats.html" },
+    { "source": "/conditions", "destination": "/__prerender/conditions.html" },
+    { "source": "/a-propos", "destination": "/__prerender/a-propos.html" },
+    { "source": "/brouillons", "destination": "/__prerender/brouillons.html" },
+    { "source": "/historique", "destination": "/__prerender/historique.html" },
+    { "source": "/documents", "destination": "/__prerender/documents.html" },
+    { "source": "/pdf", "destination": "/__prerender/pdf.html" },
+    { "source": "/optimiser", "destination": "/__prerender/optimiser.html" }
   ]
 }
