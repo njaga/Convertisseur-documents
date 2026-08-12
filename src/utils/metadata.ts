@@ -1,9 +1,8 @@
 export const siteMetadata = {
-  title: "Convertisseur de Documents en Ligne Gratuit",
-  description: "Convertissez gratuitement vos fichiers en ligne : PDF, DOCX, images, vidéos et audio. Conversion rapide, sécurisée et sans inscription.",
-  keywords: "convertisseur fichiers, conversion pdf, convertir images, convertir vidéos, convertir audio, conversion gratuite, convertisseur en ligne",
+  title: "Doxali — Outils PDF & documents gratuits en ligne",
+  description: "Modifiez, fusionnez, compressez, signez et convertissez vos PDF et documents gratuitement, sans compte et avec traitement local en priorité.",
   author: "Ndiaga Ndiaye",
   siteUrl: "https://convertisseur-documents.vercel.app",
-  ogImage: "/og-image.jpg",
+  ogImage: "/og-image.png",
   twitterHandle: "@ndiagandiaye",
 };
