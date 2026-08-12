@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useEffect, useRef, useState } from 'react';
 import { ChevronDown, FileArchive, FileImage, FileSignature, FileText, Files, FormInput, History, Image, Layers3, Menu, PencilLine, RotateCw, Save, ScanText, Scissors, Split, X, Zap } from 'lucide-react';
 import Logo from './Logo';
+import RouteMetadata from './RouteMetadata';
 
 const mainLinks = [
   { to: '/fusionner-pdf', label: 'Fusionner PDF' },
@@ -86,74 +87,77 @@ export default function Navbar() {
   };
 
   return (
-    <nav className={`fixed z-50 w-full border-b border-slate-200 bg-white transition-shadow ${isScrolled ? 'shadow-sm' : ''}`}>
-      <div className="mx-auto max-w-7xl px-5 lg:px-6">
-        <div className="flex h-16 items-center justify-between gap-6">
-          <Link to="/" onClick={closeMenus} className="flex shrink-0 items-center gap-2.5">
-            <Logo size={32} />
-            <span className="text-lg font-bold tracking-[-0.02em] text-slate-950">Doxali</span>
-          </Link>
+    <>
+      <RouteMetadata />
+      <nav className={`fixed z-50 w-full border-b border-slate-200 bg-white transition-shadow ${isScrolled ? 'shadow-sm' : ''}`}>
+        <div className="mx-auto max-w-7xl px-5 lg:px-6">
+          <div className="flex h-16 items-center justify-between gap-6">
+            <Link to="/" onClick={closeMenus} className="flex shrink-0 items-center gap-2.5">
+              <Logo size={32} />
+              <span className="text-lg font-bold tracking-[-0.02em] text-slate-950">Doxali</span>
+            </Link>
 
-          <div className="hidden flex-1 items-center justify-end gap-6 lg:flex">
-            {mainLinks.map(link => (
-              <Link key={link.to} to={link.to} onClick={() => setMoreOpen(false)} className="whitespace-nowrap text-sm font-medium text-slate-700 transition-colors hover:text-[#2457E6]">{link.label}</Link>
-            ))}
-
-            <div ref={moreMenuRef} className="relative">
-              <button
-                type="button"
-                aria-haspopup="menu"
-                aria-expanded={moreOpen}
-                onClick={() => setMoreOpen(open => !open)}
-                className={`inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold transition-colors ${moreOpen ? 'text-[#2457E6]' : 'text-slate-800 hover:text-[#2457E6]'}`}
-              >
-                Tous les outils
-                <ChevronDown size={14} className={`transition-transform ${moreOpen ? 'rotate-180' : ''}`} />
-              </button>
-
-              {moreOpen && (
-                <div role="menu" className="absolute right-0 top-full z-50 mt-4 w-[780px] border border-slate-200 bg-white p-5 shadow-xl">
-                  <div className="grid grid-cols-4 gap-5">
-                    {toolGroups.map(group => (
-                      <section key={group.title}>
-                        <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">{group.title}</p>
-                        <div className="space-y-1">
-                          {group.links.map(link => (
-                            <Link key={link.to} to={link.to} role="menuitem" onClick={() => setMoreOpen(false)} className="group flex items-center gap-2.5 px-2 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-[#F5F7FF] hover:text-[#2457E6]">
-                              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600 group-hover:text-[#2457E6]"><link.icon size={15} /></span>
-                              <span>{link.label}</span>
-                            </Link>
-                          ))}
-                        </div>
-                      </section>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          <button onClick={() => setMobile(open => !open)} className="border border-slate-200 bg-white p-2 text-slate-600 lg:hidden" aria-label="Menu" aria-expanded={mobile}>
-            {mobile ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-
-        {mobile && (
-          <div className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-slate-100 py-4 lg:hidden">
-            <div className="grid gap-1 sm:grid-cols-2">
-              {mainLinks.map(link => <Link key={link.to} to={link.to} onClick={closeMenus} className="px-3 py-3 text-sm font-semibold text-slate-800 hover:bg-[#F5F7FF] hover:text-[#2457E6]">{link.label}</Link>)}
-            </div>
-            <div className="mt-4 grid gap-5 border-t border-slate-100 pt-4 sm:grid-cols-2">
-              {toolGroups.map(group => (
-                <section key={group.title}>
-                  <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">{group.title}</p>
-                  {group.links.map(link => <Link key={link.to} to={link.to} onClick={closeMenus} className="flex items-center gap-2 px-3 py-2.5 text-sm text-slate-700 hover:bg-[#F5F7FF] hover:text-[#2457E6]"><link.icon size={15} /> {link.label}</Link>)}
-                </section>
+            <div className="hidden flex-1 items-center justify-end gap-6 lg:flex">
+              {mainLinks.map(link => (
+                <Link key={link.to} to={link.to} onClick={() => setMoreOpen(false)} className="whitespace-nowrap text-sm font-medium text-slate-700 transition-colors hover:text-[#2457E6]">{link.label}</Link>
               ))}
+
+              <div ref={moreMenuRef} className="relative">
+                <button
+                  type="button"
+                  aria-haspopup="menu"
+                  aria-expanded={moreOpen}
+                  onClick={() => setMoreOpen(open => !open)}
+                  className={`inline-flex items-center gap-1.5 whitespace-nowrap text-sm font-semibold transition-colors ${moreOpen ? 'text-[#2457E6]' : 'text-slate-800 hover:text-[#2457E6]'}`}
+                >
+                  Tous les outils
+                  <ChevronDown size={14} className={`transition-transform ${moreOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {moreOpen && (
+                  <div role="menu" className="absolute right-0 top-full z-50 mt-4 w-[780px] border border-slate-200 bg-white p-5 shadow-xl">
+                    <div className="grid grid-cols-4 gap-5">
+                      {toolGroups.map(group => (
+                        <section key={group.title}>
+                          <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">{group.title}</p>
+                          <div className="space-y-1">
+                            {group.links.map(link => (
+                              <Link key={link.to} to={link.to} role="menuitem" onClick={() => setMoreOpen(false)} className="group flex items-center gap-2.5 px-2 py-2.5 text-sm font-medium text-slate-700 transition-colors hover:bg-[#F5F7FF] hover:text-[#2457E6]">
+                                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-slate-100 text-slate-600 group-hover:text-[#2457E6]"><link.icon size={15} /></span>
+                                <span>{link.label}</span>
+                              </Link>
+                            ))}
+                          </div>
+                        </section>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
+
+            <button onClick={() => setMobile(open => !open)} className="border border-slate-200 bg-white p-2 text-slate-600 lg:hidden" aria-label="Menu" aria-expanded={mobile}>
+              {mobile ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
-        )}
-      </div>
-    </nav>
+
+          {mobile && (
+            <div className="max-h-[calc(100vh-4rem)] overflow-y-auto border-t border-slate-100 py-4 lg:hidden">
+              <div className="grid gap-1 sm:grid-cols-2">
+                {mainLinks.map(link => <Link key={link.to} to={link.to} onClick={closeMenus} className="px-3 py-3 text-sm font-semibold text-slate-800 hover:bg-[#F5F7FF] hover:text-[#2457E6]">{link.label}</Link>)}
+              </div>
+              <div className="mt-4 grid gap-5 border-t border-slate-100 pt-4 sm:grid-cols-2">
+                {toolGroups.map(group => (
+                  <section key={group.title}>
+                    <p className="mb-1 px-3 text-[11px] font-semibold uppercase tracking-wider text-slate-400">{group.title}</p>
+                    {group.links.map(link => <Link key={link.to} to={link.to} onClick={closeMenus} className="flex items-center gap-2 px-3 py-2.5 text-sm text-slate-700 hover:bg-[#F5F7FF] hover:text-[#2457E6]"><link.icon size={15} /> {link.label}</Link>)}
+                  </section>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
+    </>
   );
 }
