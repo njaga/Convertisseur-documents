@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type PointerEvent as ReactPointerEvent } from 'react';
-import { CheckSquare2, ChevronDown, CircleDot, Copy, Download, FileSignature, FormInput, GripVertical, Loader2, RotateCcw, Search, Trash2, Type, X } from 'lucide-react';
+import { CheckCircle2, CheckSquare2, ChevronDown, CircleDot, Cloud, Copy, Download, FileSignature, FormInput, GripVertical, Keyboard, Loader2, Redo2, RotateCcw, Search, Trash2, Type, Undo2, X } from 'lucide-react';
 import { createPdfPagePreviews, type PdfOutput, type PdfPagePreview } from '../services/pdfTools';
 import {
   applyPdfFormEdits,
@@ -10,6 +10,7 @@ import {
   type PdfFormInspection,
   type PdfFormValue,
 } from '../services/pdfForms';
+import { findWorkspaceDraft, saveWorkspaceDraft } from '../services/workspace';
 
 interface DragState {
   id: string;
@@ -24,6 +25,21 @@ interface DragState {
   stageHeight: number;
 }
 
+interface FormSnapshot {
+  values: Record<string, PdfFormValue>;
+  removedFields: string[];
+  newFields: NewPdfFormField[];
+  flatten: boolean;
+  removeXfa: boolean;
+}
+
+interface PdfFormDraftState extends FormSnapshot {
+  version: 1;
+  activePage: number;
+}
+
+type DraftStatus = 'idle' | 'saving' | 'saved' | 'error';
+
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 const fieldMeta: Record<NewPdfFormFieldType, { label: string; icon: typeof Type }> = {
   text: { label: 'Champ texte', icon: Type },
@@ -34,6 +50,14 @@ const fieldMeta: Record<NewPdfFormFieldType, { label: string; icon: typeof Type 
 
 function initialValues(inspection: PdfFormInspection): Record<string, PdfFormValue> {
   return Object.fromEntries(inspection.fields.map(field => [field.name, field.value]));
+}
+
+function cloneValues(values: Record<string, PdfFormValue>): Record<string, PdfFormValue> {
+  return Object.fromEntries(Object.entries(values).map(([key, value]) => [key, Array.isArray(value) ? [...value] : value]));
+}
+
+function cloneNewFields(fields: NewPdfFormField[]): NewPdfFormField[] {
+  return fields.map(field => ({ ...field, options: [...field.options] }));
 }
 
 function existingTypeLabel(type: PdfFormFieldSnapshot['type']): string {
@@ -66,15 +90,27 @@ export default function PdfFormEditor({ file }: { file: File }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [output, setOutput] = useState<PdfOutput | null>(null);
+  const [undoStack, setUndoStack] = useState<FormSnapshot[]>([]);
+  const [redoStack, setRedoStack] = useState<FormSnapshot[]>([]);
+  const [draftStatus, setDraftStatus] = useState<DraftStatus>('idle');
+  const [restoredDraft, setRestoredDraft] = useState(false);
   const previewUrls = useRef<string[]>([]);
   const outputUrl = useRef<string | null>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef<DragState | null>(null);
+  const draftId = useRef<string | undefined>(undefined);
+  const undoButtonRef = useRef<HTMLButtonElement>(null);
+  const redoButtonRef = useRef<HTMLButtonElement>(null);
+  const saveButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let cancelled = false;
-    void Promise.all([inspectPdfForm(file), createPdfPagePreviews([file], 0.9)])
-      .then(([nextInspection, nextPreviews]) => {
+    void Promise.all([
+      inspectPdfForm(file),
+      createPdfPagePreviews([file], 0.9),
+      findWorkspaceDraft<PdfFormDraftState>('pdf-form', file).catch(() => null),
+    ])
+      .then(([nextInspection, nextPreviews, draft]) => {
         if (cancelled) {
           nextPreviews.forEach(preview => URL.revokeObjectURL(preview.url));
           return;
@@ -82,7 +118,21 @@ export default function PdfFormEditor({ file }: { file: File }) {
         previewUrls.current = nextPreviews.map(preview => preview.url);
         setInspection(nextInspection);
         setPreviews(nextPreviews);
-        setValues(initialValues(nextInspection));
+
+        if (draft?.state?.version === 1) {
+          const state = draft.state;
+          draftId.current = draft.id;
+          setValues(cloneValues(state.values));
+          setRemovedFields(new Set(state.removedFields));
+          setNewFields(cloneNewFields(state.newFields));
+          setFlatten(state.flatten);
+          setRemoveXfa(state.removeXfa);
+          setActivePage(clamp(state.activePage || 1, 1, Math.max(1, nextInspection.pageCount)));
+          setRestoredDraft(true);
+          setDraftStatus('saved');
+        } else {
+          setValues(initialValues(nextInspection));
+        }
       })
       .catch(caught => {
         if (!cancelled) setError(caught instanceof Error ? caught.message : 'Impossible de lire les champs de ce PDF.');
@@ -97,6 +147,29 @@ export default function PdfFormEditor({ file }: { file: File }) {
       outputUrl.current = null;
     };
   }, [file]);
+
+  useEffect(() => {
+    if (loading || !inspection) return undefined;
+    const timer = window.setTimeout(() => {
+      setDraftStatus('saving');
+      const state: PdfFormDraftState = {
+        version: 1,
+        values: cloneValues(values),
+        removedFields: Array.from(removedFields),
+        newFields: cloneNewFields(newFields),
+        flatten,
+        removeXfa,
+        activePage,
+      };
+      saveWorkspaceDraft('pdf-form', file, state, draftId.current)
+        .then(draft => {
+          draftId.current = draft.id;
+          setDraftStatus('saved');
+        })
+        .catch(() => setDraftStatus('error'));
+    }, 600);
+    return () => window.clearTimeout(timer);
+  }, [activePage, file, flatten, inspection, loading, newFields, removeXfa, removedFields, values]);
 
   useEffect(() => {
     const move = (event: PointerEvent) => {
@@ -129,6 +202,33 @@ export default function PdfFormEditor({ file }: { file: File }) {
     };
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const modifier = event.metaKey || event.ctrlKey;
+      const key = event.key.toLowerCase();
+      if (modifier && key === 's') {
+        event.preventDefault();
+        saveButtonRef.current?.click();
+        return;
+      }
+
+      const target = event.target as HTMLElement | null;
+      if (target?.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName ?? '')) return;
+      if (modifier && key === 'z' && event.shiftKey) {
+        event.preventDefault();
+        redoButtonRef.current?.click();
+      } else if (modifier && key === 'z') {
+        event.preventDefault();
+        undoButtonRef.current?.click();
+      } else if (modifier && key === 'y') {
+        event.preventDefault();
+        redoButtonRef.current?.click();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const activePreview = previews.find(preview => preview.pageNumber === activePage);
   const selectedField = newFields.find(field => field.id === selectedFieldId) ?? null;
   const filteredExisting = useMemo(() => {
@@ -137,14 +237,70 @@ export default function PdfFormEditor({ file }: { file: File }) {
     return term ? inspection.fields.filter(field => `${field.name} ${existingTypeLabel(field.type)}`.toLowerCase().includes(term)) : inspection.fields;
   }, [inspection, search]);
 
-  const updateExistingValue = (name: string, value: PdfFormValue) => setValues(current => ({ ...current, [name]: value }));
-  const updateNewField = (id: string, patch: Partial<NewPdfFormField>) => setNewFields(current => current.map(field => field.id === id ? { ...field, ...patch } : field));
-
-  const toggleRemoved = (name: string) => setRemovedFields(current => {
-    const next = new Set(current);
-    if (next.has(name)) next.delete(name); else next.add(name);
-    return next;
+  const snapshot = (): FormSnapshot => ({
+    values: cloneValues(values),
+    removedFields: Array.from(removedFields),
+    newFields: cloneNewFields(newFields),
+    flatten,
+    removeXfa,
   });
+
+  const clearOutput = () => {
+    if (outputUrl.current) URL.revokeObjectURL(outputUrl.current);
+    outputUrl.current = null;
+    setOutput(null);
+  };
+
+  const checkpoint = () => {
+    setUndoStack(stack => [...stack.slice(-29), snapshot()]);
+    setRedoStack([]);
+    clearOutput();
+  };
+
+  const applySnapshot = (state: FormSnapshot) => {
+    setValues(cloneValues(state.values));
+    setRemovedFields(new Set(state.removedFields));
+    setNewFields(cloneNewFields(state.newFields));
+    setFlatten(state.flatten);
+    setRemoveXfa(state.removeXfa);
+    setSelectedFieldId(null);
+    clearOutput();
+  };
+
+  const undo = () => {
+    const previous = undoStack[undoStack.length - 1];
+    if (!previous) return;
+    setRedoStack(stack => [...stack.slice(-29), snapshot()]);
+    setUndoStack(stack => stack.slice(0, -1));
+    applySnapshot(previous);
+  };
+
+  const redo = () => {
+    const next = redoStack[redoStack.length - 1];
+    if (!next) return;
+    setUndoStack(stack => [...stack.slice(-29), snapshot()]);
+    setRedoStack(stack => stack.slice(0, -1));
+    applySnapshot(next);
+  };
+
+  const updateExistingValue = (name: string, value: PdfFormValue) => {
+    checkpoint();
+    setValues(current => ({ ...current, [name]: value }));
+  };
+
+  const updateNewField = (id: string, patch: Partial<NewPdfFormField>) => {
+    checkpoint();
+    setNewFields(current => current.map(field => field.id === id ? { ...field, ...patch } : field));
+  };
+
+  const toggleRemoved = (name: string) => {
+    checkpoint();
+    setRemovedFields(current => {
+      const next = new Set(current);
+      if (next.has(name)) next.delete(name); else next.add(name);
+      return next;
+    });
+  };
 
   const nextFieldName = (type: NewPdfFormFieldType) => {
     const base = `doxali.${type}`;
@@ -155,6 +311,7 @@ export default function PdfFormEditor({ file }: { file: File }) {
   };
 
   const addField = (type: NewPdfFormFieldType) => {
+    checkpoint();
     const offset = (newFields.filter(field => field.page === activePage).length * 3) % 30;
     const compact = type === 'checkbox';
     const field: NewPdfFormField = {
@@ -179,13 +336,16 @@ export default function PdfFormEditor({ file }: { file: File }) {
   };
 
   const removeNewField = (id: string) => {
+    checkpoint();
     setNewFields(current => current.filter(field => field.id !== id));
     if (selectedFieldId === id) setSelectedFieldId(null);
   };
 
   const duplicateNewField = (field: NewPdfFormField) => {
+    checkpoint();
     const duplicate: NewPdfFormField = {
       ...field,
+      options: [...field.options],
       id: crypto.randomUUID(),
       name: nextFieldName(field.type),
       x: clamp(field.x + 3, 0, 100 - field.width),
@@ -200,6 +360,7 @@ export default function PdfFormEditor({ file }: { file: File }) {
     if (!rect) return;
     event.preventDefault();
     event.stopPropagation();
+    checkpoint();
     setSelectedFieldId(field.id);
     dragRef.current = {
       id: field.id,
@@ -234,13 +395,13 @@ export default function PdfFormEditor({ file }: { file: File }) {
 
   const reset = () => {
     if (!inspection) return;
+    checkpoint();
     setValues(initialValues(inspection));
     setRemovedFields(new Set());
     setNewFields([]);
     setSelectedFieldId(null);
     setFlatten(false);
     setRemoveXfa(false);
-    setOutput(null);
     setError(null);
   };
 
@@ -267,11 +428,21 @@ export default function PdfFormEditor({ file }: { file: File }) {
     <section className="mt-6 overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm" aria-label="Éditeur de formulaires PDF">
       <div className="border-b border-gray-100 bg-gray-50/60 p-5 md:p-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div><h2 className="text-lg font-semibold text-gray-950">Éditeur de formulaire</h2><p className="mt-1 text-sm text-gray-500">Remplissez les champs existants ou ajoutez vos propres champs directement sur les pages.</p></div>
-          <div className="flex flex-wrap gap-2 text-xs">
-            <span className="rounded-full border bg-white px-3 py-1.5"><strong>{inspection.fields.length}</strong> détecté{inspection.fields.length > 1 ? 's' : ''}</span>
-            <span className="rounded-full border bg-white px-3 py-1.5"><strong>{newFields.length}</strong> ajouté{newFields.length > 1 ? 's' : ''}</span>
-            <span className="rounded-full border bg-white px-3 py-1.5"><strong>{inspection.pageCount}</strong> page{inspection.pageCount > 1 ? 's' : ''}</span>
+          <div>
+            <h2 className="text-lg font-semibold text-gray-950">Éditeur de formulaire</h2>
+            <p className="mt-1 text-sm text-gray-500">Remplissez les champs existants ou ajoutez vos propres champs directement sur les pages.</p>
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-gray-500">
+              <span className="inline-flex items-center gap-1.5">{draftStatus === 'saving' ? <Cloud size={13} className="animate-pulse text-blue-600" /> : <CheckCircle2 size={13} className={draftStatus === 'error' ? 'text-red-500' : 'text-emerald-600'} />}{draftStatus === 'saving' ? 'Sauvegarde locale…' : draftStatus === 'error' ? 'Brouillon non sauvegardé' : restoredDraft ? 'Brouillon restauré et sauvegardé localement' : 'Sauvegarde automatique locale'}</span>
+              <a href="/brouillons" className="font-semibold text-blue-700 hover:underline">Voir les brouillons</a>
+              <span className="hidden items-center gap-1.5 sm:inline-flex"><Keyboard size={13} /> Ctrl/⌘+S · Ctrl/⌘+Z</span>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <button ref={undoButtonRef} type="button" onClick={undo} disabled={!undoStack.length} title="Annuler · Ctrl/⌘+Z" className="inline-flex items-center gap-1.5 rounded-lg border bg-white px-3 py-2 text-xs font-medium disabled:opacity-35"><Undo2 size={14} /> Annuler</button>
+            <button ref={redoButtonRef} type="button" onClick={redo} disabled={!redoStack.length} title="Rétablir · Ctrl/⌘+Shift+Z" className="inline-flex items-center gap-1.5 rounded-lg border bg-white px-3 py-2 text-xs font-medium disabled:opacity-35"><Redo2 size={14} /> Rétablir</button>
+            <span className="rounded-full border bg-white px-3 py-1.5 text-xs"><strong>{inspection.fields.length}</strong> détecté{inspection.fields.length > 1 ? 's' : ''}</span>
+            <span className="rounded-full border bg-white px-3 py-1.5 text-xs"><strong>{newFields.length}</strong> ajouté{newFields.length > 1 ? 's' : ''}</span>
+            <span className="rounded-full border bg-white px-3 py-1.5 text-xs"><strong>{inspection.pageCount}</strong> page{inspection.pageCount > 1 ? 's' : ''}</span>
           </div>
         </div>
         {inspection.hasXfa && <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">Ce PDF contient des données XFA. Les champs XFA ne sont pas éditables ici ; vous pouvez les conserver ou les retirer pour privilégier les champs PDF standards.</div>}
@@ -343,9 +514,18 @@ export default function PdfFormEditor({ file }: { file: File }) {
       </div>
 
       <div className="border-t p-5 md:p-6">
-        <div className="grid gap-3 md:grid-cols-2"><label className="flex items-start gap-3 rounded-xl border p-3 text-sm"><input type="checkbox" checked={flatten} onChange={event => setFlatten(event.target.checked)} className="mt-1" /><span><strong className="block">Aplatir le formulaire</strong><span className="text-xs text-gray-500">Les valeurs deviennent fixes et les champs ne seront plus modifiables.</span></span></label>{inspection.hasXfa && <label className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"><input type="checkbox" checked={removeXfa} onChange={event => setRemoveXfa(event.target.checked)} className="mt-1" /><span><strong className="block">Retirer les données XFA</strong><span className="text-xs text-amber-700">Conserve les champs PDF standards.</span></span></label>}</div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <label className="flex items-start gap-3 rounded-xl border p-3 text-sm"><input type="checkbox" checked={flatten} onChange={event => { checkpoint(); setFlatten(event.target.checked); }} className="mt-1" /><span><strong className="block">Aplatir le formulaire</strong><span className="text-xs text-gray-500">Les valeurs deviennent fixes et les champs ne seront plus modifiables.</span></span></label>
+          {inspection.hasXfa && <label className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900"><input type="checkbox" checked={removeXfa} onChange={event => { checkpoint(); setRemoveXfa(event.target.checked); }} className="mt-1" /><span><strong className="block">Retirer les données XFA</strong><span className="text-xs text-amber-700">Conserve les champs PDF standards.</span></span></label>}
+        </div>
         {error && <p role="alert" className="mt-4 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-600">{error}</p>}
-        <div className="mt-5 flex flex-col gap-2 sm:flex-row"><button type="button" onClick={reset} disabled={busy} className="inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold"><RotateCcw size={16} /> Réinitialiser</button><button type="button" onClick={() => void save()} disabled={busy} className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gray-950 px-5 py-3 text-sm font-semibold text-white disabled:bg-gray-300">{busy ? <><Loader2 size={17} className="animate-spin" /> Génération…</> : <><FormInput size={17} /> Générer le PDF</>}</button></div>
+        <div className="mt-5 flex flex-col gap-2 sm:flex-row"><button type="button" onClick={reset} disabled={busy} className="inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold"><RotateCcw size={16} /> Réinitialiser</button><button ref={saveButtonRef} type="button" onClick={() => void save()} disabled={busy} title="Générer · Ctrl/⌘+S" className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-gray-950 px-5 py-3 text-sm font-semibold text-white disabled:bg-gray-300">{busy ? <><Loader2 size={17} className="animate-spin" /> Génération…</> : <><FormInput size={17} /> Générer le PDF</>}</button></div>
+      </div>
+
+      <div className="sticky bottom-3 z-30 mx-3 mb-3 flex items-center gap-2 rounded-2xl border border-gray-200 bg-white/95 p-2 shadow-xl backdrop-blur md:hidden">
+        <button type="button" onClick={undo} disabled={!undoStack.length} aria-label="Annuler" className="flex h-11 w-11 items-center justify-center rounded-xl border disabled:opacity-30"><Undo2 size={17} /></button>
+        <button type="button" onClick={redo} disabled={!redoStack.length} aria-label="Rétablir" className="flex h-11 w-11 items-center justify-center rounded-xl border disabled:opacity-30"><Redo2 size={17} /></button>
+        <button type="button" onClick={() => void save()} disabled={busy} className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gray-950 px-4 text-sm font-semibold text-white disabled:bg-gray-300"><FormInput size={16} /> {busy ? 'Génération…' : 'Générer'}</button>
       </div>
 
       {output && <div className="border-t border-emerald-100 bg-emerald-50/40 p-5 md:p-6"><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><p className="font-semibold">Formulaire généré</p><p className="text-xs text-gray-500">Vérifiez le résultat avant téléchargement.</p></div><a href={output.url} download={output.name} className="inline-flex items-center gap-2 rounded-xl bg-gray-950 px-4 py-2.5 text-sm font-semibold text-white"><Download size={16} /> Télécharger</a></div><iframe src={`${output.url}#toolbar=1&navpanes=0`} title="Aperçu du formulaire PDF généré" className="h-[34rem] w-full rounded-xl border bg-white" /></div>}
