@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Download, FileText, Image, Music, Shield, Upload, Video, X, Zap } from 'lucide-react';
+import { ArrowRight, Download, FileText, Image, Music, ShieldCheck, Video, X } from 'lucide-react';
 import ConversionProgress from '../components/ConversionProgress';
 import FilePreview from '../components/FilePreview';
 import FileUploader from '../components/FileUploader';
@@ -10,18 +10,6 @@ import { saveHistory } from '../services/history';
 import { createZip } from '../services/zip';
 import { ConversionFormat, ConversionJob, FileType } from '../types/converter';
 import { getFileTypeFromExtension } from '../utils/formats';
-
-const features = [
-  { icon: Zap, label: 'Rapide', description: 'Traitement directement dans le navigateur lorsque le format le permet.' },
-  { icon: Shield, label: 'Privé', description: 'Les conversions locales ne nécessitent pas d’envoyer vos fichiers.' },
-];
-
-const supportedTypes = [
-  { icon: Image, label: 'Images', formats: 'PNG, JPG, WebP, ICO' },
-  { icon: Video, label: 'Vidéos', formats: 'MP4, WebM, AVI, MKV, MOV, GIF' },
-  { icon: Music, label: 'Audio', formats: 'MP3, WAV, OGG, AAC, FLAC, M4A' },
-  { icon: FileText, label: 'Texte & documents', formats: 'TXT, Markdown, HTML et Office → PDF si configuré' },
-];
 
 function formatFileSize(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -156,61 +144,47 @@ export default function ConverterPage() {
   };
 
   return (
-    <main className="flex-grow bg-gray-50">
-      <section className="border-b border-gray-200 bg-white px-6 pb-12 pt-28">
-        <div className="mx-auto max-w-4xl text-center">
-          <div className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-sm text-gray-600">
-            <Shield size={14} className="text-[#2457E6]" />
-            Traitement local en priorité
+    <main className="flex-grow bg-[#f7f8fb] px-6 pb-20 pt-28">
+      <div className="mx-auto max-w-6xl">
+        <header className="mx-auto mb-8 max-w-3xl text-center">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-600 shadow-sm">
+            <ShieldCheck size={14} /> Traitement local en priorité
           </div>
-          <h1 className="mt-6 text-4xl font-semibold tracking-tight text-gray-950 md:text-5xl">Convertir un fichier</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-gray-950 md:text-5xl">Convertir un fichier</h1>
           <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-gray-600 md:text-lg">
-            Convertissez images, vidéos, fichiers audio et documents avec uniquement les formats de sortie réellement disponibles.
+            Convertissez images, vidéos, fichiers audio et documents vers les formats réellement disponibles pour votre fichier.
           </p>
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
-            {features.map(feature => (
-              <div key={feature.label} title={feature.description} className="flex items-center gap-2 rounded-full border border-gray-200 bg-gray-50 px-3.5 py-2 text-sm text-gray-700">
-                <feature.icon size={15} className="text-[#2457E6]" />
-                {feature.label}
-              </div>
-            ))}
-          </div>
-          <Link to="/formats" className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-[#2457E6] hover:underline">
-            Voir tous les formats pris en charge <ArrowRight size={15} />
-          </Link>
-        </div>
-      </section>
+        </header>
 
-      <section className="px-6 py-12">
-        <div className="mx-auto max-w-3xl">
-          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
-            <div className="flex items-center gap-2 border-b border-gray-100 px-6 py-4 text-sm font-medium text-gray-700">
-              <Upload size={16} className="text-[#2457E6]" />
-              Déposez vos fichiers
-            </div>
-            <div className="p-6">
+        <section className="mx-auto max-w-4xl overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm">
+          <div className="p-5 md:p-7">
+            {selectedFiles.length === 0 && (
               <FileUploader onFilesSelect={handleFilesSelect} onPdfSelect={handlePdfSelect} />
-            </div>
+            )}
 
             {selectionError && (
-              <p role="alert" className="mx-6 mb-6 rounded-lg border border-red-100 bg-red-50 p-3 text-sm text-red-700">
+              <p role="alert" className="mt-4 rounded-xl border border-red-100 bg-red-50 p-3 text-sm text-red-600">
                 {selectionError}
               </p>
             )}
 
             {selectedFiles.length > 0 && fileType && (
-              <div className="px-6 pb-6">
-                <div className="mb-3 flex items-center justify-between gap-4">
-                  <p className="text-sm font-medium text-gray-700">
-                    {selectedFiles.length} fichier{selectedFiles.length > 1 ? 's' : ''} prêt{selectedFiles.length > 1 ? 's' : ''}
-                  </p>
-                  <button type="button" onClick={clearSelection} className="text-xs font-medium text-red-600 hover:text-red-700">
+              <>
+                <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="font-semibold text-gray-950">
+                      {selectedFiles.length} fichier{selectedFiles.length > 1 ? 's' : ''} prêt{selectedFiles.length > 1 ? 's' : ''}
+                    </p>
+                    <p className="mt-1 text-xs text-gray-500">Tous les fichiers d’un lot doivent avoir le même format source.</p>
+                  </div>
+                  <button type="button" onClick={clearSelection} className="text-sm font-medium text-red-600 hover:text-red-700">
                     Tout retirer
                   </button>
                 </div>
+
                 <div className="grid gap-3 sm:grid-cols-2">
                   {selectedFiles.map((file, index) => (
-                    <article key={`${file.name}-${file.size}-${file.lastModified}`} className="relative rounded-xl border border-gray-200 bg-gray-50 p-3">
+                    <article key={`${file.name}-${file.size}-${file.lastModified}`} className="relative rounded-2xl border border-gray-200 bg-gray-50 p-3">
                       <button
                         type="button"
                         onClick={() => removeSelectedFile(index)}
@@ -223,69 +197,59 @@ export default function ConverterPage() {
                       <div className="mt-3 flex items-center gap-2">
                         <div className="rounded-lg border border-gray-200 bg-white p-2"><FileTypeIcon type={fileType} /></div>
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-medium text-gray-900">{file.name}</p>
+                          <p className="truncate pr-6 text-sm font-medium text-gray-900">{file.name}</p>
                           <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
                         </div>
                       </div>
                     </article>
                   ))}
                 </div>
-              </div>
-            )}
 
-            {fileType && (
-              <div className="border-t border-gray-100 px-6 py-6">
-                <div className="mb-4 flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <ArrowRight size={16} className="text-gray-400" />
-                  Choisissez le format de sortie
+                <div className="mt-4">
+                  <FileUploader compact onFilesSelect={handleFilesSelect} onPdfSelect={handlePdfSelect} />
                 </div>
-                <FormatSelector fileType={fileType} onFormatSelect={handleFormatSelect} sourceFormat={sourceFormat} />
-              </div>
+
+                <section className="mt-6 rounded-2xl border border-gray-200 bg-gray-50 p-4 md:p-5" aria-labelledby="output-format-title">
+                  <div className="mb-4">
+                    <h2 id="output-format-title" className="text-sm font-semibold text-gray-900">Choisissez le format de sortie</h2>
+                    <p className="mt-1 text-xs text-gray-500">Seules les conversions réellement compatibles avec le format source sont proposées.</p>
+                  </div>
+                  <FormatSelector fileType={fileType} onFormatSelect={handleFormatSelect} sourceFormat={sourceFormat} />
+                </section>
+              </>
             )}
           </div>
 
           {batchDownload && (
-            <a href={batchDownload.url} download={batchDownload.name} className="mt-5 flex items-center justify-center gap-2 rounded-xl bg-[#2457E6] px-5 py-4 font-medium text-white hover:bg-[#1e49c4]">
-              <Download size={18} />
-              Télécharger toutes les conversions en ZIP
-            </a>
+            <div className="border-t border-gray-100 bg-emerald-50/40 p-5 md:p-7">
+              <a href={batchDownload.url} download={batchDownload.name} className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-gray-950 px-5 py-3 text-sm font-semibold text-white hover:bg-gray-800">
+                <Download size={17} /> Télécharger toutes les conversions en ZIP
+              </a>
+            </div>
           )}
 
           {conversionJobs.length > 0 && (
-            <div className="mt-6 overflow-hidden rounded-2xl border border-gray-200 bg-white">
-              <div className="border-b border-gray-100 px-6 py-4 text-sm font-medium text-gray-700">Conversions</div>
-              <div className="space-y-3 p-4">
+            <div className="border-t border-gray-100 p-5 md:p-7">
+              <div className="mb-4">
+                <h2 className="font-semibold text-gray-950">Conversions</h2>
+                <p className="mt-1 text-xs text-gray-500">Suivez chaque fichier jusqu’à ce que le résultat soit prêt.</p>
+              </div>
+              <div className="space-y-3">
                 {conversionJobs.map(job => <ConversionProgress key={job.id} job={job} />)}
               </div>
             </div>
           )}
-        </div>
-      </section>
+        </section>
 
-      <section className="border-t border-gray-200 bg-white px-6 py-12">
-        <div className="mx-auto max-w-4xl">
-          <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-gray-950">Familles de formats</h2>
-              <p className="mt-1 text-sm text-gray-500">La disponibilité exacte dépend du format source et, pour Office, de la configuration serveur.</p>
-            </div>
-            <Link to="/batch" className="inline-flex items-center gap-1.5 text-sm font-medium text-[#2457E6] hover:underline">
-              Traitement par lot <ArrowRight size={14} />
-            </Link>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {supportedTypes.map(type => (
-              <article key={type.label} className="rounded-xl border border-gray-200 p-5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-[#2457E6]">
-                  <type.icon size={18} />
-                </div>
-                <h3 className="mt-3 text-sm font-semibold text-gray-900">{type.label}</h3>
-                <p className="mt-1 text-xs leading-5 text-gray-500">{type.formats}</p>
-              </article>
-            ))}
-          </div>
+        <div className="mx-auto mt-5 flex max-w-4xl flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
+          <Link to="/formats" className="inline-flex items-center gap-1.5 font-medium text-[#2457E6] hover:underline">
+            Formats pris en charge <ArrowRight size={14} />
+          </Link>
+          <Link to="/batch" className="inline-flex items-center gap-1.5 font-medium text-gray-600 hover:text-gray-950">
+            Traitement par lot <ArrowRight size={14} />
+          </Link>
         </div>
-      </section>
+      </div>
     </main>
   );
 }
