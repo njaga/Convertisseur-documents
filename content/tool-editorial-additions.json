@@ -50,5 +50,57 @@
         "description": "Réduisez le poids du document après vos modifications lorsque c’est nécessaire."
       }
     ]
+  },
+  "/ocr-pdf": {
+    "heading": "Extraire du texte à partir d’un PDF ou d’une image",
+    "intro": [
+      "L’OCR transforme le texte visible dans une image ou une page scannée en texte exploitable. Doxali commence par lire directement la couche texte des PDF lorsqu’elle existe, puis utilise Tesseract WebAssembly dans le navigateur pour les pages scannées et les images.",
+      "Le résultat peut être copié, corrigé ou téléchargé en TXT. La qualité dépend principalement de la netteté du document, de la résolution du scan, de la taille des caractères et de la mise en page."
+    ],
+    "steps": [
+      {
+        "title": "Ajoutez le document",
+        "description": "Importez une image ou un PDF. Les PDF avec une couche texte exploitable sont lus directement."
+      },
+      {
+        "title": "Lancez la reconnaissance",
+        "description": "Les pages scannées et les images sont analysées localement avec le moteur OCR WebAssembly français et anglais."
+      },
+      {
+        "title": "Relisez le texte",
+        "description": "Corrigez si nécessaire puis copiez le contenu ou téléchargez le résultat en fichier TXT."
+      }
+    ],
+    "faqs": [
+      {
+        "question": "L’OCR fonctionne-t-il uniquement dans Chrome ou Edge ?",
+        "answer": "Non. Doxali ne dépend plus d’une API expérimentale propre à certains navigateurs. Le moteur OCR repose sur WebAssembly et les Web Workers, disponibles dans les navigateurs modernes comme Chrome, Edge, Firefox et Safari."
+      },
+      {
+        "question": "Mes documents sont-ils envoyés vers un serveur pour l’OCR ?",
+        "answer": "Non. La reconnaissance est réalisée dans le navigateur. Au premier lancement, Doxali télécharge le moteur OCR et les modèles de langue français et anglais, mais le document source n’est pas envoyé au service qui fournit ces fichiers techniques."
+      },
+      {
+        "question": "Puis-je utiliser l’OCR sur un PDF de plusieurs pages ?",
+        "answer": "Oui. Doxali traite les pages successivement. Les pages qui possèdent déjà du texte intégré sont lues directement, tandis que les pages scannées sont rendues puis reconnues par le moteur OCR."
+      }
+    ],
+    "related": [
+      {
+        "href": "/pdf-en-png",
+        "label": "PDF en PNG",
+        "description": "Exporter les pages d’un PDF sous forme d’images."
+      },
+      {
+        "href": "/creer-pdf",
+        "label": "Créer un PDF",
+        "description": "Réutiliser le texte extrait dans un nouveau document."
+      },
+      {
+        "href": "/modifier-pdf",
+        "label": "Modifier un PDF",
+        "description": "Ajouter des corrections ou des annotations au document."
+      }
+    ]
   }
 }

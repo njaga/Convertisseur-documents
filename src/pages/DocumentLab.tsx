@@ -6,7 +6,7 @@ import FileDropZone from '../components/FileDropZone';
 import FilePreview from '../components/FilePreview';
 import PdfAnnotationEditor from '../components/PdfAnnotationEditor';
 import ResultPreview from '../components/ResultPreview';
-import { annotatePdf, generateDocument, runLocalOcr } from '../services/documentLab';
+import { annotatePdf, generateDocument, runLocalOcr, type OcrRunProgress } from '../services/documentLab';
 import { PdfOutput } from '../services/pdfTools';
 import { PdfAnnotationState } from '../types/documentLab';
 
@@ -44,6 +44,7 @@ export default function DocumentLab() {
   const [signature, setSignature] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
   const [ocrText, setOcrText] = useState('');
+  const [ocrProgress, setOcrProgress] = useState<OcrRunProgress | null>(null);
   const [output, setOutput] = useState<PdfOutput | null>(null);
   const [error, setError] = useState('');
   const [title, setTitle] = useState('Nouveau document');
@@ -105,6 +106,7 @@ export default function DocumentLab() {
     setSignature(null);
     setError('');
     setOcrText('');
+    setOcrProgress(null);
     setAnnotation(initialAnnotation);
     navigate(tabs.find(item => item.id === next)?.path ?? '/ocr-pdf');
   };
@@ -112,6 +114,8 @@ export default function DocumentLab() {
   const selectFile = (files: File[]) => {
     clearOutput();
     setError('');
+    setOcrText('');
+    setOcrProgress(null);
     setFile(files[0] ?? null);
     setAnnotation(current => ({ ...current, page: 1 }));
   };
@@ -123,7 +127,9 @@ export default function DocumentLab() {
     try {
       if (tab === 'ocr') {
         if (!file) throw new Error('Ajoutez une image ou un PDF.');
-        setOcrText(await runLocalOcr(file, ['fr', 'en']));
+        setOcrText('');
+        setOcrProgress({ progress: 0, message: 'Préparation de la reconnaissance…' });
+        setOcrText(await runLocalOcr(file, ['fra', 'eng'], setOcrProgress));
       } else if (tab === 'annotate') {
         if (!file) throw new Error('Ajoutez un PDF.');
         publish(await annotatePdf({ pdf: file, signature: signature ?? undefined, ...annotation }));
@@ -183,14 +189,33 @@ export default function DocumentLab() {
                 <p className="truncate text-sm font-semibold text-gray-900">{file.name}</p>
                 <p className="mt-0.5 text-xs text-gray-500">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
               </div>
-              <button type="button" onClick={() => { setFile(null); setSignature(null); clearOutput(); }} className="text-sm font-medium text-blue-600 hover:text-blue-700">Changer de fichier</button>
+              <button type="button" onClick={() => { setFile(null); setSignature(null); setOcrText(''); setOcrProgress(null); clearOutput(); }} className="text-sm font-medium text-blue-600 hover:text-blue-700">Changer de fichier</button>
             </div>
           )}
 
           {tab === 'ocr' && file && (
             <div>
               <div className="mx-auto max-w-3xl"><FilePreview file={file} /></div>
-              <p className="mt-5 text-sm text-gray-600">Reconnaissance locale français/anglais. Le document reste sur votre appareil quand le moteur OCR natif est disponible.</p>
+              <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50/50 p-4 text-sm leading-6 text-gray-700">
+                <p><strong>OCR français + anglais dans le navigateur.</strong> Les PDF qui possèdent déjà une couche texte sont lus directement. Les scans et images sont reconnus avec un moteur Tesseract WebAssembly.</p>
+                <p className="mt-1 text-xs text-gray-500">Au premier lancement, le navigateur télécharge le moteur OCR et les modèles de langue. Votre document n’est pas envoyé au service OCR.</p>
+              </div>
+
+              {busy && ocrProgress && (
+                <div className="mt-5 rounded-xl border border-gray-200 bg-gray-50 p-4" aria-live="polite">
+                  <div className="flex items-center justify-between gap-3 text-xs font-medium text-gray-600">
+                    <span>{ocrProgress.message}</span>
+                    <span>{ocrProgress.progress}%</span>
+                  </div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-200">
+                    <div className="h-full rounded-full bg-[#2457E6] transition-[width] duration-200" style={{ width: `${ocrProgress.progress}%` }} />
+                  </div>
+                  {ocrProgress.page && ocrProgress.pageCount && ocrProgress.pageCount > 1 && (
+                    <p className="mt-2 text-xs text-gray-500">Page {ocrProgress.page} sur {ocrProgress.pageCount}</p>
+                  )}
+                </div>
+              )}
+
               {ocrText && (
                 <div className="mt-5">
                   <div className="mb-2 flex items-center justify-between gap-3"><h2 className="font-semibold text-gray-900">Texte extrait</h2><button type="button" onClick={downloadText} className="rounded-lg border border-gray-200 px-3 py-2 text-xs font-medium">Télécharger en TXT</button></div>
@@ -258,7 +283,7 @@ export default function DocumentLab() {
 
           {(tab === 'generate' || file) && (
             <button onClick={() => void run()} disabled={busy} className="mt-6 flex min-h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-gray-950 px-5 py-3 font-semibold text-white hover:bg-gray-800 disabled:bg-gray-300">
-              {busy ? <><Loader2 size={17} className="animate-spin" /> Traitement…</> : tab === 'ocr' ? 'Extraire le texte' : tab === 'annotate' ? 'Appliquer et générer le PDF' : 'Créer le PDF'}
+              {busy ? <><Loader2 size={17} className="animate-spin" /> {tab === 'ocr' && ocrProgress ? `${ocrProgress.progress}% · ${ocrProgress.message}` : 'Traitement…'}</> : tab === 'ocr' ? 'Extraire le texte' : tab === 'annotate' ? 'Appliquer et générer le PDF' : 'Créer le PDF'}
             </button>
           )}
 

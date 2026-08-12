@@ -24,6 +24,7 @@ const sections = [
     title: 'Confidentialité et traitement des fichiers',
     paragraphs: [
       'Doxali suit une approche local-first : les conversions d’images, d’audio, de vidéo, de texte ainsi que les principaux outils PDF sont exécutés dans votre navigateur lorsque cela est techniquement possible.',
+      'Pour l’OCR, les PDF disposant déjà d’une couche texte sont lus directement. Les scans et images sont reconnus dans le navigateur avec un moteur WebAssembly. Lors de la première utilisation, le navigateur peut télécharger le moteur OCR et les modèles de langue depuis des ressources publiques épinglées ; le document source n’est pas envoyé à ces hébergeurs.',
       'La conversion Office vers PDF est différente : lorsqu’un moteur Office est activé sur le déploiement, le document est transmis au service de conversion pour être traité. Le service est conçu pour supprimer ses fichiers temporaires après la requête. Si ce moteur n’est pas configuré, les formats Office ne sont pas proposés.',
       'Les brouillons et l’historique disponibles dans l’application sont stockés localement dans votre navigateur. Ils ne constituent pas une sauvegarde cloud et peuvent disparaître si vous effacez les données du site ou changez d’appareil.',
     ],
@@ -42,7 +43,7 @@ const sections = [
     paragraphs: [
       'Doxali est fourni en l’état. Même si les traitements sont testés, aucune compatibilité absolue ne peut être garantie pour tous les fichiers, navigateurs, appareils ou documents endommagés.',
       'Conservez toujours une copie de vos documents d’origine et vérifiez le fichier généré avant de supprimer une source, de signer un document important ou de l’utiliser dans un contexte professionnel, administratif ou juridique.',
-      'Les performances dépendent notamment de la mémoire disponible, de la puissance de l’appareil, du navigateur et de la taille du fichier. Les gros PDF et les traitements FFmpeg peuvent être particulièrement exigeants sur mobile.',
+      'Les performances dépendent notamment de la mémoire disponible, de la puissance de l’appareil, du navigateur et de la taille du fichier. Les gros PDF, l’OCR de scans multipages et les traitements FFmpeg peuvent être particulièrement exigeants sur mobile.',
     ],
   },
   {
