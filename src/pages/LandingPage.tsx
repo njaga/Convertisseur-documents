@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, FileArchive, FileImage, FileSignature, FileText, Files, History, Image, Infinity as InfinityIcon, Layers3, Merge, PencilLine, RotateCw, ScanText, Scissors, ShieldCheck, UserRoundX, Video } from 'lucide-react';
+import { ArrowRight, FileArchive, FileImage, FileSignature, FileText, Files, FormInput, History, Image, Infinity as InfinityIcon, Layers3, Merge, PencilLine, RotateCw, ScanText, Scissors, ShieldCheck, UserRoundX, Video } from 'lucide-react';
 
 const popularTools = [
   { to: '/fusionner-pdf', title: 'Fusionner PDF', description: 'Combinez plusieurs fichiers PDF dans l’ordre de votre choix.', icon: Merge, iconClass: 'bg-orange-50 text-orange-600' },
@@ -11,6 +11,7 @@ const popularTools = [
 const pdfTools = [
   { to: '/signer-pdf', title: 'Signer PDF', description: 'Placez visuellement une signature ou un cachet sur votre document.', icon: FileSignature, iconClass: 'bg-blue-50 text-blue-600' },
   { to: '/modifier-pdf', title: 'Modifier PDF', description: 'Ajoutez texte, images, signatures, annotations et dessins, puis organisez les pages.', icon: PencilLine, iconClass: 'bg-violet-50 text-violet-600' },
+  { to: '/pdf?tool=forms', title: 'Formulaires PDF', description: 'Remplissez les champs existants ou créez vos propres champs interactifs.', icon: FormInput, iconClass: 'bg-teal-50 text-teal-700' },
   { to: '/organiser-pdf', title: 'Organiser PDF', description: 'Choisir précisément les pages et leur ordre final.', icon: Layers3, iconClass: 'bg-indigo-50 text-indigo-600' },
   { to: '/pivoter-pdf', title: 'Faire pivoter PDF', description: 'Tourner les pages à 90°, 180° ou 270°.', icon: RotateCw, iconClass: 'bg-fuchsia-50 text-fuchsia-600' },
   { to: '/pdf-en-png', title: 'PDF en PNG', description: 'Convertir chaque page du PDF en image PNG.', icon: FileImage, iconClass: 'bg-amber-50 text-amber-600' },
@@ -46,7 +47,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-5xl text-center">
           <p className="mb-4 text-xs font-bold uppercase tracking-[0.18em] text-blue-600">Doxali · boîte à outils documentaire</p>
           <h1 className="mx-auto max-w-4xl text-4xl font-bold leading-[1.08] tracking-[-0.035em] md:text-6xl">Tous les outils essentiels pour vos documents, au même endroit.</h1>
-          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-gray-600">Fusionnez, divisez, compressez, convertissez, signez et modifiez vos fichiers sans parcours compliqué. Choisissez simplement ce que vous voulez faire.</p>
+          <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-gray-600">Fusionnez, divisez, compressez, convertissez, signez, remplissez et modifiez vos fichiers sans parcours compliqué. Choisissez simplement ce que vous voulez faire.</p>
           <div className="mt-7 flex flex-wrap justify-center gap-x-6 gap-y-3 text-sm text-gray-500">
             <span className="inline-flex items-center gap-2"><ShieldCheck size={16} className="text-emerald-600" /> Traitement local en priorité</span>
             <span className="inline-flex items-center gap-2"><UserRoundX size={16} className="text-blue-600" /> Sans compte</span>
@@ -68,8 +69,8 @@ export default function LandingPage() {
 
       <section className="px-6 pb-14">
         <div className="mx-auto max-w-7xl rounded-3xl border border-gray-200 bg-white p-6 md:p-8">
-          <div className="mb-6"><p className="text-xs font-bold uppercase tracking-wider text-gray-400">PDF</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Organiser, signer et éditer vos PDF</h2></div>
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mb-6"><p className="text-xs font-bold uppercase tracking-wider text-gray-400">PDF</p><h2 className="mt-1 text-2xl font-bold tracking-tight">Organiser, signer, remplir et éditer vos PDF</h2></div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {pdfTools.map(tool => <ToolCard key={tool.to} tool={tool} />)}
           </div>
         </div>
