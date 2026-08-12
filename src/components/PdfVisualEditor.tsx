@@ -1,18 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { Copy, Download, FilePlus2, GripVertical, Loader2, PencilLine, Redo2, RotateCcw, RotateCw, Scissors, Trash2, Undo2 } from 'lucide-react';
+import { CheckCircle2, Cloud, Copy, Download, FilePlus2, GripVertical, Keyboard, Loader2, PencilLine, Redo2, RotateCcw, RotateCw, Scissors, Trash2, Undo2 } from 'lucide-react';
 import PdfPageContentEditor from './PdfPageContentEditor';
-import { createPdfPagePreviews, CompositePdfPage, PdfOutput } from '../services/pdfTools';
+import { createPdfPagePreviews, PdfOutput } from '../services/pdfTools';
 import { buildRichCompositePdf, clonePdfOverlays, getImageDimensions, getPdfPageDimensions, PdfOverlay } from '../services/pdfContentEditor';
+import { hydratePdfEditorDraft, serializePdfEditorDraft, type PdfEditorDraftState, type PdfEditorWorkspacePage } from '../services/pdfEditorWorkspace';
+import { findWorkspaceDraft, saveWorkspaceDraft } from '../services/workspace';
 
-interface PageState extends CompositePdfPage {
-  id: string;
-  pageNumber: number;
-  url: string;
-  label: string;
-  pageWidth: number;
-  pageHeight: number;
-  overlays: PdfOverlay[];
-}
+type PageState = PdfEditorWorkspacePage;
+type DraftStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 const clonePages = (pages: PageState[], regenerateOverlayIds = false) => pages.map(page => ({
   ...page,
@@ -30,22 +25,34 @@ export default function PdfVisualEditor({ file }: { file: File }) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [undoStack, setUndoStack] = useState<PageState[][]>([]);
   const [redoStack, setRedoStack] = useState<PageState[][]>([]);
+  const [draftStatus, setDraftStatus] = useState<DraftStatus>('idle');
+  const [restoredDraft, setRestoredDraft] = useState(false);
   const draggedIndex = useRef<number | null>(null);
   const lastSelected = useRef<number | null>(null);
   const objectUrls = useRef<string[]>([]);
   const outputUrls = useRef<string[]>([]);
   const initialPages = useRef<PageState[]>([]);
+  const draftId = useRef<string | undefined>(undefined);
+  const undoButtonRef = useRef<HTMLButtonElement>(null);
+  const redoButtonRef = useRef<HTMLButtonElement>(null);
+  const selectAllButtonRef = useRef<HTMLButtonElement>(null);
+  const deleteButtonRef = useRef<HTMLButtonElement>(null);
+  const saveButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([createPdfPagePreviews([file], 0.65), getPdfPageDimensions(file)])
-      .then(([previews, dimensions]) => {
+    Promise.all([
+      createPdfPagePreviews([file], 0.65),
+      getPdfPageDimensions(file),
+      findWorkspaceDraft<PdfEditorDraftState>('pdf-editor', file).catch(() => null),
+    ])
+      .then(async ([previews, dimensions, draft]) => {
         if (cancelled) {
           previews.forEach(preview => URL.revokeObjectURL(preview.url));
           return;
         }
         objectUrls.current.push(...previews.map(preview => preview.url));
-        const next = previews.map((preview, index): PageState => ({
+        const basePages = previews.map((preview, index): PageState => ({
           id: `base-${index}`,
           kind: 'pdf',
           file,
@@ -58,8 +65,27 @@ export default function PdfVisualEditor({ file }: { file: File }) {
           pageHeight: dimensions[index]?.height ?? 842,
           overlays: [],
         }));
-        initialPages.current = clonePages(next);
-        setPages(next);
+        initialPages.current = clonePages(basePages);
+
+        if (draft?.state?.pages?.length) {
+          try {
+            const restored = await hydratePdfEditorDraft(draft.state);
+            if (cancelled) {
+              restored.objectUrls.forEach(URL.revokeObjectURL);
+              return;
+            }
+            objectUrls.current.push(...restored.objectUrls);
+            draftId.current = draft.id;
+            setPages(restored.pages);
+            setRestoredDraft(true);
+            setDraftStatus('saved');
+            return;
+          } catch {
+            // Un brouillon partiellement illisible ne doit jamais bloquer l'ouverture du PDF original.
+          }
+        }
+
+        setPages(basePages);
       })
       .catch(() => setError('Impossible de charger ce PDF dans l’éditeur.'))
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -72,6 +98,54 @@ export default function PdfVisualEditor({ file }: { file: File }) {
       results.forEach(URL.revokeObjectURL);
     };
   }, [file]);
+
+  useEffect(() => {
+    if (loading || !pages.length) return undefined;
+    const timer = window.setTimeout(() => {
+      setDraftStatus('saving');
+      saveWorkspaceDraft('pdf-editor', file, serializePdfEditorDraft(pages), draftId.current)
+        .then(draft => {
+          draftId.current = draft.id;
+          setDraftStatus('saved');
+        })
+        .catch(() => setDraftStatus('error'));
+    }, 600);
+    return () => window.clearTimeout(timer);
+  }, [file, loading, pages]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (editingId) return;
+      const target = event.target as HTMLElement | null;
+      if (target?.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target?.tagName ?? '')) return;
+      const modifier = event.metaKey || event.ctrlKey;
+      const key = event.key.toLowerCase();
+
+      if (modifier && key === 's') {
+        event.preventDefault();
+        saveButtonRef.current?.click();
+      } else if (modifier && key === 'a') {
+        event.preventDefault();
+        selectAllButtonRef.current?.click();
+      } else if (modifier && key === 'z' && event.shiftKey) {
+        event.preventDefault();
+        redoButtonRef.current?.click();
+      } else if (modifier && key === 'z') {
+        event.preventDefault();
+        undoButtonRef.current?.click();
+      } else if (modifier && key === 'y') {
+        event.preventDefault();
+        redoButtonRef.current?.click();
+      } else if (event.key === 'Delete' || event.key === 'Backspace') {
+        if (selected.size) {
+          event.preventDefault();
+          deleteButtonRef.current?.click();
+        }
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [editingId, selected.size]);
 
   const commit = (next: PageState[]) => {
     setUndoStack(stack => [...stack.slice(-29), clonePages(pages)]);
@@ -260,12 +334,20 @@ export default function PdfVisualEditor({ file }: { file: File }) {
         <div>
           <h2 className="font-semibold text-gray-900">Éditeur PDF visuel</h2>
           <p className="mt-1 text-xs text-gray-500">Réorganisez les pages puis ouvrez-en une pour ajouter texte, signature, image, surlignage, caviardage ou dessin.</p>
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-gray-500">
+            <span className="inline-flex items-center gap-1.5">
+              {draftStatus === 'saving' ? <Cloud size={13} className="animate-pulse text-blue-600" /> : <CheckCircle2 size={13} className={draftStatus === 'error' ? 'text-red-500' : 'text-emerald-600'} />}
+              {draftStatus === 'saving' ? 'Sauvegarde locale…' : draftStatus === 'error' ? 'Brouillon non sauvegardé' : restoredDraft ? 'Brouillon restauré et sauvegardé localement' : 'Sauvegarde automatique locale'}
+            </span>
+            <a href="/brouillons" className="font-semibold text-blue-700 hover:underline">Voir les brouillons</a>
+            <span className="hidden items-center gap-1.5 sm:inline-flex"><Keyboard size={13} /> Ctrl/⌘+S · Ctrl/⌘+Z · Ctrl/⌘+A</span>
+          </div>
         </div>
         <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={undo} disabled={!undoStack.length} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium disabled:opacity-35"><Undo2 size={14} /> Annuler</button>
-          <button type="button" onClick={redo} disabled={!redoStack.length} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium disabled:opacity-35"><Redo2 size={14} /> Rétablir</button>
+          <button ref={undoButtonRef} type="button" onClick={undo} disabled={!undoStack.length} title="Annuler · Ctrl/⌘+Z" className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium disabled:opacity-35"><Undo2 size={14} /> Annuler</button>
+          <button ref={redoButtonRef} type="button" onClick={redo} disabled={!redoStack.length} title="Rétablir · Ctrl/⌘+Shift+Z" className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium disabled:opacity-35"><Redo2 size={14} /> Rétablir</button>
           <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium"><FilePlus2 size={14} /> {inserting ? 'Insertion…' : 'Insérer PDF/images'}<input type="file" className="hidden" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.ico,application/pdf,image/*" onChange={event => { void handleInsert(event.target.files); event.target.value = ''; }} /></label>
-          <button type="button" onClick={() => setSelected(new Set(pages.map(page => page.id)))} className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium">Tout sélectionner</button>
+          <button ref={selectAllButtonRef} type="button" onClick={() => setSelected(new Set(pages.map(page => page.id)))} title="Tout sélectionner · Ctrl/⌘+A" className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium">Tout sélectionner</button>
           <button type="button" onClick={reset} className="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium">Réinitialiser</button>
         </div>
       </div>
@@ -305,10 +387,16 @@ export default function PdfVisualEditor({ file }: { file: File }) {
         <p className="text-sm text-gray-600"><strong>{selected.size}</strong> sélectionnée{selected.size > 1 ? 's' : ''} · <strong>{pages.length}</strong> dans le document · <strong>{pages.reduce((total, page) => total + page.overlays.length, 0)}</strong> élément{pages.reduce((total, page) => total + page.overlays.length, 0) > 1 ? 's' : ''} ajouté{pages.reduce((total, page) => total + page.overlays.length, 0) > 1 ? 's' : ''}</p>
         <div className="flex flex-wrap gap-2">
           <button type="button" onClick={duplicateSelected} disabled={!selected.size} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium disabled:opacity-40"><Copy size={16} /> Dupliquer</button>
-          <button type="button" onClick={deleteSelected} disabled={!selected.size} className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2.5 text-sm font-medium text-red-600 disabled:opacity-40"><Trash2 size={16} /> Supprimer</button>
+          <button ref={deleteButtonRef} type="button" onClick={deleteSelected} disabled={!selected.size} title="Supprimer · Suppr" className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-4 py-2.5 text-sm font-medium text-red-600 disabled:opacity-40"><Trash2 size={16} /> Supprimer</button>
           <button type="button" onClick={() => void generate('extract')} disabled={!selected.size || processing !== null} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium disabled:opacity-40"><Scissors size={16} /> Extraire</button>
-          <button type="button" onClick={() => void generate('save')} disabled={!pages.length || processing !== null} className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white disabled:bg-gray-300"><Download size={16} /> {processing === 'save' ? 'Génération…' : 'Générer le PDF'}</button>
+          <button ref={saveButtonRef} type="button" onClick={() => void generate('save')} disabled={!pages.length || processing !== null} title="Générer · Ctrl/⌘+S" className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white disabled:bg-gray-300"><Download size={16} /> {processing === 'save' ? 'Génération…' : 'Générer le PDF'}</button>
         </div>
+      </div>
+
+      <div className="sticky bottom-3 z-30 mt-4 flex items-center gap-2 rounded-2xl border border-gray-200 bg-white/95 p-2 shadow-xl backdrop-blur md:hidden">
+        <button type="button" onClick={undo} disabled={!undoStack.length} aria-label="Annuler" className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 disabled:opacity-30"><Undo2 size={17} /></button>
+        <button type="button" onClick={redo} disabled={!redoStack.length} aria-label="Rétablir" className="flex h-11 w-11 items-center justify-center rounded-xl border border-gray-200 disabled:opacity-30"><Redo2 size={17} /></button>
+        <button type="button" onClick={() => void generate('save')} disabled={!pages.length || processing !== null} className="flex min-h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-gray-950 px-4 text-sm font-semibold text-white disabled:bg-gray-300"><Download size={16} /> {processing === 'save' ? 'Génération…' : 'Générer'}</button>
       </div>
 
       {error && <p role="alert" className="mt-4 rounded-lg border border-red-100 bg-red-50 p-3 text-sm text-red-600">{error}</p>}
