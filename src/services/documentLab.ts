@@ -194,24 +194,25 @@ export async function runLocalOcr(
     const loadingTask = getDocument({ data: new Uint8Array(await file.arrayBuffer()) });
     const pdf = await loadingTask.promise;
     const pageTexts: string[] = [];
-    let session: OcrSession | null = null;
+    let sessionPromise: Promise<OcrSession> | null = null;
     let activePage = 1;
 
-    const getSession = async () => {
-      if (session) return session;
-      session = await createOcrSession(languages, engineProgress => {
-        const pageFraction = engineProgress.status.toLowerCase().includes('recognizing text')
-          ? Math.min(1, Math.max(0, engineProgress.progress))
-          : 0;
-        const overall = ((activePage - 1) + pageFraction) / Math.max(1, pdf.numPages) * 100;
-        onProgress({
-          progress: Math.min(99, Math.round(overall)),
-          message: describeEngineProgress(engineProgress),
-          page: activePage,
-          pageCount: pdf.numPages,
+    const getSession = () => {
+      if (!sessionPromise) {
+        sessionPromise = createOcrSession(languages, engineProgress => {
+          const pageFraction = engineProgress.status.toLowerCase().includes('recognizing text')
+            ? Math.min(1, Math.max(0, engineProgress.progress))
+            : 0;
+          const overall = ((activePage - 1) + pageFraction) / Math.max(1, pdf.numPages) * 100;
+          onProgress({
+            progress: Math.min(99, Math.round(overall)),
+            message: describeEngineProgress(engineProgress),
+            page: activePage,
+            pageCount: pdf.numPages,
+          });
         });
-      });
-      return session;
+      }
+      return sessionPromise;
     };
 
     try {
@@ -263,7 +264,10 @@ export async function runLocalOcr(
         }
       }
     } finally {
-      if (session) await session.terminate().catch(() => undefined);
+      if (sessionPromise) {
+        const activeSession = await sessionPromise.catch(() => null);
+        if (activeSession) await activeSession.terminate().catch(() => undefined);
+      }
       await loadingTask.destroy();
     }
 
