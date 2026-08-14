@@ -5,7 +5,7 @@ export const siteMetadata = {
   keywords: 'outils PDF, modifier PDF, fusionner PDF, compresser PDF, signer PDF, convertir fichiers, OCR PDF, images en PDF, formulaire PDF',
   author: 'Doxali',
   siteUrl: 'https://convertisseur-documents.vercel.app',
-  ogImage: '/og-image.png',
+  ogImage: '/api/og-image-v2',
   locale: 'fr_FR',
   themeColor: '#2457E6',
 } as const;
